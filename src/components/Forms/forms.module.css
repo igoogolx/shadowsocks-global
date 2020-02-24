@@ -1,0 +1,23 @@
+.container {
+  width: 300px;
+  & .input {
+    font-size: 18px;
+  }
+  & .selector {
+    margin: 5px 0;
+  }
+  & .buttonContainer {
+    margin: auto;
+    & .button {
+      margin: 5px 10px 0 10px;
+      border-radius: 5px;
+      width: 80px;
+    }
+  }
+}
+.adornment {
+  &:hover {
+    color: rgba(17, 17, 17, 0.44);
+  }
+  padding: 0;
+}

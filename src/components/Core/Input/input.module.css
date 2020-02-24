@@ -1,0 +1,141 @@
+@value unit from "../global/global.css";
+
+.container {
+  composes: font-lower from "../global/global.css";
+  position: relative;
+  min-height: calc(unit * 8);
+  padding-top: calc(unit * 2);
+  box-sizing: border-box;
+
+  & * {
+    box-sizing: border-box;
+  }
+
+  & .borderLess {
+    min-height: calc(unit * 4);
+    padding: 0;
+  }
+  & .input {
+    width: 100%;
+    min-height: calc(unit * 4);
+    padding: 0;
+
+    background: transparent;
+
+    font: inherit;
+    caret-color: var(--main-color);
+    &::placeholder {
+      color: transparent;
+    }
+
+    &:focus::placeholder {
+      transition: color var(--fast-ease);
+      color: var(--disabled-color);
+    }
+  }
+
+  & .adornment + .input {
+    padding-right: 24px;
+  }
+  & .label {
+    position: absolute;
+    top: calc(unit * 3 - 3px);
+    left: 0;
+
+    transition: transform var(--fast-ease), color var(--fast-ease);
+    transform-origin: top left;
+    pointer-events: none;
+
+    color: var(--secondary-color);
+
+    font-size: 15px;
+  }
+
+  & .underline {
+    height: 1px;
+
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+
+    border-color: var(--line-color);
+  }
+
+  & .focusUnderline,
+  & .errorUnderline {
+    width: 100%;
+    height: 2px;
+
+    transform: scaleX(0);
+    transform-origin: top left;
+  }
+
+  & .focusUnderline {
+    margin-top: -1px;
+
+    background: var(--main-color);
+  }
+
+  & .errorUnderline {
+    margin-top: -2px;
+
+    background: var(--error-color);
+  }
+}
+.sizeS {
+  width: calc(unit * 12);
+}
+
+.sizeM {
+  width: calc(unit * 30);
+}
+
+.sizeL {
+  width: calc(unit * 50);
+}
+
+.sizeFULL {
+  width: 100%;
+}
+.container ~ .active > .label {
+  transform: translateY(calc(unit * -2 - 1px)) scale(calc(12 / 13));
+}
+
+.input:focus ~ .label,
+.container.active > .label,
+.container:not(.empty) > .label {
+  transform: translateY(calc(unit * -3 - 1px)) scale(calc(12 / 13));
+}
+
+.input:focus ~ .focusUnderline,
+.container.active > .focusUnderline,
+.message > .errorUnderline {
+  transition: transform 0.15s ease-out;
+  transform: scaleX(1);
+}
+
+.input:focus ~ .label {
+  color: var(--main-color);
+}
+
+.message,
+.message > :focus ~ .label {
+  color: var(--error-color);
+}
+
+.errorText {
+  height: 0;
+  padding: calc(unit / 2) 0 unit;
+
+  transition: height 0.3s ease-out;
+
+  color: var(--error-color);
+  font-size: 15px;
+}
+
+.adornment {
+  position: absolute;
+  top: 17px;
+  right: 0;
+  box-sizing: content-box;
+  padding-right: 0;
+}

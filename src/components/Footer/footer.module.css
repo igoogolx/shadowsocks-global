@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  position: fixed;
+  z-index: var(--z-index-medium);
+  flex-direction: row-reverse;
+  background-color: rgb(221, 221, 221);
+  font-size: var(--font-size);
+  bottom: 0;
+  left: 0;
+  height: 25px;
+  width: 100vw;
+  & .content {
+    margin: auto 20px;
+    & span {
+      display: inline-block;
+      width: 50px;
+    }
+  }
+}

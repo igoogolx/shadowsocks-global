@@ -1,0 +1,22 @@
+.container {
+  background-color: var(--content-background-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: flex;
+}
+
+.clickable {
+  cursor: pointer;
+  &:active {
+    transform: scale(0.95);
+  }
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.78);
+  }
+}
+
+.disabled {
+  cursor: default;
+  pointer-events: none;
+}

@@ -1,0 +1,56 @@
+.container {
+  z-index: var(--z-index-top);
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 0 5px #bbbdc9;
+  overflow: auto;
+  & .list {
+    padding: 4px;
+    list-style: none;
+    & .divider {
+      margin: 5px 0;
+      height: 1px;
+      background: linear-gradient(to right, #dcdcdc, rgba(220, 220, 220, 0));
+    }
+    & .item {
+      & .icon {
+        color: var(--main-color);
+      }
+      & .content {
+        margin-left: 8px;
+      }
+
+      &:hover {
+        background-color: #eeeef4;
+        border-radius: 5px;
+        color: var(--main-color);
+      }
+    }
+  }
+
+  & .list::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  & .list::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
+    border-radius: 5px;
+  }
+}
+
+.container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+  border-radius: 5px;
+}
+
+.danger {
+  color: var(--error-color);
+}

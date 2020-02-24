@@ -1,0 +1,60 @@
+@value unit from "../global/global.css";
+@value line-shadow: inset 0 -1px 0 0;
+@value selected-line-shadow: inset 0 -3px 0 0;
+
+.tabs {
+  composes: font from "../global/global.css";
+
+  display: inline-block;
+  margin-bottom: calc(unit * 2);
+
+  box-shadow: line-shadow var(--line-color);
+}
+.tab + .tab {
+  margin-left: calc(unit * 3);
+}
+
+.tab {
+  border-radius: 0;
+  composes: font from "../global/global.css";
+
+  position: relative;
+
+  display: inline-block;
+
+  padding: 0;
+
+  cursor: pointer;
+
+  color: inherit;
+
+  border: none;
+  background: none;
+
+  line-height: calc(unit * 4);
+
+  &:hover:not(.active),
+  &:focus:not(.active),
+  &:active:not(.active) {
+    color: var(--main-color);
+    outline-style: none;
+    box-shadow: inset 0 -1px 0 0 var(--main-color);
+  }
+
+  &[disabled] {
+    pointer-events: none;
+  }
+}
+
+.active {
+  cursor: default;
+
+  outline: none;
+  box-shadow: selected-line-shadow var(--text-color);
+
+  font-weight: bold;
+  &:hover,
+  &:focus {
+    color: inherit;
+  }
+}

@@ -1,0 +1,37 @@
+@value unit: 8px;
+
+.font {
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+}
+
+.font-lower {
+  composes: font;
+
+  line-height: var(--line-height-lower);
+}
+
+.font-smaller {
+  composes: font-lower;
+
+  font-size: var(--font-size-smaller);
+}
+
+.font-smaller-lower {
+  composes: font-smaller;
+
+  line-height: var(--line-height-lowest);
+}
+
+.font-larger-lower {
+  composes: font-lower;
+
+  font-size: var(--font-size-larger);
+}
+
+.font-larger {
+  composes: font-larger-lower;
+
+  line-height: var(--line-height-taller);
+}

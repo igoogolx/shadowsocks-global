@@ -1,0 +1,17 @@
+.container {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  background-color: var(--disabled-color);
+  box-shadow: var(--disabled-color) 0 -1px 7px 1px;
+}
+.enabled {
+  background-color: var(--success-color);
+  box-shadow: var(--success-color) 0 -1px 7px 1px;
+}
+
+.disabled {
+  background-color: var(--error-color);
+  box-shadow: var(--error-color) 0 -1px 7px 1px;
+}

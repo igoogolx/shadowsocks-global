@@ -1,0 +1,52 @@
+.animation {
+  display: flex;
+  flex-direction: column;
+  transition: all 240ms cubic-bezier(0, 0, 0.2, 1);
+  align-items: center;
+}
+.animation[data-state="entering"],
+.animation[data-state="entered"] {
+  animation: open 240ms cubic-bezier(0.175, 0.885, 0.32, 1.175);
+}
+
+.animation[data-state="exiting"] {
+  animation: close 500ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.container {
+  position: fixed;
+  display: flex;
+  top: 40px;
+  width: 100%;
+  z-index: var(--z-index-top);
+  pointer-events: none;
+  flex-direction: column;
+}
+
+.close {
+  animation-name: close;
+}
+
+.open {
+  animation-name: open;
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(-120%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes close {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,88 @@
+.container {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+
+  & .svg {
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+  }
+}
+
+.size-12 {
+  font-size: 12px;
+}
+
+.size-14 {
+  font-size: 14px;
+}
+.size-16 {
+  font-size: 16px;
+}
+.size-18 {
+  font-size: 18px;
+}
+
+.size-20 {
+  font-size: 20px;
+}
+.size-24 {
+  font-size: 24px;
+}
+.size-32 {
+  font-size: 32px;
+}
+
+.size-40 {
+  font-size: 40px;
+}
+.size-48 {
+  font-size: 48px;
+}
+.size-64 {
+  font-size: 64px;
+}
+.size-96 {
+  font-size: 96px;
+}
+.size-128 {
+  font-size: 128px;
+}
+
+.gray {
+  color: #666;
+}
+
+.red {
+  color: var(--red-color);
+}
+
+.black {
+  color: var(--black-color);
+}
+
+.white {
+  color: var(--content-background-color);
+}
+.mainColor {
+  color: var(--main-color);
+}
+
+.iconLoading {
+  animation: loading 0.8s infinite linear;
+}
+
+@keyframes loading {
+  from {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

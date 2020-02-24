@@ -1,0 +1,41 @@
+.message {
+  z-index: var(--z-index-top);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin: 10px auto 0 auto;
+  font-size: 16px;
+  background-color: white;
+  padding: 6px 24px;
+  border-radius: 5px;
+  color: var(--black-color);
+  display: flex;
+  pointer-events: auto;
+  & .button {
+    margin: auto;
+    color: white;
+  }
+
+  & .popup {
+    padding: 8px 0;
+    display: flex;
+  }
+}
+
+.iconContainer {
+  display: flex;
+  margin-right: 5px;
+  & .icon {
+    margin: auto;
+  }
+  & .error {
+    color: var(--error-color);
+  }
+  & .info {
+    color: var(--info-color);
+  }
+  & .success {
+    color: var(--success-color);
+  }
+  & .waring {
+    color: var(--warning-color);
+  }
+}

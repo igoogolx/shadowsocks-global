@@ -1,0 +1,16 @@
+.buttonContainer {
+  width: 100%;
+  display: flex;
+
+  & .button {
+    width: 100px;
+    font-weight: 400;
+    margin: 0 auto;
+    border-radius: 100px;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}

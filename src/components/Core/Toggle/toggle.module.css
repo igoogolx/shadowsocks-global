@@ -1,0 +1,126 @@
+@value unit from "../global/global.css";
+@value padding: 2px;
+@value disabled-line-color: rgba(255, 255, 255, 0.9);
+@value duration: 300ms;
+@value timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+
+.container {
+  cursor: pointer;
+
+  &:hover {
+    & .switch {
+      background-color: var(--main-hover-color);
+    }
+  }
+
+  &.disabled {
+    pointer-events: none;
+  }
+}
+
+.label {
+  margin-left: calc(unit / 2);
+}
+
+.leftLabel {
+  margin-right: calc(unit / 2);
+}
+
+.switchWrapper {
+  position: relative;
+
+  display: inline-block;
+
+  width: calc(unit * 3);
+  height: calc(unit * 2);
+
+  vertical-align: -3px;
+}
+
+.input {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  margin: 0;
+
+  opacity: 0;
+}
+
+.switch {
+  position: relative;
+
+  background-color: #b8d1e5;
+
+  &::before {
+    background-color: #fff;
+  }
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  transition: background-color timing-function duration;
+
+  border-radius: unit;
+
+  &.input:focus {
+    box-shadow: inset 0 0 0 1px var(--main-hover-color),
+      0 0 0 1px var(--main-hover-color);
+  }
+
+  &::before {
+    position: absolute;
+    top: padding;
+    left: 0;
+
+    width: calc(unit * 1.5);
+    height: calc(unit * 1.5);
+
+    content: "";
+
+    transition: transform timing-function duration;
+
+    transform: translateX(padding);
+
+    border-radius: calc(unit * 0.75);
+  }
+}
+
+.input:checked + .switch {
+  background-color: var(--main-color);
+}
+
+.input:checked + ::before {
+  transform: translateX(calc(unit * 1.5 - padding));
+}
+
+.input[disabled] + ::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  content: "";
+
+  border-radius: unit;
+  background-image: linear-gradient(
+    45deg,
+    transparent,
+    transparent 37.5%,
+    disabled-line-color 37.5%,
+    disabled-line-color 50%,
+    transparent 50%,
+    transparent 87.5%,
+    disabled-line-color 87.5%,
+    disabled-line-color
+  );
+  background-repeat: repeat;
+  background-size: 4px 4px;
+}

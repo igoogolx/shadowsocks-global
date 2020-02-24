@@ -1,0 +1,44 @@
+:root {
+  --main-color: #280ab2;
+  --main-hover-color: rgba(40, 10, 178, 0.67);
+  --main-background-color: #ededf3;
+  --content-background-color: white;
+  --black-color: balck;
+  --info-color: var(--main-color);
+  --error-color: #c22731;
+  --warning-color: #cc8b00;
+  --success-color: #1890ff;
+  --red-color: var(--error-color);
+  --line-color: #bbbdc9;
+  --text-color: #1f2326;
+  --border-color: #b8d1e5;
+  --heading-color: var(--text-color);
+  --disabled-color: #999;
+
+  --secondary-color: #999;
+
+  --icon-hover-color: #80c6ff;
+
+  --ease: 0.3s ease-out;
+  --fast-ease: 0.15s ease-out;
+
+  --border-radius-large: 100px;
+  --border-radius: 10px;
+  --border-radius-small: 2px;
+  --font-size-larger: 16px;
+  --font-size: 13px;
+  --font-size-smaller: 12px;
+  --line-height-taller: 21px;
+  --line-height: 20px;
+  --line-height-lower: 18px;
+  --line-height-lowest: 16px;
+
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+    Oxygen, Ubuntu, Cantarell, Droid Sans, Helvetica Neue, Arial, sans-serif;
+  --font-family-monospace: Menlo, "Bitstream Vera Sans Mono", "Ubuntu Mono",
+    Consolas, "Courier New", Courier, monospace;
+
+  --z-index-top: 2;
+  --z-index-medium: 1;
+  --z-index-bottom: 0;
+}

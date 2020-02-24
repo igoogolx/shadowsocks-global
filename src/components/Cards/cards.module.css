@@ -1,0 +1,154 @@
+.server {
+  display: flex;
+  position: relative;
+  margin: 10px 5px;
+  & .dot {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+  & .card {
+    height: 80px;
+    width: 180px;
+  }
+  & .dropdown {
+    color: var(--border-color);
+    position: absolute;
+    right: 16px;
+    padding: 0;
+    top: 8px;
+    &:hover {
+      color: black;
+    }
+  }
+
+  & .flagContainer {
+    margin: auto 10px;
+    position: relative;
+    overflow: hidden;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    & .flag {
+      font-size: 40px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+  & .body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100px;
+    & .title {
+      margin: 0;
+      font-weight: 600;
+      font-size: var(--font-size);
+    }
+  }
+  & .delay {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+  }
+}
+
+.status {
+  width: 180px;
+  height: 80px;
+
+  & .iconContainer {
+    margin: auto 10px;
+    position: relative;
+    overflow: hidden;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    & .icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+  & .body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 10px;
+    & .title {
+      font-size: var(--font-size-smaller);
+    }
+    & .data {
+      font-size: var(--font-size-larger);
+      font-weight: bold;
+    }
+  }
+}
+
+.traffic {
+  height: 80px;
+  justify-content: space-between;
+  & .statistic {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 40px;
+    & .title {
+      font-size: var(--font-size-smaller);
+    }
+    & .data {
+      font-size: var(--font-size-larger);
+      font-weight: bold;
+    }
+  }
+}
+
+.speed {
+  width: 392px;
+  height: 200px;
+  pointer-events: auto;
+}
+
+.latency {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+
+  & .dns {
+    background-color: #f2ebfb;
+    color: #7844dd;
+  }
+
+  & .internet {
+    background-color: #eef9ff;
+    color: #50baff;
+  }
+
+  & .server {
+    background-color: #fef3ef;
+    color: #ff8b58;
+  }
+}
+
+.portNetSpeed {
+  flex-direction: column;
+  width: 180px;
+  height: 200px;
+  font-size: var(--font-size-larger);
+  & .title {
+    font-weight: 600;
+  }
+  & .item {
+    margin: 5px 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.disabled {
+  cursor: default;
+  pointer-events: none;
+}

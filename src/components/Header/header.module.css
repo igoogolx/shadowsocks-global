@@ -1,0 +1,18 @@
+.container {
+  position: fixed;
+  z-index: var(--z-index-medium);
+  height: 50px;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: row-reverse;
+  background-color: white;
+  width: 100vw;
+  & .selector {
+    margin: auto 20px;
+  }
+  & .button {
+    margin: auto 20px auto 0;
+    width: 100px;
+  }
+}
