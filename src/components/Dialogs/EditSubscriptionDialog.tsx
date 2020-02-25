@@ -12,6 +12,7 @@ import { decodeSsUrl } from "../../utils/url";
 import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
 import uuid from "uuid/v4";
 import styles from "./dialogs.module.css";
+import { useRedirect } from "./useRedirect";
 
 const UPDATE_SUBSCRIPTIONS_TIMEOUT_MS = 5000;
 
@@ -27,12 +28,7 @@ export const EditSubscriptionDialog = React.memo(
     const dispatch = useDispatch();
     const [value, setValue] = useState(initialValue || {});
     const [isLoading, setIsLoading] = useState(false);
-    const history = useHistory();
-    const location = useLocation();
-    const success = () => {
-      close();
-      if (location.pathname !== "/proxies") history.push("/proxies");
-    };
+    const redirect = useRedirect();
     const onChange = useCallback(
       (fieldValue: { [key: string]: any }) => {
         setValue({ ...value, ...fieldValue });
@@ -83,8 +79,8 @@ export const EditSubscriptionDialog = React.memo(
             })
           );
         notifier.success("Update the subscription successfully!");
-        success();
         close();
+        redirect();
       } catch (e) {
         notifier.error("Fail to update the subscription!");
         setIsLoading(false);

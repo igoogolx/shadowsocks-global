@@ -8,6 +8,7 @@ import styles from "./dialogs.module.css";
 import { Button, Dialog, INPUT_SIZE } from "../Core";
 import { RegionCodeSelector } from "./RegioncodeSelector";
 import { isPort } from "../../utils/validator";
+import { useRedirect } from "./useRedirect";
 
 type EditSocks5sDialogProps = {
   isShow: boolean;
@@ -21,12 +22,7 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
   const [isChanged, setIsChanged] = useState(false);
   const [value, setValue] = useState(initialValue || { regionCode: "Auto" });
   const dispatch = useDispatch();
-  const history = useHistory();
-  const location = useLocation();
-  const success = () => {
-    close();
-    if (location.pathname !== "/proxies") history.push("/proxies");
-  };
+  const redirect = useRedirect();
 
   const onChange = useCallback(
     (filedValue: { [key: string]: any }) => {
@@ -64,7 +60,8 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
           }
         })
       );
-    success();
+    close();
+    redirect();
   };
   return (
     <Dialog isShow={isShow} close={close}>

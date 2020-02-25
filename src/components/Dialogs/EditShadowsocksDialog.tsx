@@ -6,7 +6,6 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import { ENCRYPTION_METHODS } from "../../constants";
 import { useDispatch } from "react-redux";
-import { useHistory, useLocation } from "react-router-dom";
 import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
 import { Field, Form } from "../Core/Form";
 import styles from "./dialogs.module.css";
@@ -14,6 +13,7 @@ import { Button, Dialog, Icon, ICON_NAME, INPUT_SIZE } from "../Core";
 import { isEmpty, isPort } from "../../utils/validator";
 import { FieldSelector } from "../Core/Selector/Selector";
 import { RegionCodeSelector } from "./RegioncodeSelector";
+import { useRedirect } from "./useRedirect";
 
 type EditShadowsocksDialogProps = {
   isShow: boolean;
@@ -40,12 +40,7 @@ export const EditShadowsocksDialog = React.memo(
       [value]
     );
     const dispatch = useDispatch();
-    const history = useHistory();
-    const location = useLocation();
-    const success = () => {
-      close();
-      if (location.pathname !== "/proxies") history.push("/proxies");
-    };
+    const redirect = useRedirect();
 
     const onSubmit = async (shadowsocks: Omit<Shadowsocks, "id">) => {
       let searchedRegionCode;
@@ -76,7 +71,8 @@ export const EditShadowsocksDialog = React.memo(
             }
           })
         );
-      success();
+      close();
+      redirect();
     };
 
     return (
