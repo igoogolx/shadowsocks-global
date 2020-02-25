@@ -5,6 +5,8 @@ import { useInfiniteScroll } from "./useInfiniteScroll";
 import { useIntersectionObserver } from "./useIntersectionObserver";
 import { useOnWindowSizeChange } from "./useOnWindowSizeChange";
 import { useChartjs } from "./useChartjs";
+import { useLockBodyScroll } from "./useLockBodyScroll";
+import { useTooltip } from "./useTooltip";
 
 export {
   usePopup,
@@ -13,5 +15,7 @@ export {
   useOnClickOutside,
   useIntersectionObserver,
   useOnWindowSizeChange,
-  useChartjs
+  useChartjs,
+  useLockBodyScroll,
+  useTooltip
 };

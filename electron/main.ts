@@ -52,11 +52,9 @@ const trayIconImages = {
 async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
-
     height: 600,
     fullscreen: isDev,
     resizable: isDev,
-    transparent: !isDev,
     webPreferences: {
       nodeIntegration: true,
       devTools: isDev,

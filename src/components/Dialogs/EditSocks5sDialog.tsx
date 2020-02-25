@@ -1,7 +1,6 @@
 import { addProxy, Socks5, updateProxy } from "../../reducers/proxyReducer";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useHistory, useLocation } from "react-router-dom";
 import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
 import { Field, Form } from "../Core/Form";
 import styles from "./dialogs.module.css";

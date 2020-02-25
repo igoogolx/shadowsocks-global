@@ -6,7 +6,6 @@ import {
   updateProxy
 } from "../../reducers/proxyReducer";
 import { useDispatch } from "react-redux";
-import { useHistory, useLocation } from "react-router-dom";
 import axios from "axios";
 import { decodeSsUrl } from "../../utils/url";
 import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
