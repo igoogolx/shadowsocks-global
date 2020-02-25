@@ -25,10 +25,13 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 **Installation**           
 
 1. Install the [Npcap](https://nmap.org/npcap/)(recommended) or  [Winpcap](https://www.winpcap.org/). 
-
 2. Download the release file and install it. 
-
 3. Enjoy.
+## How to use customized rules
+
+1. Download rules from https://github.com/FQrabbit/SSTap-Rule or write your own rules.
+2. Go to **setting->rule->Customized rules dir path**, add your rules dir.
+
 
 ## Roadmap
 **Before** version **1.0.0** : fix bug, remove unsafe type assertions , clean code, improve performance and UI. **No more new features**.<br />**After** version **1.0.0**:  more new features......
@@ -50,4 +53,6 @@ Runs the app in the development mode.<br />The page will restart if you make edi
 
 Builds the app for production to the `dist` folder.<br />
 
+## License
 
+[MIT]
