@@ -1,6 +1,8 @@
-# Shadowsocks-global
+# Shadowsocks-global ![Build](https://github.com/igoogolx/shadowsocks-global/workflows/Build/badge.svg)
 
 A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jigsaw-Code/outline-client)(windows).
+
+![Running screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/Running.png)
 
 ## Features
 
@@ -20,7 +22,10 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 ​	**Fix:**
 
 1. After the "failed" installation, go to "**Control Panel\Network and Internet\Network Connections**" and manually rename the TAP device to `shadowsocksGlobal-tap0`
-2. Run the installer again to force reinstall Outline.
+
+    ![RenameTapDevice screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/RenameTapDevice.png)
+
+2. Run the installer again to force reinstall Shadowsocks-global.
 
 **Installation**           
 
