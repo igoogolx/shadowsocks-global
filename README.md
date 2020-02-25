@@ -7,7 +7,7 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 ## Features
 
 - Supports Shadowsocks and SOCKS5 protocol
-- Build in Shadowsocks plugin: simple-obfs
+- Built in Shadowsocks plugin: simple-obfs
 - Supports Udp
 - Supports Smart Dns, Dns over Tcp
 

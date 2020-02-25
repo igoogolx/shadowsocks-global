@@ -87,14 +87,18 @@ export const Navigation = () => {
             />
           </Button>
         </Dropdown>
-        {isShowDialog &&
-          (currentEditType === TYPES[0] ? (
-            <EditShadowsocksDialog close={closeDialog} isShow={isShowDialog} />
-          ) : currentEditType === TYPES[1] ? (
-            <EditSocks5sDialog close={closeDialog} isShow={isShowDialog} />
-          ) : (
-            <EditSubscriptionDialog close={closeDialog} isShow={isShowDialog} />
-          ))}
+        <EditShadowsocksDialog
+          close={closeDialog}
+          isShow={isShowDialog && currentEditType === TYPES[0]}
+        />
+        <EditSocks5sDialog
+          close={closeDialog}
+          isShow={isShowDialog && currentEditType === TYPES[1]}
+        />
+        <EditSubscriptionDialog
+          close={closeDialog}
+          isShow={isShowDialog && currentEditType === TYPES[2]}
+        />
       </div>
 
       <ul className={styles.list}>

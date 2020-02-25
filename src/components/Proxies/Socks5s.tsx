@@ -61,14 +61,11 @@ export const Socks5s = React.memo(() => {
   const closeDialog = useCallback(() => setIsEditing(false), []);
   return (
     <>
-      {isEditing && (
-        <EditSocks5sDialog
-          isShow={isEditing}
-          close={closeDialog}
-          initialValue={getEditSocks5()}
-        />
-      )}
-
+      <EditSocks5sDialog
+        isShow={isEditing}
+        close={closeDialog}
+        initialValue={isEditing ? getEditSocks5() : undefined}
+      />
       {socks5s.length !== 0 && <div className={styles.title}>Sock5s</div>}
       <div className={styles.shadowsockses}>
         <Socks5sContext.Provider
