@@ -10,11 +10,11 @@ import React, {
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { deleteProxy, Socks5 } from "../../reducers/proxyReducer";
-import { Dialog, ICON_NAME, Menu } from "../Core";
+import { ICON_NAME, Menu } from "../Core";
 import { usePopup } from "../../hooks";
-import { EditSocks5Form } from "../Forms/EditSocks5Form";
 import styles from "./proxies.module.css";
 import { Socks5Card } from "../Cards/Socks5Card";
+import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
 
 export type Socks5sContextValue = {
   dropdownRef: MutableRefObject<HTMLElement | undefined>;
@@ -61,14 +61,14 @@ export const Socks5s = React.memo(() => {
   const closeDialog = useCallback(() => setIsEditing(false), []);
   return (
     <>
-      <Dialog isShow={isEditing} close={closeDialog}>
-        {isEditing && (
-          <EditSocks5Form
-            close={() => setIsEditing(false)}
-            defaultValue={getEditSocks5()}
-          />
-        )}
-      </Dialog>
+      {isEditing && (
+        <EditSocks5sDialog
+          isShow={isEditing}
+          close={closeDialog}
+          initialValue={getEditSocks5()}
+        />
+      )}
+
       {socks5s.length !== 0 && <div className={styles.title}>Sock5s</div>}
       <div className={styles.shadowsockses}>
         <Socks5sContext.Provider

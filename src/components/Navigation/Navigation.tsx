@@ -1,15 +1,15 @@
 import React, { useState, useRef, useCallback } from "react";
 import styles from "./navigation.module.css";
-import { Button, Dialog, Dropdown, Icon, ICON_NAME, ICON_SIZE } from "../Core";
+import { Button, Dropdown, Icon, ICON_NAME, ICON_SIZE } from "../Core";
 import { NavLink, useHistory, useLocation } from "react-router-dom";
-import { EditShadowsocksForm } from "../Forms/EditShadowsocksForm";
-import { EditSocks5Form } from "../Forms/EditSocks5Form";
-import { EditSubscriptionForm } from "../Forms/EditSubscriptionForm";
 import { clipboard } from "electron";
 import { decodeSsUrl } from "../../utils/url";
 import { useDispatch } from "react-redux";
 import { addProxy, Shadowsocks } from "../../reducers/proxyReducer";
 import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
+import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
+import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
+import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
 
 const TYPES = ["shadowsocks", "socks5", "subscription"];
 
@@ -87,16 +87,14 @@ export const Navigation = () => {
             />
           </Button>
         </Dropdown>
-        <Dialog isShow={isShowDialog} close={closeDialog}>
-          {isShowDialog &&
-            (currentEditType === TYPES[0] ? (
-              <EditShadowsocksForm close={closeDialog} />
-            ) : currentEditType === TYPES[1] ? (
-              <EditSocks5Form close={closeDialog} />
-            ) : (
-              <EditSubscriptionForm close={closeDialog} />
-            ))}
-        </Dialog>
+        {isShowDialog &&
+          (currentEditType === TYPES[0] ? (
+            <EditShadowsocksDialog close={closeDialog} isShow={isShowDialog} />
+          ) : currentEditType === TYPES[1] ? (
+            <EditSocks5sDialog close={closeDialog} isShow={isShowDialog} />
+          ) : (
+            <EditSubscriptionDialog close={closeDialog} isShow={isShowDialog} />
+          ))}
       </div>
 
       <ul className={styles.list}>

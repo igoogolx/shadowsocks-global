@@ -1,5 +1,5 @@
 import { FieldSelector, Option } from "../Core/Selector/Selector";
-import styles from "./forms.module.css";
+import styles from "./dialogs.module.css";
 import React, { useRef } from "react";
 import regions from "i18n-iso-countries/langs/en.json";
 

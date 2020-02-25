@@ -13,7 +13,6 @@ import { deleteProxy, ProxyState } from "../../reducers/proxyReducer";
 import styles from "./proxies.module.css";
 import { Dialog, ICON_NAME, Menu } from "../Core";
 import { usePopup } from "../../hooks";
-import { EditShadowsocksForm } from "../Forms/EditShadowsocksForm";
 import { Shadowsockses } from "./Shadowsockses";
 import { Socks5s } from "./Socks5s";
 import { Subscriptions } from "./Subscriptions";
@@ -21,6 +20,7 @@ import { encodeSsUrl } from "../../utils/url";
 import { clipboard } from "electron";
 import { notifier } from "../Core/Notification";
 import QRCode from "qrcode";
+import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
 
 //TODO:Remove improper type
 export type ProxiesContextValue = {
@@ -124,18 +124,17 @@ export const Proxies = () => {
 
   return (
     <>
-      <Dialog isShow={isEditing} close={closeEditDialog}>
-        {isEditing && (
-          <EditShadowsocksForm
-            close={() => setIsEditing(false)}
-            defaultValue={getEditingShadowsocks()}
-          />
-        )}
-      </Dialog>
+      {isEditing && (
+        <EditShadowsocksDialog
+          isShow={isEditing}
+          close={closeEditDialog}
+          initialValue={getEditingShadowsocks()}
+        />
+      )}
+
       <Dialog isShow={isShowQrCode} close={closeQrCodeDialog}>
         <canvas id="qr-code" />
       </Dialog>
-
       <div className={styles.container}>
         <ProxiesContext.Provider
           value={{

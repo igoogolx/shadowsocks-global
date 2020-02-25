@@ -2,10 +2,10 @@ import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { deleteProxy, Subscription } from "../../reducers/proxyReducer";
-import { Dialog, Dropdown, Icon, ICON_NAME } from "../Core";
-import { EditSubscriptionForm } from "../Forms/EditSubscriptionForm";
+import { Dropdown, Icon, ICON_NAME } from "../Core";
 import styles from "./proxies.module.css";
 import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
+import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
 
 export const Subscriptions = React.memo(() => {
   const subscriptions = useSelector<AppState, Subscription[]>(
@@ -21,16 +21,15 @@ export const Subscriptions = React.memo(() => {
 
   return (
     <>
-      <Dialog isShow={isShowDialog} close={closeDialog}>
-        {isShowDialog && (
-          <EditSubscriptionForm
-            close={closeDialog}
-            defaultValue={subscriptions.find(
-              subscription => subscription.id === editingId
-            )}
-          />
-        )}
-      </Dialog>
+      {isShowDialog && (
+        <EditSubscriptionDialog
+          isShow={isShowDialog}
+          close={closeDialog}
+          initialValue={subscriptions.find(
+            subscription => subscription.id === editingId
+          )}
+        />
+      )}
       {subscriptions.map(subscription => {
         return (
           <div key={subscription.id}>
