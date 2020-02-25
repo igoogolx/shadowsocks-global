@@ -12,6 +12,7 @@ import {
   validateServerCredentials
 } from "../../utils/connectivity";
 
+//TODO: Remove repeated code
 export const LatencyCard = () => {
   return (
     <div className={styles.latency}>
@@ -26,6 +27,9 @@ export const ToSeverCard = () => {
   const [latency, setLatency] = useState<number | null>(0);
   const [isChecking, setIsChecking] = useState(false);
   const proxy = useSelector<AppState, ProxyState>(state => state.proxy);
+  const isOnchangeToStared = useSelector<AppState, boolean>(
+    state => state.proxy.isStarted && !state.proxy.isProcessing
+  );
   const disabled = !proxy.isStarted || isChecking;
   const onClick = useCallback(async () => {
     setIsChecking(true);
@@ -37,7 +41,8 @@ export const ToSeverCard = () => {
         attempts: 5,
         timeout: 2000
       });
-      setLatency(latency);
+      if (latency) setLatency(latency);
+      else setLatency(null);
       setIsChecking(false);
     } catch (e) {
       setIsChecking(false);
@@ -45,11 +50,11 @@ export const ToSeverCard = () => {
     }
   }, [proxy]);
   useEffect(() => {
-    if (proxy.isStarted)
+    if (isOnchangeToStared)
       onClick()
         //Ignore promise returned from onClick
         .then();
-  }, [proxy.isStarted, onClick]);
+  }, [onClick, isOnchangeToStared]);
   return (
     <StatusCard
       iconName={ICON_NAME.PAPER_PLANE}
@@ -70,12 +75,17 @@ export const ToDnsCard = () => {
   const isStarted = useSelector<AppState, boolean>(
     state => state.proxy.isStarted
   );
+  const isOnchangeToStared = useSelector<AppState, boolean>(
+    state => state.proxy.isStarted && !state.proxy.isProcessing
+  );
   const disabled = !isStarted || isChecking;
   const onClick = useCallback(async () => {
     setIsChecking(true);
     try {
       const latency = await checkDns();
-      setLatency(latency);
+
+      if (latency) setLatency(latency);
+      else setLatency(null);
       setIsChecking(false);
     } catch (e) {
       setIsChecking(false);
@@ -83,11 +93,11 @@ export const ToDnsCard = () => {
     }
   }, []);
   useEffect(() => {
-    if (isStarted)
+    if (isOnchangeToStared)
       onClick()
         //Ignore promise returned from onClick
         .then();
-  }, [isStarted, onClick]);
+  }, [isOnchangeToStared, onClick]);
   return (
     <StatusCard
       iconName={ICON_NAME.DNS}
@@ -107,6 +117,9 @@ export const ToInternetCard = () => {
   const [isChecking, setIsChecking] = useState(false);
   const shadowsocksLocalPort = useSelector<AppState, number>(
     state => state.setting.general.shadowsocksLocalPort
+  );
+  const isOnchangeToStared = useSelector<AppState, boolean>(
+    state => state.proxy.isStarted && !state.proxy.isProcessing
   );
   const proxy = useSelector<AppState, ProxyState>(state => state.proxy);
   const isStarted = useSelector<AppState, boolean>(
@@ -129,7 +142,8 @@ export const ToInternetCard = () => {
           activatedServer.host,
           activatedServer.port
         );
-      setLatency(latency);
+      if (latency) setLatency(latency);
+      else setLatency(null);
       setIsChecking(false);
     } catch (e) {
       setIsChecking(false);
@@ -138,11 +152,11 @@ export const ToInternetCard = () => {
   }, [proxy, shadowsocksLocalPort]);
 
   useEffect(() => {
-    if (isStarted)
+    if (isOnchangeToStared)
       onClick()
         //Ignore promise returned from onClick
         .then();
-  }, [isStarted, onClick]);
+  }, [isOnchangeToStared, onClick]);
 
   return (
     <StatusCard
