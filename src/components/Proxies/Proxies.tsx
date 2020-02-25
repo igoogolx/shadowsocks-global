@@ -34,6 +34,12 @@ export const Proxies = () => {
   const proxy = useSelector<AppState, ProxyState>(state => state.proxy);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState("");
+  const activatedId = useSelector<AppState, string>(
+    state => state.proxy.activeId
+  );
+  const isStartedOrProcessing = useSelector<AppState, boolean>(
+    state => state.proxy.isProcessing || state.proxy.isStarted
+  );
   const [isShowQrCode, setIsShowQrCode] = useState(false);
   const dispatch = useDispatch();
 
@@ -55,14 +61,17 @@ export const Proxies = () => {
     return shadowsocks;
   }, [editingId, proxy.shadowsockses, proxy.subscriptions]);
 
-  const dropdownItems = useMemo(
-    () => [
+  const dropdownItems = useMemo(() => {
+    const isActivated = activatedId === editingId && isStartedOrProcessing;
+
+    return [
       {
         iconName: ICON_NAME.EDIT,
         content: "Edit",
         handleOnClick: () => {
           setIsEditing(true);
-        }
+        },
+        disabled: isActivated
       },
       {
         iconName: ICON_NAME.COPY,
@@ -95,11 +104,17 @@ export const Proxies = () => {
         content: "Delete",
         handleOnClick: () => {
           dispatch(deleteProxy({ type: "shadowsocks", id: editingId }));
-        }
+        },
+        disabled: isActivated
       }
-    ],
-    [dispatch, editingId, getEditingShadowsocks]
-  );
+    ];
+  }, [
+    activatedId,
+    dispatch,
+    editingId,
+    getEditingShadowsocks,
+    isStartedOrProcessing
+  ]);
   const [dropdownRef, setIsShowDropdown] = usePopup(
     <Menu items={dropdownItems} />
   );

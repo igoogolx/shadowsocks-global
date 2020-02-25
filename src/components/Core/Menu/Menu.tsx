@@ -12,6 +12,7 @@ export type MenuItemProps = {
   isDivider?: boolean;
   isDanger?: boolean;
   style?: any;
+  disabled?: boolean;
 };
 
 type MenuProps = {
@@ -22,6 +23,7 @@ type MenuProps = {
   };
 };
 
+//TODO: Refactor Menu to improve performance
 export const Menu = React.memo((props: MenuProps) => {
   const { items, className, style } = props;
   return (
@@ -61,31 +63,26 @@ const Item = React.memo((props: MenuItemProps) => {
     iconName,
     isDivider = false,
     content,
-    isDanger = false,
-    style
+    isDanger,
+    style,
+    disabled
   } = props;
+
   return (
-    <div style={style}>
+    <div style={style} className={disabled ? styles.disabled : ""}>
       {isDivider && <li className={styles.divider} />}
       <li
-        className={styles.item}
+        className={classNames(styles.item, {
+          [styles.danger]: isDanger,
+          [styles.disabled]: disabled
+        })}
         onClick={() => handleOnClick && handleOnClick()}
       >
         {typeof content !== "string" ? (
           content
         ) : (
-          <Button
-            size={BUTTON_SIZE.large}
-            type={"button"}
-            className={isDanger ? styles.danger : ""}
-          >
-            {iconName && (
-              <Icon
-                iconName={iconName}
-                className={isDanger ? "" : styles.icon}
-                type={iconType}
-              />
-            )}
+          <Button size={BUTTON_SIZE.large}>
+            {iconName && <Icon iconName={iconName} type={iconType} />}
             <span className={styles.content}>{content}</span>
           </Button>
         )}

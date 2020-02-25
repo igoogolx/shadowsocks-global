@@ -26,11 +26,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
 
   return (
     <div className={styles.server}>
-      <Button
-        className={styles.dropdown}
-        onClick={onClickDropdown}
-        disabled={isActive && disabled}
-      >
+      <Button className={styles.dropdown} onClick={onClickDropdown}>
         <Icon iconName={ICON_NAME.OMIT} />
       </Button>
       <Card

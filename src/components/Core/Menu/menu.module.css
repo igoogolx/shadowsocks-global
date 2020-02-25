@@ -13,9 +13,10 @@
       background: linear-gradient(to right, #dcdcdc, rgba(220, 220, 220, 0));
     }
     & .item {
-      & .icon {
+      & svg {
         color: var(--main-color);
       }
+
       & .content {
         margin-left: 8px;
       }
@@ -23,7 +24,22 @@
       &:hover {
         background-color: #eeeef4;
         border-radius: 5px;
-        color: var(--main-color);
+      }
+    }
+
+    & .danger {
+      & svg {
+        color: var(--error-color);
+      }
+    }
+
+    & .disabled {
+      pointer-events: none;
+      & svg {
+        color: var(--disabled-color);
+      }
+      & span {
+        color: var(--disabled-color);
       }
     }
   }
@@ -49,8 +65,4 @@
   background-color: darkgrey;
   outline: 1px solid slategrey;
   border-radius: 5px;
-}
-
-.danger {
-  color: var(--error-color);
 }

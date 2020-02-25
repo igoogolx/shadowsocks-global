@@ -26,14 +26,22 @@ export const Socks5s = React.memo(() => {
   const socks5s = useSelector<AppState, Socks5[]>(state => state.proxy.socks5s);
   const [editingId, setEditingId] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const activatedId = useSelector<AppState, string>(
+    state => state.proxy.activeId
+  );
+  const isStartedOrProcessing = useSelector<AppState, boolean>(
+    state => state.proxy.isProcessing || state.proxy.isStarted
+  );
 
   const dispatch = useDispatch();
-  const dropdownItems = useMemo(
-    () => [
+  const dropdownItems = useMemo(() => {
+    const isActivated = activatedId === editingId && isStartedOrProcessing;
+    return [
       {
         iconName: ICON_NAME.EDIT,
         content: "Edit",
-        handleOnClick: () => setIsEditing(true)
+        handleOnClick: () => setIsEditing(true),
+        disabled: isActivated
       },
       {
         iconName: ICON_NAME.DELETE,
@@ -41,11 +49,11 @@ export const Socks5s = React.memo(() => {
         content: "Delete",
         handleOnClick: () => {
           dispatch(deleteProxy({ type: "socks5", id: editingId }));
-        }
+        },
+        disabled: isActivated
       }
-    ],
-    [dispatch, editingId]
-  );
+    ];
+  }, [activatedId, dispatch, editingId, isStartedOrProcessing]);
   const [dropdownRef, setIsShowDropdown] = usePopup(
     <Menu items={dropdownItems} />
   );
