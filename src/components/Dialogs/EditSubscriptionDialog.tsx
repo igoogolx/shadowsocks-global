@@ -87,7 +87,7 @@ export const EditSubscriptionDialog = React.memo(
     };
 
     return (
-      <Dialog isShow={isShow} close={close}>
+      <Dialog isShow={isShow} close={close} disabled={isLoading}>
         <Form
           onSubmit={onSubmit}
           className={styles.container}
@@ -110,7 +110,12 @@ export const EditSubscriptionDialog = React.memo(
             >
               Save
             </Button>
-            <Button isPrimary={true} onClick={close} className={styles.button}>
+            <Button
+              isPrimary={true}
+              onClick={close}
+              className={styles.button}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
           </div>

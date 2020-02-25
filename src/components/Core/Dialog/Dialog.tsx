@@ -1,28 +1,29 @@
-import React, { useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import styles from "./dialog.module.css";
 import { createPortal } from "react-dom";
 import classNames from "classnames";
-import { DialogHeader } from "./DIalogHeader";
-import { DialogFooter } from "./DIalogFooter";
-import { useOnClickOutside } from "../../../hooks";
-import { useLockBodyScroll } from "../../../hooks/useLockBodyScroll";
+import { useLockBodyScroll, useOnClickOutside } from "../../../hooks";
 import { Button, Icon, ICON_NAME } from "../index";
 type DialogProps = {
   isShow: boolean;
   children: React.ReactNode;
-  header?: string;
-  footer?: React.ReactNode;
+  disabled?: boolean;
   close: () => void;
 };
 
-const Dialog = (props: DialogProps) => {
-  const { isShow, close, children, header, footer } = props;
+export const Dialog = React.memo((props: DialogProps) => {
+  const { isShow, close, children, disabled } = props;
   const contentRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(contentRef, close, isShow);
-  const cls = classNames(styles.container, {
-    hidden: !isShow
-  });
+  const disabledClose = useCallback(() => {
+    if (disabled) return;
+    close();
+  }, [close, disabled]);
+  useOnClickOutside(contentRef, disabledClose, isShow);
 
+  const cls = classNames(styles.container, {
+    hidden: !isShow,
+    [styles.disabled]: disabled
+  });
   useLockBodyScroll(isShow);
   return createPortal(
     <div className={cls}>
@@ -31,16 +32,10 @@ const Dialog = (props: DialogProps) => {
           <Icon iconName={ICON_NAME.CLOSE} />
         </Button>
         <div className={styles.panel} ref={contentRef}>
-          {header && <DialogHeader title={header} />}
           {children}
-          {footer && <DialogFooter content={footer} />}
         </div>
       </div>
     </div>,
     document.body
   );
-};
-
-const DialogMemo = React.memo(Dialog);
-
-export { DialogMemo as Dialog };
+});
