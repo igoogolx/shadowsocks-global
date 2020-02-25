@@ -2,6 +2,13 @@
 
 A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jigsaw-Code/outline-client)(windows).
 
+## Features
+
+- Supports Shadowsocks and SOCKS5 protocol
+- Build in Shadowsocks plugin: simple-obfs
+- Supports Udp
+- Supports Smart Dns, Dns over Tcp
+
 ## How to install
 
 **Prerequisite**: No Tencent Computer Manger(腾讯电脑管家) or 360 Safeguard(360 安全卫士) is installed. If have, please uninstall it before performing the following steps.
