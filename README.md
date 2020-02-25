@@ -29,7 +29,7 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 3. Enjoy.
 ## How to use customized rules
 
-1. Download rules from https://github.com/FQrabbit/SSTap-Rule or write your own rules.
+1. Download rules from https://github.com/FQrabbit/SSTap-Rule or write your own rules. **Note**: the rule file size must be smaller than 100Kb to ensure performance.
 2. Go to **setting->rule->Customized rules dir path**, add your rules dir.
 
 
