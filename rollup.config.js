@@ -34,9 +34,6 @@ export default [
             src: [
               "defaultRules",
               "scripts/*",
-              `tools/find_tap_name/${
-                isX64 ? "amd64" : "i386"
-              }/find_tap_name.exe`,
               "tools/ShadowsocksGlobalService/ShadowsocksGlobalService/bin/x86/Release/ShadowsocksGlobalService.exe",
               "tools/ShadowsocksGlobalService/ShadowsocksGlobalService/bin/x86/Release/Newtonsoft.Json.dll",
               "tools/smartdnsblock/bin/smartdnsblock.exe"

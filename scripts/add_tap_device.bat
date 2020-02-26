@@ -27,28 +27,33 @@ set DEVICE_HWID=tap0901
 set PATH=%PATH%;%SystemRoot%\system32;%SystemRoot%\system32\wbem;%SystemRoot%\system32\WindowsPowerShell/v1.0
 
 :: Check whether the device already exists.
-netsh interface show interface name=%DEVICE_NAME%
+netsh interface show interface name=%DEVICE_NAME% >nul
 if %errorlevel% equ 0 (
   echo TAP network device already exists.
   goto :configure
 )
 
-echo Storing existing network interfaces...
-set NETWORK_INTERFACES_FILE=%tmp%\shadowsocksGlobalInstaller-network-interfaces.txt
-:: This command retrieves the existing network interface names and formats it as
-:: a commma-separated string, so it can be passed to find_tap_name.exe:
-::  - removes empty lines with findstr
-::  - removes leading/trailing space with trim
-::  - joins the names without newlines (CLRF) with get-content and set-content
-::  - stores the result in NETWORK_INTERFACES_FILE
+:: Add the device, recording the names of devices before and after to help
+:: us find the name of the new device.
 ::
-:: Note that we pipe input from /dev/null to prevent Powershell hanging forever
-:: waiting on EOF.
-powershell "wmic nic where 'netconnectionid is not null' get netconnectionid | findstr /r /v '^$' | foreach-object {$_.trim()} > '%NETWORK_INTERFACES_FILE%'; ((get-content '%NETWORK_INTERFACES_FILE%') -join ',') | set-content -nonewline '%NETWORK_INTERFACES_FILE%'" <nul
+:: Note:
+::  - While we could limit the search to devices having ServiceName=%DEVICE_HWID%,
+::    that will cause wmic to output just "no instances available" when there
+::    are no other TAP devices present, messing up the diff.
+::  - We do not use findstr, etc., to strip blank lines because those ancient tools
+::    typically don't understand/output non-Latin characters (wmic *does*, even on
+::    Windows 7).
+set BEFORE_DEVICES=%tmp%\shadowsocksGlobalInstaller-tap-devices-before.txt
+set AFTER_DEVICES=%tmp%\shadowsocksGlobalInstaller-tap-devices-after.txt
+
+echo Creating TAP network device...
+echo Storing current network device list...
+wmic nic where "netconnectionid is not null" get netconnectionid > "%BEFORE_DEVICES%"
 if %errorlevel% neq 0 (
-  echo Could not store existing network interfaces. >&2
+  echo Could not store network device list. >&2
+  exit /b 1
 )
-type "%NETWORK_INTERFACES_FILE%"
+type "%BEFORE_DEVICES%"
 
 echo Creating TAP network device...
 tap-windows6\tapinstall install tap-windows6\OemVista.inf %DEVICE_HWID%
@@ -56,20 +61,33 @@ if %errorlevel% neq 0 (
   echo Could not create TAP network device. >&2
   exit /b 1
 )
-
-:: Find the name of the most recently installed TAP device in the registry and rename it.
-echo Searching for new TAP network device name...
-set TAP_NAME_FILE=%tmp%\shadowsocksGlobalInstaller-tap-device-name.txt
-find_tap_name.exe --component-id %DEVICE_HWID% --ignored-names "%NETWORK_INTERFACES_FILE%" > %TAP_NAME_FILE%
+echo Storing new network device list...
+wmic nic where "netconnectionid is not null" get netconnectionid > "%AFTER_DEVICES%"
 if %errorlevel% neq 0 (
-  echo Could not find TAP device name. >&2
+  echo Could not store network device list. >&2
   exit /b 1
 )
-set /p TAP_NAME=<%TAP_NAME_FILE%
-echo Found TAP device name: "%TAP_NAME%"
-netsh interface set interface name= "%TAP_NAME%" newname= "%DEVICE_NAME%"
+type "%AFTER_DEVICES%"
+
+:: Find the name of the new device and rename it.
+::
+:: Obviously, this command is a beast; roughly what it does, in this order, is:
+::  - perform a diff on the *trimmed* (in case wmic uses different column widths) before and after
+::    text files
+::  - remove leading/trailing space and blank lines with trim()
+::  - store the result in NEW_DEVICE
+::  - print NEW_DEVICE, for debugging (though non-Latin characters may appear as ?)
+::  - invoke netsh
+::
+:: Running all this in one go helps reduce the need to deal with temporary
+:: files and the character encoding headaches that follow.
+::
+:: Note that we pipe input from /dev/null to prevent Powershell hanging forever
+:: waiting on EOF.
+echo Searching for new TAP network device name...
+powershell "(compare-object (cat \"%BEFORE_DEVICES%\" | foreach-object {$_.trim()}) (cat \"%AFTER_DEVICES%\" | foreach-object {$_.trim()}) | format-wide -autosize | out-string).trim() | set-variable NEW_DEVICE; write-host \"New TAP device name: ${NEW_DEVICE}\"; netsh interface set interface name = \"${NEW_DEVICE}\" newname = \"%DEVICE_NAME%\"" <nul
 if %errorlevel% neq 0 (
-  echo Could not rename TAP device. >&2
+  echo Could not find or rename new TAP network device. >&2
   exit /b 1
 )
 

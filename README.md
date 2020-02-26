@@ -1,6 +1,6 @@
 # Shadowsocks-global ![Build](https://github.com/igoogolx/shadowsocks-global/workflows/Build/badge.svg)
 
-A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jigsaw-Code/outline-client)(windows).
+A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jigsaw-Code/outline-client)(windows). **Note: Don' support Ipv6**
 
 ![Running screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/Running.png)
 
@@ -14,18 +14,6 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 ## How to install
 
 **Prerequisite**: No Tencent Computer Manger(腾讯电脑管家) or 360 Safeguard(360 安全卫士) is installed. If have, please uninstall it before performing the following steps.
-
-**Note**:
-
-​	**!!!Known bug**: If your Windows install language isn't **en_us**, you may receive the error message "sorry we could not configure your system to connect to Shadowsocks-global" during the installation.
-
-​	**Fix:**
-
-1. After the "failed" installation, go to "**Control Panel\Network and Internet\Network Connections**" and manually rename the TAP device to `shadowsocksGlobal-tap0`
-
-    ![RenameTapDevice screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/RenameTapDevice.png)
-
-2. Run the installer again to force reinstall Shadowsocks-global.
 
 **Installation**           
 
