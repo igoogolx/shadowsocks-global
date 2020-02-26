@@ -50,11 +50,6 @@ ${StrLoc}
   ${EndIf}
   SetOutPath -
   File "${PROJECT_DIR}\scripts\add_tap_device.bat"
-  ${If} ${RunningX64}
-    File /r "${PROJECT_DIR}\tools\find_tap_name\amd64\find_tap_name.exe"
-  ${Else}
-    File /r "${PROJECT_DIR}\tools\find_tap_name\i386\find_tap_name.exe"
-  ${EndIf}
 
   ; OutlineService files, stopping the service first in case it's still running.
   nsExec::Exec "net stop ShadowsocksGlobalService"
