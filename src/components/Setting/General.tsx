@@ -30,8 +30,8 @@ export const General = React.memo(() => {
   );
   const onSubmit = useCallback(
     data => {
-      dispatch(setShadowsocksLocalPort(data.shadowsocskLocalPort));
-      setIsChanged(true);
+      dispatch(setShadowsocksLocalPort(data.shadowsocksLocalPort));
+      setIsChanged(false);
       notifier.success("Update setting successfully");
     },
     [dispatch]

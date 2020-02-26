@@ -20,6 +20,7 @@ import { getActivatedServer } from "../Proxies/util";
 import { Config } from "../../../electron/main";
 import { DNS_OPTIONS, DNS_SMART_TYPE } from "../../constants";
 import { Dns } from "../../../electron/process_manager";
+import detectPort from "detect-port";
 
 const Header = () => {
   const customizedRulesDirPath = useSelector<AppState, string>(
@@ -89,27 +90,33 @@ const Header = () => {
   );
 
   const start = useCallback(async () => {
-    if (!activeId) {
-      notifier.error("No server has been selected!");
-      return;
-    }
-    dispatch(setIsProcessing(true));
-    const activatedServer = getActivatedServer(proxy);
-    const rulePath = rulePaths.find(
-      rulePath => path.basename(rulePath, ".rules") === currentRule
-    ) as string;
-    const config: Config = {
-      rulePath,
-      dns,
-      additionalRoute: additionalRoute,
-      // @ts-ignore
-      server:
-        activatedServer.type === "shadowsocks"
-          ? { ...activatedServer, proxyPort: localPort }
-          : activatedServer
-    };
-    console.log(config);
     try {
+      if (!activeId) {
+        notifier.error("No server has been selected!");
+        return;
+      }
+      dispatch(setIsProcessing(true));
+      const activatedServer = getActivatedServer(proxy);
+      const rulePath = rulePaths.find(
+        rulePath => path.basename(rulePath, ".rules") === currentRule
+      ) as string;
+      if (activatedServer.type === "shadowsocks") {
+        const _port = await detectPort(localPort);
+        if (_port !== localPort)
+          throw new Error(
+            `port: ${localPort} was occupied, try port: ${_port}`
+          );
+      }
+      const config: Config = {
+        rulePath,
+        dns,
+        additionalRoute: additionalRoute,
+        // @ts-ignore
+        server:
+          activatedServer.type === "shadowsocks"
+            ? { ...activatedServer, proxyPort: localPort }
+            : activatedServer
+      };
       // @ts-ignore
       await promiseIpc.send("start", config);
       dispatch(setIsProcessing(false));
@@ -131,12 +138,22 @@ const Header = () => {
   ]);
 
   useEffect(() => {
+    //TODO: use customized channel for "Disconnected" because there are others message.
+    ipcRenderer.on("message", (event, message) => {
+      if (message === "Disconnected") {
+        dispatch(setIsProcessing(false));
+        dispatch(stopVpn());
+      }
+    });
+    return () => {
+      ipcRenderer.removeAllListeners("message");
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
     //TODO:i18next
     ipcRenderer.send("localizationResponse", null);
-    ipcRenderer.on("start", async () => {
-      await start();
-    });
-  }, [start]);
+  }, []);
 
   useEffect(() => {
     const loadRulePath = async () => {
