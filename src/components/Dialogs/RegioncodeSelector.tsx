@@ -18,6 +18,7 @@ export const RegionCodeSelector = () => {
       label={"Region"}
       className={styles.selector}
       options={regionOptions.current as Option[]}
+      isVirtualizedList={true}
     />
   );
 };

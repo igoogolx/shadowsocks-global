@@ -4,6 +4,10 @@ import classNames from "classnames";
 import React from "react";
 import { FixedSizeList as List } from "react-window";
 
+const VIRTUALIZED_ITEM_SIZE = 35;
+const VIRTUALIZED_ITEM_WIDTH = 188;
+const VIRTUALIZED_ITEM_HEIGHT = 150;
+
 export type MenuItemProps = {
   content?: React.ReactNode;
   iconType?: "iconFont" | "flag";
@@ -18,33 +22,31 @@ export type MenuItemProps = {
 type MenuProps = {
   items: MenuItemProps[];
   className?: string;
-  style?: {
-    [key: string]: string | number;
-  };
+  isVirtualized?: boolean;
 };
 
 //TODO: Refactor Menu to improve performance
 export const Menu = React.memo((props: MenuProps) => {
-  const { items, className, style } = props;
+  const { items, className, isVirtualized } = props;
   return (
-    <div className={classNames(styles.container, className)} style={style}>
-      {items.length < 20 ? (
-        <ul className={styles.list}>
-          {items.map((itemProps, index) => (
-            <Item {...itemProps} key={index} />
-          ))}
-        </ul>
-      ) : (
+    <div className={classNames(styles.container, className)}>
+      {isVirtualized ? (
         <List
           itemCount={items.length}
-          itemSize={35}
-          width={188}
-          height={150}
+          itemSize={VIRTUALIZED_ITEM_SIZE}
+          width={VIRTUALIZED_ITEM_WIDTH}
+          height={VIRTUALIZED_ITEM_HEIGHT}
           className={styles.list}
           itemData={items}
         >
           {VirtualizedItem}
         </List>
+      ) : (
+        <ul className={styles.list}>
+          {items.map((itemProps, index) => (
+            <Item {...itemProps} key={index} />
+          ))}
+        </ul>
       )}
     </div>
   );

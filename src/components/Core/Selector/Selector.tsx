@@ -18,6 +18,7 @@ type SelectorProps = {
   buttonClassName?: string;
   optionsClassName?: string;
   disabled?: boolean;
+  isVirtualizedList?: boolean;
 };
 
 export const Selector = (props: SelectorProps) => {
@@ -29,7 +30,8 @@ export const Selector = (props: SelectorProps) => {
     optionsClassName,
     className,
     disabled,
-    value
+    value,
+    isVirtualizedList
   } = props;
   const [currentOption, setCurrentOption] = useState(
     options.find(option => option.value === value) || options[0]
@@ -62,6 +64,7 @@ export const Selector = (props: SelectorProps) => {
         menuClassName={classNames(optionsClassName, styles.menu)}
         onChange={setIsOpen}
         disabled={disabled}
+        isVirtualizedList={isVirtualizedList}
       >
         <Button
           isBorder={true}
