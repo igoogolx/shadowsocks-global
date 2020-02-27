@@ -99,6 +99,7 @@ export const getConfig = async (
     dnsWhiteListServers: string[],
     proxyRoutes: string[],
     reservedRoutes = [serverIp + "/32"];
+  //Proxy rule
   if (!rulePath) {
     proxyRoutes = GLOBAL_PROXY_ROUTES;
     reservedRoutes = [...reservedRoutes, ...GLOBAL_RESERVED_ROUTES];
@@ -115,6 +116,7 @@ export const getConfig = async (
       ];
     }
   }
+  //Smart Dns
   if (dns.type === DNS_SMART_TYPE) {
     dnsServers = [SMART_DNS_ADDRESS];
     dnsWhiteListServers = SMART_DNS_WHITE_LIST_SERVERS;
@@ -144,6 +146,7 @@ export const getConfig = async (
         dns.nativeWebsite.alternateServer + "/32"
       ];
     }
+    //Customized Dns
   } else {
     dnsWhiteListServers = dnsServers = [
       dns.preferredServer,
