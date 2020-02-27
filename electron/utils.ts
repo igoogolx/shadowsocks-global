@@ -3,7 +3,7 @@ import { app } from "electron";
 import path from "path";
 import fs from "fs";
 import { Dns } from "./process_manager";
-import { DNS_SMART_TYPE } from "../src/constants";
+import { DNS_SMART_TYPE, SMART_DNS_ADDRESS } from "../src/constants";
 import {
   GLOBAL_PROXY_ROUTES,
   GLOBAL_RESERVED_ROUTES,
@@ -95,7 +95,6 @@ export const getConfig = async (
   additionalRoutes: AdditionalRoute
 ) => {
   const serverIp = await lookupIp(serverHost);
-  console.log(serverIp);
   let dnsServers: string[],
     dnsWhiteListServers: string[],
     proxyRoutes: string[],
@@ -117,10 +116,7 @@ export const getConfig = async (
     }
   }
   if (dns.type === DNS_SMART_TYPE) {
-    dnsServers = [
-      dns.defaultWebsite.alternateServer,
-      dns.defaultWebsite.preferredServer
-    ];
+    dnsServers = [SMART_DNS_ADDRESS];
     dnsWhiteListServers = SMART_DNS_WHITE_LIST_SERVERS;
     if (dns.defaultWebsite.isProxy) {
       proxyRoutes = [
