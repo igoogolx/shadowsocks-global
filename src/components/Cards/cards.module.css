@@ -12,13 +12,13 @@
     width: 180px;
   }
   & .dropdown {
-    color: var(--border-color);
+    color: var(--icon-color);
     position: absolute;
     right: 16px;
     padding: 0;
     top: 8px;
     &:hover {
-      color: black;
+      color: var(--icon-hover-color);
     }
   }
 
@@ -124,9 +124,9 @@
       top: 8px;
       right: 8px;
       cursor: pointer;
-      color: var(--disabled-color);
+      color: var(--icon-color);
       &:hover {
-        color: #494949;
+        color: var(--icon-hover-color);
       }
     }
   }

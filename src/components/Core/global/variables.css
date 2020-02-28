@@ -17,7 +17,8 @@
 
   --secondary-color: #999;
 
-  --icon-hover-color: #80c6ff;
+  --icon-color: var(--disabled-color);
+  --icon-hover-color: black;
 
   --ease: 0.3s ease-out;
   --fast-ease: 0.15s ease-out;

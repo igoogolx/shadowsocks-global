@@ -27,8 +27,9 @@
   }
 }
 .adornment {
+  color: var(--icon-color);
   &:hover {
-    color: rgba(17, 17, 17, 0.44);
+    color: var(--icon-hover-color);
   }
   padding: 0;
 }
