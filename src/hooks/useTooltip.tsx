@@ -9,6 +9,8 @@ import ReactDom from "react-dom";
 import * as React from "react";
 import { useClientRect } from "./useClientRect";
 
+const OFFSET = 4;
+
 export const useTooltip = (
   content: string,
   type: "top" | "left" | "right" | "bottom" = "bottom"
@@ -34,10 +36,10 @@ export const useTooltip = (
       const heightShortage = (targetRect.height - tooltipRect.height) / 2;
       absoluteRect.left = targetRect.left + +widthShortage;
       absoluteRect.top = targetRect.top + heightShortage;
-      if (type === "top") absoluteRect.top = targetRect.top;
-      if (type === "bottom") absoluteRect.top = targetRect.bottom;
-      if (type === "right") absoluteRect.left = targetRect.right;
-      if (type === "left") absoluteRect.left = targetRect.left;
+      if (type === "top") absoluteRect.top = targetRect.top + OFFSET;
+      if (type === "bottom") absoluteRect.top = targetRect.bottom + OFFSET;
+      if (type === "right") absoluteRect.left = targetRect.right + OFFSET;
+      if (type === "left") absoluteRect.left = targetRect.left + OFFSET;
     }
 
     ReactDom.render(
@@ -48,7 +50,7 @@ export const useTooltip = (
           //TODO:Fix bug: absoluteRect.left may be NaN
           left: absoluteRect.left || 0,
           zIndex: 2, //var(--z-index-top)
-          backgroundColor: "rgba(0, 0, 0, 0.75)",
+          backgroundColor: "rgba(36,36,36,1)",
           color: "white",
           fontSize: 14,
           padding: "6px 8px",
