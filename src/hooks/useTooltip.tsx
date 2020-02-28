@@ -36,10 +36,12 @@ export const useTooltip = (
       const heightShortage = (targetRect.height - tooltipRect.height) / 2;
       absoluteRect.left = targetRect.left + +widthShortage;
       absoluteRect.top = targetRect.top + heightShortage;
-      if (type === "top") absoluteRect.top = targetRect.top + OFFSET;
+      if (type === "top")
+        absoluteRect.top = targetRect.top - OFFSET - tooltipRect.height;
       if (type === "bottom") absoluteRect.top = targetRect.bottom + OFFSET;
       if (type === "right") absoluteRect.left = targetRect.right + OFFSET;
-      if (type === "left") absoluteRect.left = targetRect.left + OFFSET;
+      if (type === "left")
+        absoluteRect.left = targetRect.left - OFFSET - tooltipRect.width;
     }
 
     ReactDom.render(
