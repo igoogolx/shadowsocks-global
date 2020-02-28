@@ -1,6 +1,6 @@
 import styles from "./cards.module.css";
 import { StatusCard } from "./StatusCard";
-import { ICON_NAME } from "../Core";
+import { Icon, ICON_NAME, ICON_SIZE } from "../Core";
 import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
@@ -11,6 +11,7 @@ import {
   checkDns,
   validateServerCredentials
 } from "../../utils/connectivity";
+import { useTooltip } from "../../hooks";
 
 //TODO: Remove repeated code
 export const LatencyCard = () => {
@@ -55,17 +56,30 @@ export const ToSeverCard = () => {
         //Ignore promise returned from onClick
         .then();
   }, [onClick, isOnchangeToStared]);
+  const tooltipRef = useTooltip("The time of connecting to proxy server");
   return (
-    <StatusCard
-      iconName={ICON_NAME.PAPER_PLANE}
-      title={"To Server"}
-      data={
-        isChecking ? "Checking" : latency === null ? "Timeout" : latency + "ms"
-      }
-      iconClassname={styles.server}
-      disabled={disabled}
-      onClick={onClick}
-    />
+    <div className={styles.card}>
+      <Icon
+        iconName={ICON_NAME.INFO_VARIANT}
+        className={styles.tooltip}
+        iconRef={tooltipRef}
+        size={ICON_SIZE.SIZE20}
+      />
+      <StatusCard
+        iconName={ICON_NAME.PAPER_PLANE}
+        title={"To Server"}
+        data={
+          isChecking
+            ? "Checking"
+            : latency === null
+            ? "Timeout"
+            : latency + "ms"
+        }
+        iconClassname={styles.server}
+        disabled={disabled}
+        onClick={onClick}
+      />
+    </div>
   );
 };
 
@@ -98,17 +112,31 @@ export const ToDnsCard = () => {
         //Ignore promise returned from onClick
         .then();
   }, [isOnchangeToStared, onClick]);
+
+  const tooltipRef = useTooltip("The time of connecting to Google Dns");
   return (
-    <StatusCard
-      iconName={ICON_NAME.DNS}
-      title={"To Dns"}
-      data={
-        isChecking ? "Checking" : latency === null ? "Timeout" : latency + "ms"
-      }
-      iconClassname={styles.dns}
-      disabled={disabled}
-      onClick={onClick}
-    />
+    <div className={styles.card}>
+      <Icon
+        iconName={ICON_NAME.INFO_VARIANT}
+        className={styles.tooltip}
+        iconRef={tooltipRef}
+        size={ICON_SIZE.SIZE20}
+      />
+      <StatusCard
+        iconName={ICON_NAME.DNS}
+        title={"To Dns"}
+        data={
+          isChecking
+            ? "Checking"
+            : latency === null
+            ? "Timeout"
+            : latency + "ms"
+        }
+        iconClassname={styles.dns}
+        disabled={disabled}
+        onClick={onClick}
+      />
+    </div>
   );
 };
 
@@ -157,17 +185,29 @@ export const ToInternetCard = () => {
         //Ignore promise returned from onClick
         .then();
   }, [isOnchangeToStared, onClick]);
-
+  const tooltipRef = useTooltip("The time of connecting to google.com", "left");
   return (
-    <StatusCard
-      iconName={ICON_NAME.INTERNET}
-      title={"To Internet"}
-      data={
-        isChecking ? "Checking" : latency === null ? "Timeout" : latency + "ms"
-      }
-      iconClassname={styles.internet}
-      disabled={disabled}
-      onClick={onClick}
-    />
+    <div className={styles.card}>
+      <Icon
+        iconName={ICON_NAME.INFO_VARIANT}
+        className={styles.tooltip}
+        iconRef={tooltipRef}
+        size={ICON_SIZE.SIZE20}
+      />
+      <StatusCard
+        iconName={ICON_NAME.INTERNET}
+        title={"To Internet"}
+        data={
+          isChecking
+            ? "Checking"
+            : latency === null
+            ? "Timeout"
+            : latency + "ms"
+        }
+        iconClassname={styles.internet}
+        disabled={disabled}
+        onClick={onClick}
+      />
+    </div>
   );
 };

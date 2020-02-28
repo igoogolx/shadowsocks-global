@@ -9,6 +9,7 @@ type IconProps = {
   size?: string;
   className?: string;
   type?: "iconFont" | "flag";
+  iconRef?: React.RefObject<any>;
 };
 const Icon = (props: IconProps) => {
   const {
@@ -16,18 +17,24 @@ const Icon = (props: IconProps) => {
     size = ICON_SIZE.DEFAULT,
     iconName,
     className,
-    type = "iconFont"
+    type = "iconFont",
+    iconRef
   } = props;
   const cls = classNames(styles.container, styles[size], className, {
     [styles.iconLoading]: isLoading
   });
   return type === "iconFont" ? (
-    <svg aria-hidden="true" className={classNames(styles.svg, cls)}>
+    <svg
+      aria-hidden="true"
+      className={classNames(styles.svg, cls)}
+      ref={iconRef}
+    >
       <use href={`#icon-${iconName}`} />
     </svg>
   ) : (
     <span
       className={`flag-icon flag-icon-${iconName.toLowerCase()} ${className}`}
+      ref={iconRef}
     />
   );
 };

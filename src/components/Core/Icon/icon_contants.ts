@@ -39,5 +39,6 @@ export const ICON_NAME = {
   DNS: "dns",
   FOLDER: "folder-open-fill",
   QRCODE: "qrcode",
-  CLOSE: "close"
+  CLOSE: "close",
+  INFO_VARIANT: "information-variant"
 };
