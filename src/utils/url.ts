@@ -54,6 +54,7 @@ export const decodeSsUrl = (url: string) => {
     };
     try {
       const serverURL = new URL(
+        //It seems that URL can't parse ss Url. So we replace it with http Url
         decodeURIComponent(url.replace(/^ss/g, "http"))
       );
       const base64 = serverURL.username;
@@ -63,9 +64,11 @@ export const decodeSsUrl = (url: string) => {
       config.host = serverURL.hostname;
       config.port = Number(serverURL.port);
       config.name = decodeURIComponent(serverURL.hash).split("#")[1] || "";
-      const pluginParts = serverURL.search.split(/;(.+)?/, 2);
-      config.plugin = pluginParts[0].split("=")[1] || "";
-      config.plugin_opts = pluginParts[1] || "";
+      const pluginParts = serverURL.searchParams
+        .get("plugin")
+        ?.split(/;(.+)?/, 2);
+      config.plugin = (pluginParts && pluginParts[0]) || "";
+      config.plugin_opts = (pluginParts && pluginParts[1]) || "";
       return config;
     } catch (e) {
       return null;
