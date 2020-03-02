@@ -153,7 +153,11 @@ const Header = () => {
   useEffect(() => {
     //TODO:i18next
     ipcRenderer.send("localizationResponse", null);
-  }, []);
+    //If the app crashes unexpectedly, the "start" Button can be loading state after restarting app.
+    //To avoid that, the state mush be reset.
+    dispatch(setIsProcessing(false));
+    dispatch(stopVpn());
+  }, [dispatch]);
 
   useEffect(() => {
     const loadRulePath = async () => {
