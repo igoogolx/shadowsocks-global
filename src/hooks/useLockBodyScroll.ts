@@ -9,24 +9,22 @@ export const useLockBodyScroll = () => {
     const keys = [32, 33, 32, 35, 36, 37, 38, 39, 40];
 
     function preventScroll(e: any) {
-      e.preventDefault();
-      window.scrollTo(scrollX, scrollY);
-      return false;
+      if (e.target === document) {
+        window.scrollTo(scrollX, scrollY);
+        return false;
+      }
     }
 
     function preventScrollForScrollKeys(e: any) {
-      if (keys.indexOf(e.keyCode) !== -1) {
-        e.preventDefault();
+      if (e.target === document && keys.indexOf(e.keyCode) !== -1) {
         window.scrollTo(scrollX, scrollY);
+        return false;
       }
-      return false;
     }
 
-    document.addEventListener("scroll", preventScroll, { passive: false });
-    document.addEventListener("wheel", preventScroll, { passive: false }); // Disable scrolling in Chrome
-    document.addEventListener("keydown", preventScrollForScrollKeys, {
-      passive: false
-    });
+    document.addEventListener("scroll", preventScroll);
+    document.addEventListener("wheel", preventScroll); // Disable scrolling in Chrome
+    document.addEventListener("keydown", preventScrollForScrollKeys);
 
     return () => {
       document.removeEventListener("scroll", preventScroll);
