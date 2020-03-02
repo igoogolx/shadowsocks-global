@@ -1,6 +1,6 @@
 {
   "name": "shadowsocks-global",
-  "version": "0.1.0-beat.1",
+  "version": "0.1.0-beat.2",
   "homepage": "./",
   "main": "electron-build/main.js",
   "dependencies": {
