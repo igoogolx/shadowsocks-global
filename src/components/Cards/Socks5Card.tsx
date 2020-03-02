@@ -1,8 +1,10 @@
-import { setActiveId, Socks5 } from "../../reducers/proxyReducer";
+import { deleteProxy, setActiveId, Socks5 } from "../../reducers/proxyReducer";
 import { ServerCard } from "./ServerCard";
-import React, { useCallback, useContext } from "react";
-import { useDispatch } from "react-redux";
-import { Socks5sContext, Socks5sContextValue } from "../Proxies/Socks5s";
+import React, { useCallback, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppState } from "../../reducers/rootReducer";
+import { ICON_NAME } from "../Core";
+import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
 
 type Socks5CardProps = {
   socks5: Socks5;
@@ -10,30 +12,56 @@ type Socks5CardProps = {
 };
 
 export const Socks5Card = React.memo((props: Socks5CardProps) => {
-  const { socks5 } = props;
+  const { id, host } = props.socks5;
   const dispatch = useDispatch();
-  const onClick = useCallback(() => dispatch(setActiveId(socks5.id)), [
-    dispatch,
-    socks5.id
-  ]);
-  const { dropdownRef, setIsShowDropdown, setEditingId } = useContext(
-    Socks5sContext
-  ) as Socks5sContextValue;
-  const onClickDropdownMemo = useCallback(
-    e => {
-      dropdownRef.current = e.currentTarget;
-      setEditingId(socks5.id);
-      setIsShowDropdown(isShow => !isShow);
-    },
-    [dropdownRef, setEditingId, setIsShowDropdown, socks5.id]
+  const onClick = useCallback(() => dispatch(setActiveId(id)), [dispatch, id]);
+  const socks5s = useSelector<AppState, Socks5[]>(state => state.proxy.socks5s);
+  const [isEditing, setIsEditing] = useState(false);
+  const activatedId = useSelector<AppState, string>(
+    state => state.proxy.activeId
+  );
+  const isStartedOrProcessing = useSelector<AppState, boolean>(
+    state => state.proxy.isProcessing || state.proxy.isStarted
   );
 
+  const dropdownItems = useMemo(() => {
+    const isActivated = activatedId === id && isStartedOrProcessing;
+    return [
+      {
+        iconName: ICON_NAME.EDIT,
+        content: "Edit",
+        handleOnClick: () => setIsEditing(true),
+        disabled: isActivated
+      },
+      {
+        iconName: ICON_NAME.DELETE,
+        isDanger: true,
+        content: "Delete",
+        handleOnClick: () => {
+          dispatch(deleteProxy({ type: "socks5", id }));
+        },
+        disabled: isActivated
+      }
+    ];
+  }, [activatedId, dispatch, id, isStartedOrProcessing]);
+
+  const getEditSocks5 = () => socks5s.find(socks5 => socks5.id === id);
+  const closeDialog = useCallback(() => setIsEditing(false), []);
+
   return (
-    <ServerCard
-      onClickDropdown={onClickDropdownMemo}
-      onClick={onClick}
-      title={socks5.host}
-      id={socks5.id}
-    />
+    <>
+      {isEditing && (
+        <EditSocks5sDialog
+          close={closeDialog}
+          initialValue={isEditing ? getEditSocks5() : undefined}
+        />
+      )}
+      <ServerCard
+        onClick={onClick}
+        title={host}
+        id={id}
+        menuItems={dropdownItems}
+      />
+    </>
   );
 });

@@ -1,7 +1,7 @@
 import styles from "./cards.module.css";
 import { StatusCard } from "./StatusCard";
 import { Icon, ICON_NAME, ICON_SIZE } from "../Core";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { getActivatedServer } from "../Proxies/util";
@@ -11,7 +11,7 @@ import {
   checkDns,
   validateServerCredentials
 } from "../../utils/connectivity";
-import { useTooltip } from "../../hooks";
+import { Tooltip } from "../Core/Tooltip/Tooltip";
 
 //TODO: Remove repeated code
 export const LatencyCard = () => {
@@ -56,7 +56,7 @@ export const ToSeverCard = () => {
         //Ignore promise returned from onClick
         .then();
   }, [onClick, isOnchangeToStared]);
-  const tooltipRef = useTooltip("The time of connecting to proxy server");
+  const tooltipRef = useRef(null);
   return (
     <div className={styles.card}>
       <Icon
@@ -64,6 +64,10 @@ export const ToSeverCard = () => {
         className={styles.tooltip}
         iconRef={tooltipRef}
         size={ICON_SIZE.SIZE20}
+      />
+      <Tooltip
+        content={"The time of connecting to proxy server"}
+        target={tooltipRef}
       />
       <StatusCard
         iconName={ICON_NAME.PAPER_PLANE}
@@ -112,8 +116,7 @@ export const ToDnsCard = () => {
         //Ignore promise returned from onClick
         .then();
   }, [isOnchangeToStared, onClick]);
-
-  const tooltipRef = useTooltip("The time of connecting to Google Dns");
+  const tooltipRef = useRef(null);
   return (
     <div className={styles.card}>
       <Icon
@@ -121,6 +124,10 @@ export const ToDnsCard = () => {
         className={styles.tooltip}
         iconRef={tooltipRef}
         size={ICON_SIZE.SIZE20}
+      />
+      <Tooltip
+        content={"The time of connecting to Google Dns"}
+        target={tooltipRef}
       />
       <StatusCard
         iconName={ICON_NAME.DNS}
@@ -185,7 +192,7 @@ export const ToInternetCard = () => {
         //Ignore promise returned from onClick
         .then();
   }, [isOnchangeToStared, onClick]);
-  const tooltipRef = useTooltip("The time of connecting to google.com", "left");
+  const tooltipRef = useRef(null);
   return (
     <div className={styles.card}>
       <Icon
@@ -193,6 +200,11 @@ export const ToInternetCard = () => {
         className={styles.tooltip}
         iconRef={tooltipRef}
         size={ICON_SIZE.SIZE20}
+      />
+      <Tooltip
+        content={"The time of connecting to Google.com"}
+        target={tooltipRef}
+        type={"left"}
       />
       <StatusCard
         iconName={ICON_NAME.INTERNET}

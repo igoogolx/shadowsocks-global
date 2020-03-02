@@ -16,14 +16,13 @@ import { useRedirect } from "./useRedirect";
 const UPDATE_SUBSCRIPTIONS_TIMEOUT_MS = 5000;
 
 type EditSubscriptionDialogProps = {
-  isShow: boolean;
   close: () => void;
   initialValue?: Subscription;
 };
 
 export const EditSubscriptionDialog = React.memo(
   (props: EditSubscriptionDialogProps) => {
-    const { isShow, close, initialValue } = props;
+    const { close, initialValue } = props;
     const dispatch = useDispatch();
     const [value, setValue] = useState(initialValue || {});
     const [isLoading, setIsLoading] = useState(false);
@@ -87,7 +86,7 @@ export const EditSubscriptionDialog = React.memo(
     };
 
     return (
-      <Dialog isShow={isShow} close={close} disabled={isLoading}>
+      <Dialog close={close} disabled={isLoading}>
         <Form
           onSubmit={onSubmit}
           className={styles.container}

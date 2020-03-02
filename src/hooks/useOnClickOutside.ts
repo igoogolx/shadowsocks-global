@@ -2,26 +2,31 @@ import { MutableRefObject, RefObject, useEffect } from "react";
 
 export function useOnClickOutside(
   ref: RefObject<HTMLElement> | MutableRefObject<HTMLElement | undefined>,
-  handler: Function,
-  flag: boolean
+  handler: Function
 ) {
-  useEffect(() => {
-    const target = ref.current;
-    const listener = (event: any) => {
-      // Do nothing if clicking ref's element or descendent elements
-      if (!target || target.contains(event.target)) {
-        return;
-      }
-      handler(event);
-    };
-    if (flag) {
-      document.addEventListener("click", listener);
-    }
+  useEffect(
+    () => {
+      const listener = (event: any) => {
+        // Do nothing if clicking ref's element or descendent elements
+        if (!ref.current || ref.current.contains(event.target)) {
+          return;
+        }
 
-    return () => {
-      if (flag) {
+        handler(event);
+      };
+
+      document.addEventListener("click", listener);
+
+      return () => {
         document.removeEventListener("click", listener);
-      }
-    };
-  }, [ref, handler, flag]);
+      };
+    },
+    // Add ref and handler to effect dependencies
+    // It's worth noting that because passed in handler is a new ...
+    // ... function on every render that will cause this effect ...
+    // ... callback/cleanup to run every render. It's not a big deal ...
+    // ... but to optimize you can wrap handler in useCallback before ...
+    // ... passing it into this hook.
+    [ref, handler]
+  );
 }

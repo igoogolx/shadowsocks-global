@@ -1,33 +1,13 @@
 .container {
   height: auto;
   display: flex;
-
+  & .menu {
+    margin-top: 8px;
+    max-height: 200px;
+  }
   & .content {
     display: flex;
     height: 100%;
     position: relative;
-
-    &:hover {
-      & .hiddenWhenNotHover {
-        display: block;
-      }
-    }
-    & .menu {
-      position: absolute;
-      top: 40px;
-      max-height: 200px;
-    }
-
-    & .left {
-      left: 0;
-    }
-
-    & .right {
-      right: 0;
-    }
-
-    & .hiddenWhenNotHover {
-      display: none;
-    }
   }
 }

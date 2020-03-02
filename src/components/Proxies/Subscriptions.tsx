@@ -21,15 +21,19 @@ export const Subscriptions = React.memo(() => {
 
   return (
     <>
-      <EditSubscriptionDialog
-        isShow={isShowDialog}
-        close={closeDialog}
-        initialValue={
-          isShowDialog
-            ? subscriptions.find(subscription => subscription.id === editingId)
-            : undefined
-        }
-      />
+      {isShowDialog && (
+        <EditSubscriptionDialog
+          close={closeDialog}
+          initialValue={
+            isShowDialog
+              ? subscriptions.find(
+                  subscription => subscription.id === editingId
+                )
+              : undefined
+          }
+        />
+      )}
+
       {subscriptions.map(subscription => {
         return (
           <div key={subscription.id}>

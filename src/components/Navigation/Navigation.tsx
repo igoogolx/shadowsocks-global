@@ -75,43 +75,40 @@ export const Navigation = () => {
     setIsShowDialog(false);
   }, []);
   return (
-    <div className={styles.container}>
-      <div className={styles.dialog}>
-        <Dropdown items={dropdownItems.current} position={"left"}>
-          <Button isPrimary={true}>
-            Add Proxy
-            <Icon
-              iconName={ICON_NAME.PLUS}
-              size={ICON_SIZE.SIZE16}
-              className={styles.icon}
+    <>
+      <div className={styles.container}>
+        <div className={styles.dialog}>
+          <Dropdown items={dropdownItems.current}>
+            <Button isPrimary={true}>
+              Add Proxy
+              <Icon
+                iconName={ICON_NAME.PLUS}
+                size={ICON_SIZE.SIZE16}
+                className={styles.icon}
+              />
+            </Button>
+          </Dropdown>
+        </div>
+        <ul className={styles.list}>
+          {items.map(item => (
+            <Item
+              name={item.name}
+              route={item.route}
+              iconName={item.iconName}
+              key={item.name}
             />
-          </Button>
-        </Dropdown>
-        <EditShadowsocksDialog
-          close={closeDialog}
-          isShow={isShowDialog && currentEditType === TYPES[0]}
-        />
-        <EditSocks5sDialog
-          close={closeDialog}
-          isShow={isShowDialog && currentEditType === TYPES[1]}
-        />
-        <EditSubscriptionDialog
-          close={closeDialog}
-          isShow={isShowDialog && currentEditType === TYPES[2]}
-        />
+          ))}
+        </ul>
       </div>
-
-      <ul className={styles.list}>
-        {items.map(item => (
-          <Item
-            name={item.name}
-            route={item.route}
-            iconName={item.iconName}
-            key={item.name}
-          />
+      {isShowDialog &&
+        (currentEditType === TYPES[0] ? (
+          <EditShadowsocksDialog close={closeDialog} />
+        ) : currentEditType === TYPES[1] ? (
+          <EditSocks5sDialog close={closeDialog} />
+        ) : (
+          <EditSubscriptionDialog close={closeDialog} />
         ))}
-      </ul>
-    </div>
+    </>
   );
 };
 

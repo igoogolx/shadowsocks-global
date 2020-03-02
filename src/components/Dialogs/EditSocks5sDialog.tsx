@@ -10,13 +10,12 @@ import { isPort } from "../../utils/validator";
 import { useRedirect } from "./useRedirect";
 
 type EditSocks5sDialogProps = {
-  isShow: boolean;
   close: () => void;
   initialValue?: Socks5;
 };
 
 export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
-  const { isShow, close, initialValue } = props;
+  const { close, initialValue } = props;
 
   const [isChanged, setIsChanged] = useState(false);
   const [value, setValue] = useState(initialValue || { regionCode: "Auto" });
@@ -63,7 +62,7 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
     redirect();
   };
   return (
-    <Dialog isShow={isShow} close={close}>
+    <Dialog close={close}>
       <Form
         onSubmit={onSubmit}
         className={styles.container}

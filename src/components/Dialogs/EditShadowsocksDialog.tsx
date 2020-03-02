@@ -16,14 +16,13 @@ import { RegionCodeSelector } from "./RegioncodeSelector";
 import { useRedirect } from "./useRedirect";
 
 type EditShadowsocksDialogProps = {
-  isShow: boolean;
   close: () => void;
   initialValue?: Shadowsocks;
 };
 
 export const EditShadowsocksDialog = React.memo(
   (props: EditShadowsocksDialogProps) => {
-    const { isShow, close, initialValue } = props;
+    const { close, initialValue } = props;
     const [value, setValue] = useState(
       initialValue || { regionCode: "Auto", method: ENCRYPTION_METHODS[0] }
     );
@@ -76,7 +75,7 @@ export const EditShadowsocksDialog = React.memo(
     };
 
     return (
-      <Dialog isShow={isShow} close={close}>
+      <Dialog close={close}>
         <Form
           onSubmit={onSubmit}
           className={styles.container}

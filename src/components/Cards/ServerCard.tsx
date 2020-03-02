@@ -1,14 +1,15 @@
 import styles from "./cards.module.css";
-import { Button, Icon, ICON_NAME } from "../Core";
+import { Dropdown, Icon, ICON_NAME } from "../Core";
 import React from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { Dot } from "../Dot/Dot";
 import { Card } from "../Core/Card/Card";
+import { MenuItemProps } from "../Core/Menu/Menu";
 
 type ServerCardProps = {
   id: string;
-  onClickDropdown: React.MouseEventHandler<HTMLButtonElement>;
+  menuItems: MenuItemProps[];
   onClick: () => void;
   title: string;
   delay?: string;
@@ -17,7 +18,7 @@ type ServerCardProps = {
 };
 
 export const ServerCard = React.memo((props: ServerCardProps) => {
-  const { onClickDropdown, title, regionCode, onClick, delay, id } = props;
+  const { title, regionCode, onClick, delay, id, menuItems } = props;
   const activeId = useSelector<AppState, string>(state => state.proxy.activeId);
   const disabled = useSelector<AppState, boolean>(
     state => state.proxy.isStarted || state.proxy.isProcessing
@@ -26,9 +27,13 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
 
   return (
     <div className={styles.server}>
-      <Button className={styles.dropdown} onClick={onClickDropdown}>
+      <Dropdown
+        items={menuItems}
+        className={styles.dropdown}
+        isLockBodyScroll={true}
+      >
         <Icon iconName={ICON_NAME.OMIT} />
-      </Button>
+      </Dropdown>
       <Card
         onClick={onClick}
         className={styles.card}
