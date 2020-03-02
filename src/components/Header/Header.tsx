@@ -246,6 +246,7 @@ const Header = () => {
         onChange={changeCurrentRule}
         className={styles.selector}
         disabled={isLoadingRules || isStarted || isProcessing}
+        isVirtualizedList={rulesOptions.length > 4}
       />
     </div>
   );
