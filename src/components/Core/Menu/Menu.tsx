@@ -1,18 +1,18 @@
 import styles from "./menu.module.css";
-import { BUTTON_SIZE, Button, Icon } from "..";
+import { Icon } from "..";
 import classNames from "classnames";
 import React from "react";
 import { FixedSizeList as List } from "react-window";
 
-const VIRTUALIZED_ITEM_SIZE = 35;
+const VIRTUALIZED_ITEM_SIZE = 40;
 const VIRTUALIZED_ITEM_WIDTH = 188;
-const VIRTUALIZED_ITEM_HEIGHT = 150;
+const VIRTUALIZED_ITEM_HEIGHT = 170;
 
 export type MenuItemProps = {
   content?: React.ReactNode;
   iconType?: "iconFont" | "flag";
   iconName?: string;
-  handleOnClick?: Function;
+  handleOnClick: () => void;
   isDivider?: boolean;
   isDanger?: boolean;
   style?: any;
@@ -71,24 +71,19 @@ const Item = React.memo((props: MenuItemProps) => {
   } = props;
 
   return (
-    <div style={style} className={disabled ? styles.disabled : ""}>
-      {isDivider && <li className={styles.divider} />}
-      <li
-        className={classNames(styles.item, {
-          [styles.danger]: isDanger,
-          [styles.disabled]: disabled
-        })}
-        onClick={() => handleOnClick && handleOnClick()}
-      >
-        {typeof content !== "string" ? (
-          content
-        ) : (
-          <Button size={BUTTON_SIZE.large}>
-            {iconName && <Icon iconName={iconName} type={iconType} />}
-            <span className={styles.content}>{content}</span>
-          </Button>
-        )}
-      </li>
-    </div>
+    <li
+      style={style}
+      className={classNames(styles.item, {
+        [styles.danger]: isDanger,
+        [styles.disabled]: disabled
+      })}
+      onClick={handleOnClick}
+    >
+      {isDivider && <div className={styles.divider} />}
+      <div className={styles.content}>
+        {iconName && <Icon iconName={iconName} type={iconType} />}
+        <span className={styles.text}>{content}</span>
+      </div>
+    </li>
   );
 });

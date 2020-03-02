@@ -13,11 +13,20 @@
       background: linear-gradient(to right, #dcdcdc, rgba(220, 220, 220, 0));
     }
     & .item {
+      display: flex;
+      cursor: pointer;
+      height: 40px;
+      font-size: 16px;
+      font-weight: normal;
+      color: var(--text-color);
       & svg {
         color: var(--main-color);
       }
-
       & .content {
+        margin: auto 8px;
+      }
+
+      & .text {
         margin-left: 8px;
       }
 
