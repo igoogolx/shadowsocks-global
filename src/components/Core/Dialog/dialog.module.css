@@ -35,6 +35,7 @@
   }
 }
 .disabled {
+  pointer-events: none;
   & .close {
     &:hover {
       color: var(--disabled-color);
@@ -43,6 +44,7 @@
 }
 
 .content {
+  position: relative;
   min-height: calc(unit * 15);
   max-height: 100%;
   margin: auto;

@@ -13,12 +13,11 @@ type DialogProps = {
 export const Dialog = React.memo((props: DialogProps) => {
   const { close, children, disabled } = props;
   const contentRef = useRef<HTMLDivElement>(null);
-  const disabledClose = useCallback(
+  const handlerClose = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (disabled) return;
       if (e.target === e.currentTarget) close();
     },
-    [close, disabled]
+    [close]
   );
 
   const cls = classNames(styles.container, {
@@ -28,9 +27,9 @@ export const Dialog = React.memo((props: DialogProps) => {
   return createPortal(
     <div>
       <div className={styles.mask} />
-      <div className={cls} onClick={disabledClose}>
+      <div className={cls} onClick={handlerClose}>
         <div className={styles.content}>
-          <Button className={styles.close}>
+          <Button className={styles.close} onClick={close}>
             <Icon iconName={ICON_NAME.CLOSE} />
           </Button>
           <div className={styles.panel} ref={contentRef}>
