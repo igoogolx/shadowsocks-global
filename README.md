@@ -35,13 +35,6 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 
 Runs the app in the development mode.<br />The page will restart if you make edits.<br />
 
-**Note**:
-
-​	**!!!Known bug**: If you have connected Shadowsocks-global  when developing, you may receive the error message "[!] (plugin copy) Error: EPERM: operation not permitted, unlink '**\shadowsocks-global\electron-build\ShadowsocksGlobalService.exe" since the ShadowsocksGlobalService.exe has been started as a service.
-
-​	**Fix:** Run `net stop ShadowsocksGlobalService`  from the command line（**Administrator**).
-
-
 ### `yarn build`
 
 Builds the app for production to the `dist` folder.<br />
