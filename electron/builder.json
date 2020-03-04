@@ -29,7 +29,6 @@
     "perMachine": true,
     "include": "electron/custom_install_steps.nsh",
     "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "deleteAppDataOnUninstall": true
+    "allowToChangeInstallationDirectory": true
   }
 }
