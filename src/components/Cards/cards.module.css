@@ -31,7 +31,11 @@
     height: 40px;
     border-radius: 50%;
     & .flag {
-      font-size: 40px;
+      /*
+      "1" px is a little tricky.
+       The content's height value should be a little larger than container's or the circle is incomplete.
+       */
+      font-size: 41px;
       position: absolute;
       top: 50%;
       left: 50%;
