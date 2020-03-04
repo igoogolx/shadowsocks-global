@@ -77,7 +77,7 @@ async function createWindow() {
   await mainWindow.loadURL(
     isDev
       ? "http://localhost:3000"
-      : `file://${path.join(__dirname, "../build/index.html")}`
+      : `file://${path.join(__dirname, "index.html")}`
   );
 
   // Emitted when the window is closed.

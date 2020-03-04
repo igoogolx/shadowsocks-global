@@ -2,7 +2,7 @@
   "name": "shadowsocks-global-dev",
   "version": "0.1.0-beat.2",
   "homepage": "./",
-  "main": "electron-build/main.js",
+  "main": "public/electron.js",
   "dependencies": {
     "axios": "^0.19.2",
     "cap": "^0.2.1",
@@ -89,7 +89,6 @@
     "react-window": "^1.8.5",
     "redux": "^4.0.5",
     "rollup": "^1.31.1",
-    "rollup-plugin-copy": "^3.3.0",
     "rollup-plugin-terser": "^5.2.0",
     "rollup-plugin-typescript2": "^0.26.0",
     "source-map-explorer": "^2.3.1",
@@ -99,7 +98,7 @@
   },
   "nodemonConfig": {
     "watch": [
-      "electron-build/main.js"
+      "public/electron.js"
     ],
     "delay": 2000
   }

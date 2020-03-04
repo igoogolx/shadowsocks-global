@@ -58,9 +58,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 export const getResourcesPath = () => {
   const appPath = app.getAppPath();
-  return isDev
-    ? path.join(appPath, "electron-build")
-    : appPath.replace("app.asar", "app.asar.unpacked");
+  return isDev ? appPath : appPath.replace("app.asar", "app.asar.unpacked");
 };
 
 export function pathToEmbeddedBinary(toolName: string, filename: string) {

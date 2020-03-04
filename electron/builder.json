@@ -2,7 +2,6 @@
   "files": [
     "build",
     "defaultRules",
-    "electron-build/main.js",
     "third_party",
     "resources",
     "!build/static/**/*.map",
@@ -16,7 +15,6 @@
   "directories": {
     "output": "dist"
   },
-  "extends": null,
   "win": {
     "target": [
       {

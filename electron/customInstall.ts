@@ -17,6 +17,7 @@ export const installTapDevice = async () => {
   await sudoPromise(pathToBatFile);
 };
 
+//TODO: Fix: exec failure in development
 export const installWindowsService = async () => {
   const pathToBatFile = path.join(
     getResourcesPath(),
