@@ -1,11 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteProxy,
-  ProxyState,
-  setActiveId,
-  Shadowsocks
-} from "../../reducers/proxyReducer";
+import { proxy, ProxyState, Shadowsocks } from "../../reducers/proxyReducer";
 import { ServerCard } from "./ServerCard";
 import { Dialog, ICON_NAME, notifier } from "../Core";
 import { encodeSsUrl } from "../../utils/url";
@@ -23,8 +18,11 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
   const { id, name, host, regionCode } = props.shadowsocks;
   const dispatch = useDispatch();
 
-  const proxy = useSelector<AppState, ProxyState>(state => state.proxy);
-  const onClick = useCallback(() => dispatch(setActiveId(id)), [dispatch, id]);
+  const proxyState = useSelector<AppState, ProxyState>(state => state.proxy);
+  const onClick = useCallback(() => dispatch(proxy.actions.setActiveId(id)), [
+    dispatch,
+    id
+  ]);
   const [isEditing, setIsEditing] = useState(false);
   const activatedId = useSelector<AppState, string>(
     state => state.proxy.activeId
@@ -35,11 +33,11 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
   );
 
   const getEditingShadowsocks = useCallback(() => {
-    const shadowsocks = proxy.shadowsockses.find(
+    const shadowsocks = proxyState.shadowsockses.find(
       shadowsocks => shadowsocks.id === id
     );
     if (!shadowsocks) {
-      const subscription = proxy.subscriptions.find(subscription =>
+      const subscription = proxyState.subscriptions.find(subscription =>
         subscription.shadowsockses.some(shadowsocks => shadowsocks.id === id)
       );
       //Shadowsocks is sure to be found.
@@ -48,7 +46,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
       );
     }
     return shadowsocks;
-  }, [id, proxy.shadowsockses, proxy.subscriptions]);
+  }, [id, proxyState.shadowsockses, proxyState.subscriptions]);
   const dropdownItems = useMemo(() => {
     const isActivated = activatedId === id && isStartedOrProcessing;
 
@@ -86,7 +84,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         isDanger: true,
         content: "Delete",
         handleOnClick: () => {
-          dispatch(deleteProxy({ type: "shadowsocks", id }));
+          dispatch(proxy.actions.delete({ type: "shadowsocks", id }));
         },
         disabled: isActivated
       }

@@ -4,10 +4,7 @@ import styles from "./setting.module.css";
 import { isPort } from "../../utils/validator";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import {
-  GeneralState,
-  setShadowsocksLocalPort
-} from "../../reducers/settingReducer";
+import { GeneralState, setting } from "../../reducers/settingReducer";
 import { notifier } from "../Core/Notification";
 
 export const General = React.memo(() => {
@@ -30,7 +27,9 @@ export const General = React.memo(() => {
   );
   const onSubmit = useCallback(
     data => {
-      dispatch(setShadowsocksLocalPort(data.shadowsocksLocalPort));
+      dispatch(
+        setting.actions.setShadowsocksLocalPort(data.shadowsocksLocalPort)
+      );
       setIsChanged(false);
       notifier.success("Update setting successfully");
     },

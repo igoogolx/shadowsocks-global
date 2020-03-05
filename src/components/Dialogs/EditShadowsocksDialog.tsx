@@ -1,8 +1,4 @@
-import {
-  addProxy,
-  Shadowsocks,
-  updateProxy
-} from "../../reducers/proxyReducer";
+import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
 import React, { useCallback, useRef, useState } from "react";
 import { ENCRYPTION_METHODS } from "../../constants";
 import { useDispatch } from "react-redux";
@@ -51,7 +47,7 @@ export const EditShadowsocksDialog = React.memo(
         } catch (e) {}
       if (initialValue)
         dispatch(
-          updateProxy({
+          proxy.actions.update({
             type: "shadowsocks",
             config: {
               ...shadowsocks,
@@ -62,7 +58,7 @@ export const EditShadowsocksDialog = React.memo(
         );
       else
         dispatch(
-          addProxy({
+          proxy.actions.add({
             type: "shadowsocks",
             config: {
               ...shadowsocks,

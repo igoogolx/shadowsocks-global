@@ -1,4 +1,4 @@
-import { deleteProxy, setActiveId, Socks5 } from "../../reducers/proxyReducer";
+import { proxy, Socks5 } from "../../reducers/proxyReducer";
 import { ServerCard } from "./ServerCard";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +14,10 @@ type Socks5CardProps = {
 export const Socks5Card = React.memo((props: Socks5CardProps) => {
   const { id, host } = props.socks5;
   const dispatch = useDispatch();
-  const onClick = useCallback(() => dispatch(setActiveId(id)), [dispatch, id]);
+  const onClick = useCallback(() => dispatch(proxy.actions.setActiveId(id)), [
+    dispatch,
+    id
+  ]);
   const socks5s = useSelector<AppState, Socks5[]>(state => state.proxy.socks5s);
   const [isEditing, setIsEditing] = useState(false);
   const activatedId = useSelector<AppState, string>(
@@ -38,7 +41,7 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
         isDanger: true,
         content: "Delete",
         handleOnClick: () => {
-          dispatch(deleteProxy({ type: "socks5", id }));
+          dispatch(proxy.actions.delete({ type: "socks5", id }));
         },
         disabled: isActivated
       }

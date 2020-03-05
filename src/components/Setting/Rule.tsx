@@ -3,11 +3,7 @@ import { Button, Field, Form, Icon, ICON_NAME, ICON_SIZE } from "../Core";
 import styles from "./setting.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import {
-  addAdditionRoute,
-  RuleState,
-  setCustomizedRulesDirPath
-} from "../../reducers/settingReducer";
+import { RuleState, setting } from "../../reducers/settingReducer";
 import promiseIpc from "electron-promise-ipc";
 import { FieldToggle } from "../Core/Toggle/Toggle";
 import { isIPv4 } from "net";
@@ -46,10 +42,12 @@ export const Rule = React.memo(() => {
   }, [initValue]);
   const onSubmit = useCallback(
     data => {
-      dispatch(setCustomizedRulesDirPath(data.customizedRulesDirPath));
+      dispatch(
+        setting.actions.setCustomizedRulesDirPath(data.customizedRulesDirPath)
+      );
       if (data.additionalRoute)
         dispatch(
-          addAdditionRoute({
+          setting.actions.addAdditionRoute({
             ip: data.additionalRoute,
             isProxy: data.isProxyAdditionalRoute
           })

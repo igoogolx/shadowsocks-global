@@ -4,11 +4,7 @@ import { FieldToggle } from "../Core/Toggle/Toggle";
 import { Button, Field, Form } from "../Core";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import {
-  DnsSettingState,
-  setCustomizedDns,
-  setSmartDns
-} from "../../reducers/settingReducer";
+import { DnsSettingState, setting } from "../../reducers/settingReducer";
 import { FieldSelector } from "../Core/Selector/Selector";
 import { isIPv4 } from "net";
 import { DNS_CUSTOMIZED_TYPE, DNS_SMART_TYPE } from "../../constants";
@@ -57,20 +53,20 @@ export const Dns = React.memo(() => {
     data => {
       if (data.type === "smart")
         dispatch(
-          setSmartDns(
-            {
+          setting.actions.setSmartDns({
+            defaultWebsite: {
               isProxy: data.isProxyDefaultWebsiteDns,
               name: data.defaultWebsiteDns
             },
-            {
+            nativeWebsite: {
               isProxy: data.isProxyNativeWebsiteDns,
               name: data.nativeWebsiteDns
             }
-          )
+          })
         );
       else
         dispatch(
-          setCustomizedDns({
+          setting.actions.setCustomizedDns({
             isProxy: data.isProxyCustomizedDns,
             preferredServer: data.preferredCustomizedServer,
             alternateServer: data.alternateCustomizedServer

@@ -7,14 +7,8 @@ import { useSelector, useDispatch } from "react-redux";
 import fs from "fs";
 import promiseIpc from "electron-promise-ipc";
 import path from "path";
-import { BUILD_IN_RULE, setCurrentRule } from "../../reducers/settingReducer";
-import {
-  ProxyState,
-  setIsProcessing,
-  startVpn,
-  stopVpn
-} from "../../reducers/proxyReducer";
-
+import { BUILD_IN_RULE, setting } from "../../reducers/settingReducer";
+import { proxy, ProxyState } from "../../reducers/proxyReducer";
 import { ipcRenderer } from "electron";
 import { getActivatedServer } from "../Proxies/util";
 import { Config } from "../../../electron/main";
@@ -49,7 +43,7 @@ const Header = () => {
 
     return { proxy, reserved };
   });
-  const proxy = useSelector<AppState, ProxyState>(state => state.proxy);
+  const proxyState = useSelector<AppState, ProxyState>(state => state.proxy);
   //@ts-ignore
   const dns = useSelector<AppState, Dns>(state => {
     const dnsSetting = state.setting.dns;
@@ -85,7 +79,7 @@ const Header = () => {
   const [isLoadingRules, setIsLoadingRules] = useState(false);
   const dispatch = useDispatch();
   const changeCurrentRule = useCallback(
-    (rule: string) => dispatch(setCurrentRule(rule)),
+    (rule: string) => dispatch(setting.actions.setCurrentRule(rule)),
     [dispatch]
   );
 
@@ -95,8 +89,8 @@ const Header = () => {
         notifier.error("No server has been selected!");
         return;
       }
-      dispatch(setIsProcessing(true));
-      const activatedServer = getActivatedServer(proxy);
+      dispatch(proxy.actions.setIsProcessing(true));
+      const activatedServer = getActivatedServer(proxyState);
       const rulePath = rulePaths.find(
         rulePath => path.basename(rulePath, ".rules") === currentRule
       ) as string;
@@ -119,12 +113,12 @@ const Header = () => {
       };
       // @ts-ignore
       await promiseIpc.send("start", config);
-      dispatch(setIsProcessing(false));
-      dispatch(startVpn());
+      dispatch(proxy.actions.setIsProcessing(false));
+      dispatch(proxy.actions.startVpn());
     } catch (e) {
       if (e.message && typeof e.message === "string") notifier.error(e.message);
       else notifier.error("Unknown error");
-      dispatch(setIsProcessing(false));
+      dispatch(proxy.actions.setIsProcessing(false));
     }
   }, [
     activeId,
@@ -133,7 +127,7 @@ const Header = () => {
     dispatch,
     dns,
     localPort,
-    proxy,
+    proxyState,
     rulePaths
   ]);
 
@@ -141,8 +135,8 @@ const Header = () => {
     //TODO: use customized channel for "Disconnected" because there are others message.
     ipcRenderer.on("message", (event, message) => {
       if (message === "Disconnected") {
-        dispatch(setIsProcessing(false));
-        dispatch(stopVpn());
+        dispatch(proxy.actions.setIsProcessing(false));
+        dispatch(proxy.actions.stopVpn());
       }
     });
     return () => {
@@ -155,8 +149,8 @@ const Header = () => {
     ipcRenderer.send("localizationResponse", null);
     //If the app crashes unexpectedly, the "start" Button can be loading state after restarting app.
     //To avoid that, the state mush be reset.
-    dispatch(setIsProcessing(false));
-    dispatch(stopVpn());
+    dispatch(proxy.actions.setIsProcessing(false));
+    dispatch(proxy.actions.stopVpn());
   }, [dispatch]);
 
   useEffect(() => {
@@ -196,14 +190,14 @@ const Header = () => {
   }, [customizedRulesDirPath]);
 
   const stop = useCallback(async () => {
-    dispatch(setIsProcessing(true));
+    dispatch(proxy.actions.setIsProcessing(true));
     try {
       // @ts-ignore
       await promiseIpc.send("stop");
-      dispatch(setIsProcessing(false));
-      dispatch(stopVpn());
+      dispatch(proxy.actions.setIsProcessing(false));
+      dispatch(proxy.actions.stopVpn());
     } catch (e) {
-      dispatch(setIsProcessing(false));
+      dispatch(proxy.actions.setIsProcessing(false));
     }
   }, [dispatch]);
   const rulesOptions = useMemo(

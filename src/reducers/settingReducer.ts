@@ -1,4 +1,4 @@
-import { createAction, createReducer } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DNS_SMART_TYPE } from "../constants";
 
 const DEFAULT_LOCAL_PORT = 1081;
@@ -66,87 +66,38 @@ export const initialSettingState: SettingState = {
   }
 };
 
-export const setSmartDns = createAction(
-  "setSmartDns",
-  (defaultWebsite: SmartDnsField, nativeWebsite: SmartDnsField) => ({
-    payload: {
-      defaultWebsite,
-      nativeWebsite
+export const setting = createSlice({
+  name: "setting",
+  initialState: initialSettingState,
+  reducers: {
+    setShadowsocksLocalPort: (state, action: PayloadAction<number>) => {
+      state.general.shadowsocksLocalPort = action.payload;
+    },
+    setSmartDns: (
+      state,
+      action: PayloadAction<{
+        defaultWebsite: SmartDnsField;
+        nativeWebsite: SmartDnsField;
+      }>
+    ) => {
+      state.dns.type = "smart";
+      state.dns.smart = action.payload;
+    },
+    setCustomizedDns: (state, action: PayloadAction<CustomizedDns>) => {
+      state.dns.type = "customized";
+      state.dns.customized = action.payload;
+    },
+    setCurrentRule: (state, action: PayloadAction<string>) => {
+      state.rule.current = action.payload;
+    },
+    setCustomizedRulesDirPath: (state, action: PayloadAction<string>) => {
+      state.rule.dirPath = action.payload;
+    },
+    addAdditionRoute: (
+      state,
+      action: PayloadAction<{ ip: string; isProxy: boolean }>
+    ) => {
+      state.rule.additionRoutes = [action.payload];
     }
-  })
-);
-export const setCustomizedDns = createAction(
-  "setCustomized",
-  (dns: CustomizedDns) => ({
-    payload: {
-      dns
-    }
-  })
-);
-
-export const setCustomizedRulesDirPath = createAction(
-  "setCustomizedRulesDirPath",
-  (dirPath: string) => ({
-    payload: { dirPath }
-  })
-);
-
-export const setShadowsocksLocalPort = createAction(
-  "setShadowsocksLocalPort",
-  (localPort: number) => ({
-    payload: { localPort }
-  })
-);
-
-export const setCurrentRule = createAction(
-  "setCurrentRule",
-  (rule: string) => ({
-    payload: { rule }
-  })
-);
-
-export const addAdditionRoute = createAction(
-  "addAdditionRoute",
-  (route: { ip: string; isProxy: boolean }) => ({
-    payload: { route }
-  })
-);
-
-export const settingReducer = createReducer(initialSettingState, {
-  [setShadowsocksLocalPort.type]: (state, action) => ({
-    ...state,
-    general: { shadowsocksLocalPort: action.payload.localPort }
-  }),
-  [setSmartDns.type]: (state, action) => ({
-    ...state,
-    dns: {
-      ...state.dns,
-      type: "smart",
-      smart: action.payload
-    }
-  }),
-  [setCustomizedDns.type]: (state, action) => ({
-    ...state,
-    dns: {
-      ...state.dns,
-      type: "customized",
-      customized: action.payload.dns
-    }
-  }),
-
-  [setCurrentRule.type]: (state, action) => {
-    return { ...state, rule: { ...state.rule, current: action.payload.rule } };
-  },
-  [setCustomizedRulesDirPath.type]: (state, action) => ({
-    ...state,
-    rule: {
-      ...state.rule,
-      dirPath: action.payload.dirPath
-    }
-  }),
-  [addAdditionRoute.type]: (state, action) => ({
-    ...state,
-    //TODO:Full-featured addition routes management
-    rule: { ...state.rule, additionRoutes: [action.payload.route] }
-  })
+  }
 });

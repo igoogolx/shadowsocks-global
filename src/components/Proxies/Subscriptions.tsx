@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import { deleteProxy, Subscription } from "../../reducers/proxyReducer";
+import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { Dropdown, Icon, ICON_NAME } from "../Core";
 import styles from "./proxies.module.css";
 import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
@@ -56,7 +56,7 @@ export const Subscriptions = React.memo(() => {
                     isDanger: true,
                     handleOnClick: () => {
                       dispatch(
-                        deleteProxy({
+                        proxy.actions.delete({
                           type: "subscription",
                           id: subscription.id
                         })

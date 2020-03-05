@@ -5,7 +5,7 @@ import { NavLink, useHistory, useLocation } from "react-router-dom";
 import { clipboard } from "electron";
 import { decodeSsUrl } from "../../utils/url";
 import { useDispatch } from "react-redux";
-import { addProxy, Shadowsocks } from "../../reducers/proxyReducer";
+import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
 import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
 import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
@@ -63,7 +63,9 @@ export const Navigation = () => {
             regionCode: regionCodes[index]
           }));
           (shadowsockses as Shadowsocks[]).forEach(shadowsocks =>
-            dispatch(addProxy({ type: "shadowsocks", config: shadowsocks }))
+            dispatch(
+              proxy.actions.add({ type: "shadowsocks", config: shadowsocks })
+            )
           );
           if (location.pathname !== "/proxies") history.push("/proxies");
         } catch (e) {}

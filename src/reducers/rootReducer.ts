@@ -1,13 +1,10 @@
 import { combineReducers } from "redux";
-import { settingReducer, SettingState } from "./settingReducer";
-import { proxyReducer, ProxyState } from "./proxyReducer";
+import { proxy } from "./proxyReducer";
+import { setting } from "./settingReducer";
 
-export type AppState = {
-  setting: SettingState;
-  proxy: ProxyState;
-};
+export type AppState = ReturnType<typeof rootReducer>;
 
 export const rootReducer = combineReducers({
-  setting: settingReducer,
-  proxy: proxyReducer
+  setting: setting.reducer,
+  proxy: proxy.reducer
 });

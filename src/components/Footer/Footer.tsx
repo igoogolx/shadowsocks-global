@@ -4,7 +4,7 @@ import { Dot } from "../Dot/Dot";
 import { ipcRenderer } from "electron";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import { stopVpn } from "../../reducers/proxyReducer";
+import { proxy } from "../../reducers/proxyReducer";
 
 const Footer = () => {
   const [udpStatus, setUdpStatus] = useState<
@@ -23,7 +23,7 @@ const Footer = () => {
   useEffect(() => {
     ipcRenderer.on("message", (event, message) => {
       if (message) setMessage(message);
-      if (message === "Disconnected") dispatch(stopVpn());
+      if (message === "Disconnected") dispatch(proxy.actions.stopVpn());
     });
     ipcRenderer.on("udpStatus", (event, udpStatus) => {
       setUdpStatus(udpStatus);

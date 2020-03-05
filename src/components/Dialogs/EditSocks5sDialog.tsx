@@ -1,4 +1,4 @@
-import { addProxy, Socks5, updateProxy } from "../../reducers/proxyReducer";
+import { proxy, Socks5 } from "../../reducers/proxyReducer";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
@@ -39,7 +39,7 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
       } catch (e) {}
     if (initialValue)
       dispatch(
-        updateProxy({
+        proxy.actions.update({
           type: "socks5",
           config: {
             ...socks5,
@@ -50,7 +50,7 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
       );
     else
       dispatch(
-        addProxy({
+        proxy.actions.add({
           type: "socks5",
           config: {
             ...socks5,

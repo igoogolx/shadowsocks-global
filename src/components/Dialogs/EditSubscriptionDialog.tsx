@@ -1,10 +1,6 @@
 import { Button, Dialog, Field, Form, INPUT_SIZE, notifier } from "../Core";
 import React, { useCallback, useState } from "react";
-import {
-  addProxy,
-  Subscription,
-  updateProxy
-} from "../../reducers/proxyReducer";
+import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { decodeSsUrl } from "../../utils/url";
@@ -64,7 +60,7 @@ export const EditSubscriptionDialog = React.memo(
         );
         if (initialValue)
           dispatch(
-            updateProxy({
+            proxy.actions.update({
               type: "subscription",
               config: {
                 ...subscription,
@@ -76,7 +72,7 @@ export const EditSubscriptionDialog = React.memo(
           );
         else
           dispatch(
-            addProxy({
+            proxy.actions.add({
               type: "subscription",
               config: {
                 ...subscription,
