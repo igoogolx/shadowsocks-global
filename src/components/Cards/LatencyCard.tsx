@@ -64,7 +64,7 @@ export const ToSeverCard = () => {
           isStarted
             ? pending
               ? "Checking"
-              : value === null || error
+              : !value || error
               ? "Timeout"
               : value + "ms"
             : "0ms"
@@ -109,7 +109,7 @@ export const ToDnsCard = () => {
           isStarted
             ? pending
               ? "Checking"
-              : value === null || error
+              : !value || error
               ? "Timeout"
               : value + "ms"
             : "0ms"
@@ -168,7 +168,7 @@ export const ToInternetCard = () => {
           isStarted
             ? pending
               ? "Checking"
-              : value === null || error
+              : !value || error
               ? "Timeout"
               : value + "ms"
             : "0ms"

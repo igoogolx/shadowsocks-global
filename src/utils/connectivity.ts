@@ -94,8 +94,8 @@ export const checkDns = () =>
 
       const lastTime = process.hrtime();
 
-      resolver.resolve(DNS_TEST_DOMAIN, err => {
-        if (err) reject("Fail to lookup dns");
+      resolver.resolve(DNS_TEST_DOMAIN, (err, address) => {
+        if (err || !address) reject("Fail to lookup dns");
         else {
           fulfill(
             financial(process.hrtime(lastTime)[1] / NS_PER_MILLI_SECOND, 0)
