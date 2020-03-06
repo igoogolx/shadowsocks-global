@@ -8,7 +8,7 @@ import fs from "fs";
 import promiseIpc from "electron-promise-ipc";
 import path from "path";
 import { BUILD_IN_RULE, setting } from "../../reducers/settingReducer";
-import { proxy, ProxyState } from "../../reducers/proxyReducer";
+import { proxy } from "../../reducers/proxyReducer";
 import { ipcRenderer } from "electron";
 import { getActivatedServer } from "../Proxies/util";
 import { Config } from "../../../electron/main";
@@ -43,7 +43,6 @@ const Header = () => {
 
     return { proxy, reserved };
   });
-  const proxyState = useSelector<AppState, ProxyState>(state => state.proxy);
   //@ts-ignore
   const dns = useSelector<AppState, Dns>(state => {
     const dnsSetting = state.setting.dns;
@@ -93,7 +92,7 @@ const Header = () => {
         return;
       }
       dispatch(proxy.actions.setIsProcessing(true));
-      const activatedServer = getActivatedServer(proxyState);
+      const activatedServer = getActivatedServer();
       const rulePath = rulePaths.find(
         rulePath => path.basename(rulePath, ".rules") === currentRule
       ) as string;
@@ -132,7 +131,6 @@ const Header = () => {
     dns,
     isProxyUdp,
     localPort,
-    proxyState,
     rulePaths
   ]);
 

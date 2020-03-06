@@ -3,6 +3,8 @@ import { Card } from "../Core/Card/Card";
 import styles from "./cards.module.css";
 import { convertTrafficData } from "../../utils/convert";
 import { ipcRenderer } from "electron";
+import { useSelector } from "react-redux";
+import { AppState } from "../../reducers/rootReducer";
 
 export const TrafficCard = React.memo(() => {
   const [netSpeed, setNetSpeed] = useState<{
@@ -14,6 +16,22 @@ export const TrafficCard = React.memo(() => {
     download: "0"
   });
   const [usage, setUsage] = useState("0");
+  const isStarted = useSelector<AppState, boolean>(
+    state => state.proxy.isStarted
+  );
+  useEffect(() => {
+    if (!isStarted) {
+      setNetSpeed(netSpeed => {
+        if (Number(netSpeed.upload) !== 0 && Number(netSpeed.download) !== 0)
+          return {
+            upload: "0",
+            download: "0"
+          };
+        return netSpeed;
+      });
+      setUsage("0");
+    }
+  }, [isStarted]);
   useEffect(() => {
     ipcRenderer.on("netSpeed", (event, traffic) => {
       if (traffic) {

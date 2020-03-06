@@ -3,10 +3,22 @@ import styles from "./cards.module.css";
 import { Card } from "../Core/Card/Card";
 import { ipcRenderer } from "electron";
 import { convertTrafficData } from "../../utils/convert";
+import { useSelector } from "react-redux";
+import { AppState } from "../../reducers/rootReducer";
 export const PortNetSpeedCard = () => {
   const [netSpeeds, setNetSpeeds] = useState<{ port: number; speed: string }[]>(
     []
   );
+  const isStarted = useSelector<AppState, boolean>(
+    state => state.proxy.isStarted
+  );
+  useEffect(() => {
+    if (!isStarted)
+      setNetSpeeds(netSpeeds => {
+        if (netSpeeds.length !== 0) return [];
+        return netSpeeds;
+      });
+  }, [isStarted]);
   useEffect(() => {
     ipcRenderer.on(
       "portNetSpeeds",
