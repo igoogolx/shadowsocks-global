@@ -1,6 +1,6 @@
 import styles from "./cards.module.css";
 import { StatusCard } from "./StatusCard";
-import { Icon, ICON_NAME, ICON_SIZE } from "../Core";
+import { Icon, ICON_NAME, ICON_SIZE, Tooltip } from "../Core";
 import React, { useCallback, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
@@ -10,7 +10,6 @@ import {
   checkDns,
   validateServerCredentials
 } from "../../utils/connectivity";
-import { Tooltip } from "../Core/Tooltip/Tooltip";
 import { useAsync } from "../../hooks";
 
 //TODO: Remove repeated code

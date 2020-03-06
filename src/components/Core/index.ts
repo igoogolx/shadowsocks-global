@@ -13,6 +13,7 @@ import { BUTTON_SIZE } from "./Button/button_contants";
 import { Selector } from "./Selector/Selector";
 import { Toggle } from "./Toggle/Toggle";
 import { Tabs } from "./Tabs/Tabs";
+import { Tooltip } from "./Tooltip/Tooltip";
 
 export {
   Button,
@@ -32,5 +33,6 @@ export {
   Selector,
   Toggle,
   Tabs,
-  notifier
+  notifier,
+  Tooltip
 };

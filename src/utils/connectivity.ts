@@ -20,7 +20,9 @@ import { SocksClient } from "socks";
 const SERVER_TEST_TIMEOUT_MS = 2000;
 const CREDENTIALS_TEST_DOMAIN = "google.com";
 const NS_PER_MILLI_SECOND = 1e6;
-const DNS_LOOKUP_TIMEOUT_MS = 10000;
+const DNS_LOOKUP_TIMEOUT_MS = 2000;
+const DNS_TEST_SERVER = "8.8.8.8";
+const DNS_TEST_DOMAIN = "google.com";
 
 // Uses the OS' built-in functions, i.e. /etc/hosts, et al.:
 // https://nodejs.org/dist/latest-v10.x/docs/api/dns.html#dns_dns
@@ -88,15 +90,13 @@ export const checkDns = () =>
   timeoutPromise<number>(
     new Promise<number>((fulfill, reject) => {
       const resolver = new dns.Resolver();
-      resolver.setServers(["8.8.8.8"]);
+      resolver.setServers([DNS_TEST_SERVER]);
 
       const lastTime = process.hrtime();
 
-      resolver.resolve("google.com", (err, address) => {
+      resolver.resolve(DNS_TEST_DOMAIN, err => {
         if (err) reject("Fail to lookup dns");
         else {
-          console.log(address);
-
           fulfill(
             financial(process.hrtime(lastTime)[1] / NS_PER_MILLI_SECOND, 0)
           );
