@@ -144,6 +144,7 @@ export class ConnectionManager {
 
   constructor(
     private remoteServer: RemoteServer,
+    private isProxyUdp: boolean,
     private route: Route,
     private dns: { servers: string[]; whiteListServers: string[] },
     private mainWindow: BrowserWindow | null
@@ -228,7 +229,7 @@ export class ConnectionManager {
     console.log("restarting tun2socks after resume");
 
     this.tun2socks.onExit = this.tun2socksExitListener;
-    this.tun2socks.start(this.isUdpEnabled);
+    this.tun2socks.start(this.isProxyUdp && this.isUdpEnabled);
 
     // Check if UDP support has changed; if so, silently restart.
     //TODO:retestUdp
@@ -256,10 +257,11 @@ export class ConnectionManager {
     await isServerReachable(this.proxyAddress, this.proxyPort);
 
     await this.mainWindow?.webContents.send("message", "Checking Udp...");
-    this.isUdpEnabled = await checkUdpForwardingEnabled(
-      this.proxyAddress,
-      this.proxyPort
-    );
+    if (this.isProxyUdp)
+      this.isUdpEnabled = await checkUdpForwardingEnabled(
+        this.proxyAddress,
+        this.proxyPort
+      );
     await this.mainWindow?.webContents.send(
       "udpStatus",
       this.isUdpEnabled ? "enabled" : "disabled"
@@ -275,7 +277,7 @@ export class ConnectionManager {
   }*/
     await this.mainWindow?.webContents.send("message", "Staring tun2socks...");
 
-    this.tun2socks.start(this.isUdpEnabled);
+    this.tun2socks.start(this.isProxyUdp && this.isUdpEnabled);
 
     //TODO: Implement a listener that terminates the start process once this.disconnecting become true.
     if (this.isDisconnecting)

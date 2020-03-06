@@ -75,6 +75,9 @@ const Header = () => {
   const currentRule = useSelector<AppState, string>(
     state => state.setting.rule.current
   );
+  const isProxyUdp = useSelector<AppState, boolean>(
+    state => state.setting.general.isProxyUdp
+  );
   const [rulePaths, setRulePaths] = useState<string[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);
   const dispatch = useDispatch();
@@ -103,6 +106,7 @@ const Header = () => {
       }
       const config: Config = {
         rulePath,
+        isProxyUdp,
         dns,
         additionalRoute: additionalRoute,
         // @ts-ignore
@@ -126,6 +130,7 @@ const Header = () => {
     currentRule,
     dispatch,
     dns,
+    isProxyUdp,
     localPort,
     proxyState,
     rulePaths

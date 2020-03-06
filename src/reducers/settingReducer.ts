@@ -33,6 +33,7 @@ export type RuleState = {
 
 export type GeneralState = {
   shadowsocksLocalPort: number;
+  isProxyUdp: boolean;
 };
 
 export type SettingState = {
@@ -43,7 +44,7 @@ export type SettingState = {
 
 //Note: The state will be initialed in configureStore by preloadedState.
 export const initialSettingState: SettingState = {
-  general: { shadowsocksLocalPort: DEFAULT_LOCAL_PORT },
+  general: { shadowsocksLocalPort: DEFAULT_LOCAL_PORT, isProxyUdp: true },
   dns: {
     type: DNS_SMART_TYPE,
     smart: {
@@ -70,6 +71,9 @@ export const setting = createSlice({
   name: "setting",
   initialState: initialSettingState,
   reducers: {
+    setIsProxyUdp: (state, action: PayloadAction<boolean>) => {
+      state.general.isProxyUdp = action.payload;
+    },
     setShadowsocksLocalPort: (state, action: PayloadAction<number>) => {
       state.general.shadowsocksLocalPort = action.payload;
     },

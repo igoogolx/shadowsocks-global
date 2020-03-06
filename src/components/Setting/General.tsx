@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { GeneralState, setting } from "../../reducers/settingReducer";
 import { notifier } from "../Core/Notification";
+import { FieldToggle } from "../Core/Toggle/Toggle";
 
 export const General = React.memo(() => {
   const general = useSelector<AppState, GeneralState>(
@@ -30,6 +31,7 @@ export const General = React.memo(() => {
       dispatch(
         setting.actions.setShadowsocksLocalPort(data.shadowsocksLocalPort)
       );
+      dispatch(setting.actions.setIsProxyUdp(data.isProxyUdp));
       setIsChanged(false);
       notifier.success("Update setting successfully");
     },
@@ -56,6 +58,9 @@ export const General = React.memo(() => {
           validate={isPort as (port: number | string) => boolean}
         />
       </div>
+      <FieldToggle name={"isProxyUdp"} disabled={disabled}>
+        Proxy Udp
+      </FieldToggle>
       <div className={styles.footer}>
         <Button
           type={"submit"}

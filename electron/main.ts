@@ -30,6 +30,7 @@ export type Config = {
   rulePath?: string;
   dns: Dns;
   additionalRoute: AdditionalRoute;
+  isProxyUdp: boolean;
 };
 
 let mainWindow: null | BrowserWindow;
@@ -132,6 +133,7 @@ const startVpn = async (config: Config) => {
   try {
     currentConnection = new ConnectionManager(
       config.server,
+      config.isProxyUdp,
       routingDaemonConfig.route,
       routingDaemonConfig.dns,
       mainWindow
