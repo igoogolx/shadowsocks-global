@@ -33,8 +33,9 @@ export const Selector = (props: SelectorProps) => {
     value,
     isVirtualizedList
   } = props;
-  const [currentOption, setCurrentOption] = useState(
-    options.find(option => option.value === value) || options[0]
+  const currentOption = useMemo(
+    () => options.find(option => option.value === value) || options[0],
+    [options, value]
   );
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,7 +46,6 @@ export const Selector = (props: SelectorProps) => {
         content: option.value,
         handleOnClick: () => {
           onChange(option.value);
-          setCurrentOption(option);
         }
       })),
     [onChange, options]
