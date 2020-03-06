@@ -12,7 +12,7 @@ type Socks5CardProps = {
 };
 
 export const Socks5Card = React.memo((props: Socks5CardProps) => {
-  const { id, host } = props.socks5;
+  const { id, host, regionCode } = props.socks5;
   const dispatch = useDispatch();
   const onClick = useCallback(() => dispatch(proxy.actions.setActiveId(id)), [
     dispatch,
@@ -60,6 +60,7 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
         />
       )}
       <ServerCard
+        regionCode={regionCode}
         onClick={onClick}
         title={host}
         id={id}
