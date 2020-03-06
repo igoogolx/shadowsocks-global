@@ -3,7 +3,7 @@ import styles from "./card.module.css";
 import classNames from "classnames";
 
 type CardProps = {
-  onClick?: Function;
+  onClick?: () => void;
   className?: string;
   disabled?: boolean;
   children: ReactNode;
@@ -16,14 +16,9 @@ export const Card = React.memo((props: CardProps) => {
     [styles.disabled]: disabled || !isClickable,
     [styles.clickable]: isClickable
   });
+
   return (
-    <div
-      className={cls}
-      onClick={() => {
-        if (disabled) return;
-        if (onClick) onClick();
-      }}
-    >
+    <div className={cls} onClick={onClick}>
       {children}
     </div>
   );

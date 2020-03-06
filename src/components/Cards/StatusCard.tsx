@@ -9,7 +9,7 @@ type StatusCardProps = {
   iconClassname?: string;
   title: string;
   data: string;
-  onClick: Function;
+  onClick: () => void;
   disabled: boolean;
 };
 export const StatusCard = (props: StatusCardProps) => {
