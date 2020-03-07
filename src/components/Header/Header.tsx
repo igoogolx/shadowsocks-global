@@ -87,15 +87,24 @@ const Header = () => {
 
   const start = useCallback(async () => {
     try {
+      let rule: { type: "Global" } | { type: "Customized"; path: string } = {
+        type: "Global"
+      };
       if (!activeId) {
         notifier.error("No server has been selected!");
         return;
       }
       dispatch(proxy.actions.setIsProcessing(true));
       const activatedServer = getActivatedServer();
-      const rulePath = rulePaths.find(
-        rulePath => path.basename(rulePath, ".rules") === currentRule
-      ) as string;
+      if (currentRule !== "Global") {
+        const rulePath = rulePaths.find(
+          rulePath => path.basename(rulePath, ".rules") === currentRule
+        );
+        if (!rulePath) throw new Error(`The "${currentRule}" rule is invalid`);
+        notifier.success(rulePath);
+        await fs.promises.access(rulePath);
+        rule = { type: "Customized", path: rulePath };
+      }
       if (activatedServer.type === "shadowsocks") {
         const _port = await detectPort(localPort);
         if (_port !== localPort)
@@ -104,7 +113,7 @@ const Header = () => {
           );
       }
       const config: Config = {
-        rulePath,
+        rule,
         isProxyUdp,
         dns,
         additionalRoute: additionalRoute,

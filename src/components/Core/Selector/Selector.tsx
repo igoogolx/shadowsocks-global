@@ -34,7 +34,7 @@ export const Selector = (props: SelectorProps) => {
     isVirtualizedList
   } = props;
   const currentOption = useMemo(
-    () => options.find(option => option.value === value) || options[0],
+    () => options.find(option => option.value === value) || { value },
     [options, value]
   );
   const [isOpen, setIsOpen] = useState(false);

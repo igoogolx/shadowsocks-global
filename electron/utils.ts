@@ -88,7 +88,7 @@ export const readRule = async (path: string) => {
 
 export const getConfig = async (
   serverHost: string,
-  rulePath: string | undefined,
+  rule: { type: "Global" } | { type: "Customized"; path: string },
   dns: Dns,
   additionalRoutes: AdditionalRoute
 ) => {
@@ -98,19 +98,19 @@ export const getConfig = async (
     proxyRoutes: string[],
     reservedRoutes = [serverIp + "/32"];
   //Proxy rule
-  if (!rulePath) {
+  if (rule.type === "Global") {
     proxyRoutes = GLOBAL_PROXY_ROUTES;
     reservedRoutes = [...reservedRoutes, ...GLOBAL_RESERVED_ROUTES];
   } else {
-    const rule = await readRule(rulePath);
-    if (rule.isProxy) {
-      proxyRoutes = rule.subnets;
+    const customizedRule = await readRule(rule.path);
+    if (customizedRule.isProxy) {
+      proxyRoutes = customizedRule.subnets;
     } else {
       proxyRoutes = GLOBAL_PROXY_ROUTES;
       reservedRoutes = [
         ...reservedRoutes,
         ...GLOBAL_RESERVED_ROUTES,
-        ...rule.subnets
+        ...customizedRule.subnets
       ];
     }
   }

@@ -27,7 +27,7 @@ export type AdditionalRoute = { proxy: string[]; reserved: string[] };
 
 export type Config = {
   server: RemoteServer;
-  rulePath?: string;
+  rule: { type: "Global" } | { type: "Customized"; path: string };
   dns: Dns;
   additionalRoute: AdditionalRoute;
   isProxyUdp: boolean;
@@ -126,7 +126,7 @@ const startVpn = async (config: Config) => {
   }
   const routingDaemonConfig = await getConfig(
     config.server.host,
-    config.rulePath,
+    config.rule,
     config.dns,
     config.additionalRoute
   );
