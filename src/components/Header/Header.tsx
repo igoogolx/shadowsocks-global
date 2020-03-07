@@ -101,7 +101,6 @@ const Header = () => {
           rulePath => path.basename(rulePath, ".rules") === currentRule
         );
         if (!rulePath) throw new Error(`The "${currentRule}" rule is invalid`);
-        notifier.success(rulePath);
         await fs.promises.access(rulePath);
         rule = { type: "Customized", path: rulePath };
       }
