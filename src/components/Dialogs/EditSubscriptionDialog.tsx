@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { decodeSsUrl } from "../../utils/url";
 import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import styles from "./dialogs.module.css";
 import { useRedirect } from "./useRedirect";
 import { AppState } from "../../reducers/rootReducer";

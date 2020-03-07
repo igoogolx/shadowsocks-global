@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 export type Shadowsocks = {
   id: string;
