@@ -1,6 +1,6 @@
 # Shadowsocks-global ![Build](https://github.com/igoogolx/shadowsocks-global/workflows/Build/badge.svg)
 
-A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jigsaw-Code/outline-client)(windows). **Note: Don' support Ipv6**
+A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jigsaw-Code/outline-client)(windows). **IPV6: not support**
 
 ![Running screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/Running.png)
 
