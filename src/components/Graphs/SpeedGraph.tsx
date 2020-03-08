@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { ChartConfiguration } from "chart.js";
 import { Graph } from "../Core";
-import { convertTrafficData } from "../../utils/convert";
+import { convertTrafficData } from "../../utils/helper";
 
 type SpeedGraphProps = {
   statistics: { download: number; upload: number; time: number }[];

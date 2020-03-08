@@ -1,13 +1,13 @@
 import { proxy, Socks5 } from "../../reducers/proxyReducer";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
 import { Field, Form } from "../Core/Form";
 import styles from "./dialogs.module.css";
 import { Button, Dialog, INPUT_SIZE } from "../Core";
 import { RegionCodeSelector } from "./RegioncodeSelector";
 import { isPort } from "../../utils/validator";
 import { useRedirect } from "./useRedirect";
+import { lookupRegionCodes } from "../../utils/helper";
 
 type EditSocks5sDialogProps = {
   close: () => void;

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "../Core/Card/Card";
 import styles from "./cards.module.css";
-import { convertTrafficData } from "../../utils/convert";
 import { ipcRenderer } from "electron";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
+import { convertTrafficData } from "../../utils/helper";
 
 export const TrafficCard = React.memo(() => {
   const [netSpeed, setNetSpeed] = useState<{

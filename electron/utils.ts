@@ -9,8 +9,8 @@ import {
   GLOBAL_RESERVED_ROUTES,
   SMART_DNS_WHITE_LIST_SERVERS
 } from "./constant";
-import { lookupIp } from "../src/utils/connectivity";
 import { AdditionalRoute } from "./main";
+import { lookupIp } from "../src/utils/helper";
 
 export const setMenu = (mainWindow: BrowserWindow) => {
   if (process.env.NODE_ENV === "development") {

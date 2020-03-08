@@ -6,10 +6,10 @@ import { clipboard } from "electron";
 import { decodeSsUrl } from "../../utils/url";
 import { useDispatch } from "react-redux";
 import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
-import { lookupRegionCodes } from "../../utils/lookupRegionCodes";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
 import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
 import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
+import { lookupRegionCodes } from "../../utils/helper";
 
 const TYPES = ["shadowsocks", "socks5", "subscription"];
 

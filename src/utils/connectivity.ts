@@ -12,36 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as net from "net";
-import { financial } from "./convert";
 import * as dns from "dns";
-import { timeoutPromise } from "./helper";
+import { financial, timeoutPromise } from "./helper";
 import { SocksClient } from "socks";
 
 const SERVER_TEST_TIMEOUT_MS = 2000;
 const CREDENTIALS_TEST_DOMAIN = "google.com";
 const NS_PER_MILLI_SECOND = 1e6;
-const DNS_LOOKUP_TIMEOUT_MS = 2000;
 const DNS_TEST_SERVER = "8.8.8.8";
 const DNS_TEST_DOMAIN = "google.com";
-
-// Uses the OS' built-in functions, i.e. /etc/hosts, et al.:
-// https://nodejs.org/dist/latest-v10.x/docs/api/dns.html#dns_dns
-//
-// Effectively a no-op if hostname is already an IP.
-export function lookupIp(hostname: string) {
-  return timeoutPromise<string>(
-    new Promise<string>((fulfill, reject) => {
-      dns.lookup(hostname, 4, (e, address) => {
-        if (e || !address) {
-          return reject("could not resolve proxy server hostname");
-        }
-        fulfill(address);
-      });
-    }),
-    DNS_LOOKUP_TIMEOUT_MS,
-    "DNS lookup"
-  );
-}
+const DNS_TEST_TIMEOUT_MS = 2000;
 
 type Options = {
   address: string;
@@ -103,7 +83,7 @@ export const checkDns = () =>
         }
       });
     }),
-    DNS_LOOKUP_TIMEOUT_MS
+    DNS_TEST_TIMEOUT_MS
   );
 
 // Resolves with true iff a response can be received from a semi-randomly-chosen website through the

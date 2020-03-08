@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import styles from "./cards.module.css";
 import { Card } from "../Core/Card/Card";
 import { ipcRenderer } from "electron";
-import { convertTrafficData } from "../../utils/convert";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
+import { convertTrafficData } from "../../utils/helper";
 export const PortNetSpeedCard = () => {
   const [netSpeeds, setNetSpeeds] = useState<{ port: number; speed: string }[]>(
     []
