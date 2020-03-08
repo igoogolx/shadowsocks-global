@@ -45,7 +45,20 @@ const About = () => {
           }}
           isLink={true}
         >
-          https://github.com/igoogolx/shadowsocks-global
+          https://github.com/igoogolx/shadowsocks-global/issues
+        </Button>
+      </div>
+      <div>
+        Releases:
+        <Button
+          onClick={async () => {
+            await shell.openExternal(
+              "https://github.com/igoogolx/shadowsocks-global/releases"
+            );
+          }}
+          isLink={true}
+        >
+          https://github.com/igoogolx/shadowsocks-global/releases
         </Button>
       </div>
     </div>
