@@ -18,9 +18,9 @@ import { powerMonitor } from "electron";
 import { checkUdpForwardingEnabled, isServerReachable } from "./connectivity";
 import { ChildProcess, spawn } from "child_process";
 import { pathToEmbeddedBinary, RemoteServer, pathToConfig } from "./utils";
-import { validateServerCredentials } from "../src/utils/connectivity";
 import { SMART_DNS_ADDRESS } from "../src/constants";
 import { BrowserWindow } from "electron";
+import { validateServerCredentials } from "../src/share";
 
 export type Dns =
   | {

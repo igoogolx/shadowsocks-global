@@ -13,12 +13,8 @@
 // limitations under the License.
 import * as net from "net";
 import * as dns from "dns";
-import { financial, timeoutPromise } from "./helper";
-import { SocksClient } from "socks";
+import { financial, NS_PER_MILLI_SECOND, timeoutPromise } from "../share";
 
-const SERVER_TEST_TIMEOUT_MS = 2000;
-const CREDENTIALS_TEST_DOMAIN = "google.com";
-const NS_PER_MILLI_SECOND = 1e6;
 const DNS_TEST_SERVER = "8.8.8.8";
 const DNS_TEST_DOMAIN = "google.com";
 const DNS_TEST_TIMEOUT_MS = 2000;
@@ -85,40 +81,3 @@ export const checkDns = () =>
     }),
     DNS_TEST_TIMEOUT_MS
   );
-
-// Resolves with true iff a response can be received from a semi-randomly-chosen website through the
-// Shadowsocks proxy.
-export const validateServerCredentials = (address: string, port: number) =>
-  new Promise<number>((fulfill, reject) => {
-    const lastTime = process.hrtime();
-    SocksClient.createConnection({
-      proxy: { host: address, port, type: 5 },
-      destination: { host: CREDENTIALS_TEST_DOMAIN, port: 80 },
-      command: "connect",
-      timeout: SERVER_TEST_TIMEOUT_MS
-    })
-      .then(client => {
-        client.socket.write(
-          `HEAD / HTTP/1.1\r\nHost: ${CREDENTIALS_TEST_DOMAIN}\r\n\r\n`
-        );
-        client.socket.on("data", data => {
-          if (data.toString().startsWith("HTTP/1.1")) {
-            client.socket.end();
-            fulfill(
-              financial(process.hrtime(lastTime)[1] / NS_PER_MILLI_SECOND, 0)
-            );
-          } else {
-            client.socket.end();
-            reject("unexpected response from remote test website");
-          }
-        });
-
-        client.socket.on("close", () => {
-          reject("could not connect to remote test website");
-        });
-        client.socket.resume();
-      })
-      .catch(e => {
-        reject(e);
-      });
-  });

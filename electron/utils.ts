@@ -10,7 +10,7 @@ import {
   SMART_DNS_WHITE_LIST_SERVERS
 } from "./constant";
 import { AdditionalRoute } from "./main";
-import { lookupIp } from "../src/utils/helper";
+import { lookupIp } from "../src/share";
 
 export const setMenu = (mainWindow: BrowserWindow) => {
   if (process.env.NODE_ENV === "development") {

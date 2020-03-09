@@ -5,12 +5,9 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { getActivatedServer } from "../Proxies/util";
-import {
-  checkServer,
-  checkDns,
-  validateServerCredentials
-} from "../../utils/connectivity";
+import { checkServer, checkDns } from "../../utils/connectivity";
 import { useAsync } from "../../hooks";
+import { validateServerCredentials } from "../../share";
 
 //TODO: Remove repeated code
 export const LatencyCard = () => {
