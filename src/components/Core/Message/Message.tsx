@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import styles from "./message.module.css";
 import { ICON_NAME, ICON_SIZE, Icon } from "..";
 import classNames from "classnames";
@@ -9,11 +9,10 @@ type MessageProps = {
   title: string;
   className?: string;
   type?: MessageType;
-};
+} & React.HTMLAttributes<HTMLDivElement>;
 
-const Message = (props: MessageProps) => {
-  const { title, type = "Info", className } = props;
-  const ref = useRef(null);
+export const Message = React.memo((props: MessageProps) => {
+  const { title, type = "Info", className, ...restProps } = props;
 
   const iconCls = classNames(styles.icon, {
     [styles.info]: type === "Info",
@@ -35,7 +34,7 @@ const Message = (props: MessageProps) => {
   const cls = classNames(styles.message, className);
 
   return (
-    <div className={cls} ref={ref}>
+    <div className={cls} {...restProps}>
       {ICON_NAME && (
         <div className={styles.iconContainer}>
           <Icon
@@ -50,8 +49,4 @@ const Message = (props: MessageProps) => {
       </div>
     </div>
   );
-};
-
-const MessageMemo = React.memo(Message);
-
-export { MessageMemo as Message };
+});

@@ -1,6 +1,7 @@
 import { Notification, NotificationType } from "./Notification";
 import { MessageType } from "../Message/Message";
 
+//TODO: refactor to improve performance
 const createNotifier = () => {
   let state = { notifications: [] as NotificationType[], counter: 0 };
 
