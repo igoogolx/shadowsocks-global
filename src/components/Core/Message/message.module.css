@@ -9,6 +9,7 @@
   color: var(--black-color);
   display: flex;
   pointer-events: auto;
+  user-select: text;
   & .button {
     margin: auto;
     color: white;
