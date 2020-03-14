@@ -7,6 +7,7 @@
     "axios": "^0.19.2",
     "cap": "^0.2.1",
     "electron-promise-ipc": "^2.0.1",
+    "geoip-country": "^4.0.9",
     "socks": "^2.3.3",
     "sudo-prompt": "^9.1.1"
   },
@@ -68,7 +69,6 @@
     "electron-builder": "^22.4.0",
     "electron-devtools-installer": "^2.2.4",
     "flag-icon-css": "^3.4.6",
-    "i18n-iso-countries": "^4.3.1",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
     "qrcode": "^1.4.4",

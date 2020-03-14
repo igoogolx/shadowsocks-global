@@ -10,9 +10,13 @@ module.exports = config => {
     ]
   });
   config.externals = {
-    moment: "moment"
+    moment: "moment",
+    "geoip-country": "commonjs geoip-country"
   };
   config.target = "electron-renderer";
-
+  config.node = {
+    ...config.node,
+    __dirname: true
+  };
   return config;
 };
