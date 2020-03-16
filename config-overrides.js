@@ -11,7 +11,8 @@ module.exports = config => {
   });
   config.externals = {
     moment: "moment",
-    "geoip-country": "commonjs geoip-country"
+    "geoip-country": "commonjs geoip-country",
+    "electron-promise-ipc": "commonjs electron-promise-ipc"
   };
   config.target = "electron-renderer";
   config.node = {

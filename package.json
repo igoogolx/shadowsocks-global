@@ -4,7 +4,6 @@
   "homepage": "./",
   "main": "public/electron.js",
   "dependencies": {
-    "axios": "^0.19.2",
     "cap": "^0.2.1",
     "electron-promise-ipc": "^2.0.1",
     "geoip-country": "^4.0.9",
@@ -61,6 +60,7 @@
     "@types/react-transition-group": "^4.2.3",
     "@types/react-window": "^1.8.1",
     "@types/uuid": "^7.0.0",
+    "axios": "^0.19.2",
     "chart.js": "^2.9.3",
     "classnames": "^2.2.6",
     "concurrently": "^5.1.0",
