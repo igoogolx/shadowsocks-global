@@ -4954,12 +4954,13 @@ electron-devtools-installer@^2.2.4:
     rimraf "^2.5.2"
     semver "^5.3.0"
 
-electron-promise-ipc@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/electron-promise-ipc/-/electron-promise-ipc-2.0.1.tgz#44e3d8d40ee3e900651184f63c520b33330b98a6"
-  integrity sha512-eEQdgS+Ua8/63qXa288Nec3l3fDiEe8E0dtu3mpAqrByTyMLj8qRasjNUrobrIGJkq95jhviURn6DS/v2t2kAA==
+electron-promise-ipc@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/electron-promise-ipc/-/electron-promise-ipc-2.1.0.tgz#23503c397f067b228246be4f5418e38186a686d7"
+  integrity sha512-5i6N9KZp4XauJl97/Il+E8sxi8EoXe6mi8lJduPJAveu4fss2Mk6+x3lU1Lu7J4OH+mf4f8uKKaVFIlwigNgmg==
   dependencies:
     is-electron-renderer "^2.0.1"
+    object.entries "^1.1.1"
     serialize-error "^5.0.0"
     uuid "^3.0.1"
 

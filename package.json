@@ -5,7 +5,7 @@
   "main": "public/electron.js",
   "dependencies": {
     "cap": "^0.2.1",
-    "electron-promise-ipc": "^2.0.1",
+    "electron-promise-ipc": "^2.1.0",
     "geoip-country": "^4.0.9",
     "socks": "^2.3.3",
     "sudo-prompt": "^9.1.1"
