@@ -1,8 +1,11 @@
-import { Shadowsocks, Subscription } from "../../reducers/proxyReducer";
-import { store } from "../../store/store";
+import {
+  ProxyState,
+  Shadowsocks,
+  Subscription
+} from "../../reducers/proxyReducer";
+
 //Note: If no server has been selected, this function will return undefined.
-export const getActivatedServer = () => {
-  const proxy = store.getState().proxy;
+export const getActivatedServer = (proxy: ProxyState) => {
   const activatedId = proxy.activeId;
   const socks5 = proxy.socks5s.find(sock5s => sock5s.id === activatedId);
   if (!socks5) {

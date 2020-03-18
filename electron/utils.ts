@@ -1,17 +1,31 @@
-import { BrowserWindow, Menu } from "electron";
+import { BrowserWindow, Menu, nativeImage } from "electron";
 import { app } from "electron";
 import path from "path";
 import fs from "fs";
-import { Dns } from "./process_manager";
 import { DNS_SMART_TYPE, SMART_DNS_ADDRESS } from "../src/constants";
 import {
   GLOBAL_PROXY_ROUTES,
   GLOBAL_RESERVED_ROUTES,
   SMART_DNS_WHITE_LIST_SERVERS
 } from "./constant";
-import { AdditionalRoute } from "./main";
 import { lookupIp } from "../src/share";
+import Store from "electron-store";
+import { AppState } from "../src/reducers/rootReducer";
+import { getActivatedServer } from "../src/components/Proxies/util";
 
+function createTrayIconImage(imageName: string) {
+  const image = nativeImage.createFromPath(
+    path.join(app.getAppPath(), "resources", "tray", imageName)
+  );
+  if (image.isEmpty()) {
+    throw new Error(`cannot find ${imageName} tray icon image`);
+  }
+  return image;
+}
+export const trayIconImages = {
+  connected: createTrayIconImage("connected.png"),
+  disconnected: createTrayIconImage("disconnected.png")
+};
 export const setMenu = (mainWindow: BrowserWindow) => {
   if (process.env.NODE_ENV === "development") {
     mainWindow.webContents.on("context-menu", (e, props) => {
@@ -51,8 +65,6 @@ export interface RemoteServer {
 
   plugin?: string;
   plugin_opts?: string;
-
-  proxyPort?: number;
 }
 const isDev = process.env.NODE_ENV === "development";
 
@@ -86,23 +98,38 @@ export const readRule = async (path: string) => {
   return { isProxy, subnets: rules.slice(1) };
 };
 
-export const getConfig = async (
-  serverHost: string,
-  rule: { type: "Global" } | { type: "Customized"; path: string },
-  dns: Dns,
-  additionalRoutes: AdditionalRoute
-) => {
-  const serverIp = await lookupIp(serverHost);
+export const getConfig = async () => {
+  const appConfig = new Store();
+  const state = appConfig.get("state") as AppState;
+  console.log(state);
+  const activatedServer = getActivatedServer(state.proxy);
+
+  const serverIp = await lookupIp(activatedServer.host);
   let dnsServers: string[],
     dnsWhiteListServers: string[],
     proxyRoutes: string[],
     reservedRoutes = [serverIp + "/32"];
   //Proxy rule
-  if (rule.type === "Global") {
+  const currentRule = state.setting.rule.current;
+  if (state.setting.rule.current === "Global") {
     proxyRoutes = GLOBAL_PROXY_ROUTES;
     reservedRoutes = [...reservedRoutes, ...GLOBAL_RESERVED_ROUTES];
   } else {
-    const customizedRule = await readRule(rule.path);
+    const defaultRuleDirPath = path.join(getResourcesPath(), "defaultRules");
+    const defaultRulePaths = await fs.promises.readdir(defaultRuleDirPath);
+    let rulePath = defaultRulePaths.find(
+      rulePath => path.basename(rulePath, ".rules") === currentRule
+    );
+    if (!rulePath && state.setting.rule.dirPath) {
+      const customizedRulePaths = await fs.promises.readdir(
+        state.setting.rule.dirPath
+      );
+      rulePath = customizedRulePaths.find(
+        rulePath => path.basename(rulePath, ".rules") === currentRule
+      );
+    }
+    if (!rulePath) throw new Error("The rule is invalid");
+    const customizedRule = await readRule(rulePath);
     if (customizedRule.isProxy) {
       proxyRoutes = customizedRule.subnets;
     } else {
@@ -115,67 +142,75 @@ export const getConfig = async (
     }
   }
   //Smart Dns
+  const dns = state.setting.dns;
   if (dns.type === DNS_SMART_TYPE) {
     dnsServers = [SMART_DNS_ADDRESS];
     dnsWhiteListServers = SMART_DNS_WHITE_LIST_SERVERS;
-    if (dns.defaultWebsite.isProxy) {
+    if (dns.smart.defaultWebsite.isProxy) {
       proxyRoutes = [
         ...proxyRoutes,
-        dns.defaultWebsite.alternateServer + "/32",
-        dns.defaultWebsite.preferredServer + "/32"
+        dns.smart.defaultWebsite.dns.alternateServer + "/32",
+        dns.smart.defaultWebsite.dns.preferredServer + "/32"
       ];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
-        dns.defaultWebsite.preferredServer + "/32",
-        dns.defaultWebsite.alternateServer + "/32"
+        dns.smart.defaultWebsite.dns.preferredServer + "/32",
+        dns.smart.defaultWebsite.dns.alternateServer + "/32"
       ];
     }
-    if (dns.nativeWebsite.isProxy) {
+    if (dns.smart.nativeWebsite.isProxy) {
       proxyRoutes = [
         ...proxyRoutes,
-        dns.nativeWebsite.alternateServer + "/32",
-        dns.nativeWebsite.preferredServer + "/32"
+        dns.smart.nativeWebsite.dns.alternateServer + "/32",
+        dns.smart.nativeWebsite.dns.preferredServer + "/32"
       ];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
-        dns.nativeWebsite.preferredServer + "/32",
-        dns.nativeWebsite.alternateServer + "/32"
+        dns.smart.nativeWebsite.dns.preferredServer + "/32",
+        dns.smart.nativeWebsite.dns.alternateServer + "/32"
       ];
     }
     //Customized Dns
   } else {
     dnsWhiteListServers = dnsServers = [
-      dns.preferredServer,
-      dns.alternateServer
+      dns.customized.preferredServer,
+      dns.customized.alternateServer
     ];
-    if (dns.isProxy) {
+    if (dns.customized.isProxy) {
       proxyRoutes = [
         ...proxyRoutes,
-        dns.preferredServer + "/32",
-        dns.alternateServer + "/32"
+        dns.customized.preferredServer + "/32",
+        dns.customized.alternateServer + "/32"
       ];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
-        dns.preferredServer + "/32",
-        dns.alternateServer + "/32"
+        dns.customized.preferredServer + "/32",
+        dns.customized.alternateServer + "/32"
       ];
     }
   }
 
-  proxyRoutes = [
-    ...proxyRoutes,
-    ...additionalRoutes.proxy.map(ip => ip + "/32")
-  ];
-  reservedRoutes = [
-    ...reservedRoutes,
-    ...additionalRoutes.reserved.map(ip => ip + "/32")
-  ];
+  const proxy: string[] = [],
+    reserved: string[] = [];
+  const additionalRoutes = state.setting.rule.additionRoutes;
+  additionalRoutes.forEach(route => {
+    if (route.isProxy) proxy.push(route.ip);
+    else reserved.push(route.ip);
+  });
+
+  proxyRoutes = [...proxyRoutes, ...proxy.map(ip => ip + "/32")];
+  reservedRoutes = [...reservedRoutes, ...reserved.map(ip => ip + "/32")];
 
   return {
     route: { proxy: proxyRoutes, reserved: reservedRoutes },
-    dns: { servers: dnsServers, whiteListServers: dnsWhiteListServers }
+    dns: { servers: dnsServers, whiteListServers: dnsWhiteListServers },
+    isProxyUdp: state.setting.general.isProxyUdp,
+    remoteServer: {
+      ...activatedServer,
+      proxyPort: state.setting.general.shadowsocksLocalPort
+    }
   };
 };

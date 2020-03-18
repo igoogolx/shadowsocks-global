@@ -28,6 +28,7 @@ export type Socks5 = {
   regionCode?: string;
   host: string;
   port: number;
+  name?: string;
 };
 
 export type ProxyState = {

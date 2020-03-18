@@ -21,6 +21,9 @@ import { pathToEmbeddedBinary, RemoteServer, pathToConfig } from "./utils";
 import { SMART_DNS_ADDRESS } from "../src/constants";
 import { BrowserWindow } from "electron";
 import { validateServerCredentials } from "../src/share";
+import Store from "electron-store";
+import { getActivatedServer } from "../src/components/Proxies/util";
+import { AppState } from "../src/reducers/rootReducer";
 
 export type Dns =
   | {
@@ -149,17 +152,19 @@ export class ConnectionManager {
     private dns: { servers: string[]; whiteListServers: string[] },
     private mainWindow: BrowserWindow | null
   ) {
-    const isSocks5 = this.remoteServer.type === "socks5";
+    const appConfig = new Store();
+    const state = appConfig.get("state") as AppState;
+    const activatedServer = getActivatedServer(state.proxy);
+    const isSocks5 = activatedServer.type === "socks5";
 
-    this.proxyAddress = isSocks5 ? this.remoteServer.host : PROXY_ADDRESS;
+    this.proxyAddress = isSocks5 ? activatedServer.host : PROXY_ADDRESS;
 
     this.routing = new RoutingDaemon(route, dns);
 
     this.proxyPort = isSocks5
-      ? this.remoteServer.port
-      : this.remoteServer.proxyPort || PROXY_PORT;
+      ? activatedServer.port
+      : state.setting.general.shadowsocksLocalPort || PROXY_PORT;
 
-    console.log(this.proxyAddress, this.proxyPort);
     this.tun2socks = new Tun2socks(this.proxyAddress, this.proxyPort);
     this.smartDns =
       this.dns.servers[0] === SMART_DNS_ADDRESS ? new SmartDns() : null;

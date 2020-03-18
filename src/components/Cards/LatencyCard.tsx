@@ -8,6 +8,7 @@ import { getActivatedServer } from "../Proxies/util";
 import { checkServer, checkDns } from "../../utils/connectivity";
 import { useAsync } from "../../hooks";
 import { validateServerCredentials } from "../../share";
+import { store } from "../../store/store";
 
 //TODO: Remove repeated code
 export const LatencyCard = () => {
@@ -25,7 +26,8 @@ export const ToSeverCard = () => {
     state => state.proxy.isStarted
   );
   const check = useCallback(async () => {
-    const activatedServer = getActivatedServer();
+    const proxy = store.getState().proxy;
+    const activatedServer = getActivatedServer(proxy);
     return await checkServer({
       address: activatedServer.host,
       port: activatedServer.port,
@@ -127,7 +129,8 @@ export const ToInternetCard = () => {
     state => state.proxy.isStarted
   );
   const check = useCallback(async () => {
-    const activatedServer = getActivatedServer();
+    const proxy = store.getState().proxy;
+    const activatedServer = getActivatedServer(proxy);
     if (activatedServer.type === "shadowsocks")
       return await validateServerCredentials("127.0.0.1", shadowsocksLocalPort);
     else

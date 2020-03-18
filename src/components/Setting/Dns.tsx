@@ -7,7 +7,11 @@ import { AppState } from "../../reducers/rootReducer";
 import { DnsSettingState, setting } from "../../reducers/settingReducer";
 import { FieldSelector } from "../Core/Selector/Selector";
 import { isIPv4 } from "net";
-import { DNS_CUSTOMIZED_TYPE, DNS_SMART_TYPE } from "../../constants";
+import {
+  DNS_CUSTOMIZED_TYPE,
+  DNS_OPTIONS,
+  DNS_SMART_TYPE
+} from "../../constants";
 import { notifier } from "../Core/Notification";
 
 const typeOptions = [{ value: DNS_SMART_TYPE }, { value: DNS_CUSTOMIZED_TYPE }];
@@ -19,9 +23,9 @@ export const Dns = React.memo(() => {
     const dns = dnsState;
     return {
       type: dns.type,
-      defaultWebsiteDns: dns.smart.defaultWebsite.name,
+      defaultWebsiteDns: dns.smart.defaultWebsite.dns.name,
       isProxyDefaultWebsiteDns: dns.smart.defaultWebsite.isProxy,
-      nativeWebsiteDns: dns.smart.nativeWebsite.name,
+      nativeWebsiteDns: dns.smart.nativeWebsite.dns.name,
       isProxyNativeWebsiteDns: dns.smart.nativeWebsite.isProxy,
       preferredCustomizedServer: dns.customized.preferredServer,
       alternateCustomizedServer: dns.customized.alternateServer,
@@ -56,11 +60,11 @@ export const Dns = React.memo(() => {
           setting.actions.setSmartDns({
             defaultWebsite: {
               isProxy: data.isProxyDefaultWebsiteDns,
-              name: data.defaultWebsiteDns
+              dns: DNS_OPTIONS[0]
             },
             nativeWebsite: {
               isProxy: data.isProxyNativeWebsiteDns,
-              name: data.nativeWebsiteDns
+              dns: DNS_OPTIONS[1]
             }
           })
         );
