@@ -12,7 +12,7 @@
     "third_party",
     "defaultRules"
   ],
-  "artifactName": "ShadowsocksGlobal.${ext}",
+  "artifactName": "Shadowsocks-Global.${ext}",
   "directories": {
     "output": "dist"
   },
