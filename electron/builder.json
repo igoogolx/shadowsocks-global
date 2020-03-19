@@ -12,7 +12,7 @@
     "third_party",
     "defaultRules"
   ],
-  "artifactName": "Shadowsocks-Global.${ext}",
+  "artifactName": "ShadowsocksGlobal.${ext}",
   "directories": {
     "output": "dist"
   },
@@ -29,6 +29,7 @@
     "perMachine": true,
     "include": "electron/custom_install_steps.nsh",
     "oneClick": false,
-    "allowToChangeInstallationDirectory": true
+    "allowToChangeInstallationDirectory": true,
+    "deleteAppDataOnUninstall": true
   }
 }
