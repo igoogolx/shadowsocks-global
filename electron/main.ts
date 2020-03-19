@@ -77,7 +77,7 @@ async function createWindow() {
     event.preventDefault(); // Prevent the app from exiting on the 'close' event.
     mainWindow.hide();
   };
-  vpnManager = new VpnManager(mainWindow);
+  vpnManager = new VpnManager(mainWindow, tray);
   mainWindow.on("minimize", minimizeWindowToTray);
   mainWindow.on("close", minimizeWindowToTray);
   mainWindow.on("show", () => {

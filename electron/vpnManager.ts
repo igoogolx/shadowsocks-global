@@ -11,9 +11,11 @@ export class VpnManager {
   currentConnection: ConnectionManager | undefined;
   traffic: Traffic | undefined;
   updateTrafficTimer: NodeJS.Timeout | undefined;
-  tray: Tray | undefined = undefined;
 
-  constructor(private mainWindow: BrowserWindow | null) {
+  constructor(
+    private mainWindow: BrowserWindow | null,
+    private tray: Tray | undefined
+  ) {
     this.traffic = new Traffic();
   }
 
