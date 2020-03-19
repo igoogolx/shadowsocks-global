@@ -1,30 +1,60 @@
 import styles from "./cards.module.css";
-import { Dropdown, Icon, ICON_NAME } from "../Core";
-import React from "react";
+import { Button, Dropdown, Icon, ICON_NAME } from "../Core";
+import React, { useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { Dot } from "../Dot/Dot";
 import { Card } from "../Core/Card/Card";
 import { MenuItemProps } from "../Core/Menu/Menu";
+import { checkServer } from "../../utils/connectivity";
+import { useAsync } from "../../hooks";
+import classNames from "classnames";
 
 type ServerCardProps = {
   id: string;
   menuItems: MenuItemProps[];
   onClick: () => void;
-  title: string;
-  delay?: string;
+  name?: string;
+  host: string;
+  port: number;
   regionCode?: string;
   disabled?: boolean;
 };
 
 export const ServerCard = React.memo((props: ServerCardProps) => {
-  const { title, regionCode, onClick, delay, id, menuItems } = props;
+  const { name, host, regionCode, onClick, id, menuItems, port } = props;
   const activeId = useSelector<AppState, string>(state => state.proxy.activeId);
   const disabled = useSelector<AppState, boolean>(
     state => state.proxy.isStarted || state.proxy.isProcessing
   );
-  const isActive = activeId === id;
+  const ping = useCallback(
+    async () =>
+      await checkServer({
+        address: host,
+        port,
+        attempts: 5,
+        timeout: 2000
+      }),
 
+    [host, port]
+  );
+
+  const { execute, pending, value: delay, error } = useAsync(ping, false);
+  const handleOnClickDelay = useCallback(
+    (e: any) => {
+      e.stopPropagation();
+      execute().catch(e => {
+        console.log(e);
+      });
+    },
+    [execute]
+  );
+  const isActive = activeId === id;
+  useEffect(() => {
+    execute().catch(e => {
+      console.log(e);
+    });
+  }, [execute]);
   return (
     <div className={styles.server}>
       <Dropdown
@@ -45,11 +75,24 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
           )}
         </div>
         <div className={styles.body}>
-          <div className={styles.title}>{title}</div>
+          <div className={styles.title}>{name || host}</div>
         </div>
-        {delay && <div className={styles.delay}>{delay}ms</div>}
         {isActive && <Dot type={"enabled"} className={styles.dot} />}
       </Card>
+
+      {(delay || error || pending) && (
+        <Button
+          className={classNames(styles.delay, {
+            [styles.timeout]: error,
+            [styles.fast]: delay && Number(delay) <= 500,
+            [styles.slow]: delay && Number(delay) > 500
+          })}
+          onClick={handleOnClickDelay}
+          isLoading={pending}
+        >
+          {pending ? "" : error ? "Timeout" : delay + "ms"}
+        </Button>
+      )}
     </div>
   );
 });

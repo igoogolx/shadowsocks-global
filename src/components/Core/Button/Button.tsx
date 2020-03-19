@@ -57,7 +57,7 @@ export const Button = React.memo((props: ButtonProps) => {
       type={type}
       {...restProps}
     >
-      {isLoading && (isPrimary || isDanger) && (
+      {isLoading && (
         <Icon
           iconName={ICON_NAME.LOADING}
           isLoading={true}

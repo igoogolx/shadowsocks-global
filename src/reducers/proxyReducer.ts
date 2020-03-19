@@ -14,6 +14,8 @@ export type Shadowsocks = {
   plugin_opts?: string;
 
   regionCode?: string;
+
+  delay?: number;
 };
 
 export type Subscription = {
@@ -29,6 +31,8 @@ export type Socks5 = {
   host: string;
   port: number;
   name?: string;
+
+  delay?: number;
 };
 
 export type ProxyState = {

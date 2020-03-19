@@ -72,7 +72,7 @@
 }
 
 .iconLoading {
-  animation: loading 0.8s infinite linear;
+  animation: loading 1.5s infinite linear;
 }
 
 @keyframes loading {

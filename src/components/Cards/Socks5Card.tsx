@@ -8,11 +8,10 @@ import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
 
 type Socks5CardProps = {
   socks5: Socks5;
-  isActive?: boolean;
 };
 
 export const Socks5Card = React.memo((props: Socks5CardProps) => {
-  const { id, host, regionCode } = props.socks5;
+  const { id, host, regionCode, port } = props.socks5;
   const dispatch = useDispatch();
   const onClick = useCallback(() => dispatch(proxy.actions.setActiveId(id)), [
     dispatch,
@@ -62,7 +61,8 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
       <ServerCard
         regionCode={regionCode}
         onClick={onClick}
-        title={host}
+        host={host}
+        port={port}
         id={id}
         menuItems={dropdownItems}
       />

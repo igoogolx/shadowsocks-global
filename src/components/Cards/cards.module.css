@@ -54,9 +54,22 @@
     }
   }
   & .delay {
+    font-size: var(--font-size-smaller);
     position: absolute;
+    padding: 0;
     bottom: 10px;
     right: 10px;
+    height: auto;
+    margin: 0;
+  }
+  & .fast {
+    color: var(--success-color);
+  }
+  & .slow {
+    color: var(--warning-color);
+  }
+  & .timeout {
+    color: var(--error-color);
   }
 }
 

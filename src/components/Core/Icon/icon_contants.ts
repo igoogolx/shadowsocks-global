@@ -18,7 +18,7 @@ export const ICON_NAME = {
   PLUS: "plus",
   CROSS: "cross",
   DELETE: "trash",
-  LOADING: "loding",
+  LOADING: "loading",
   EYE: "eye",
   EYE_SLASH: "eye-slash",
   OMIT: "omit",

@@ -1,4 +1,4 @@
-import { rootReducer, AppState } from "../reducers/rootReducer";
+import { rootReducer } from "../reducers/rootReducer";
 import { configureStore } from "@reduxjs/toolkit";
 import { initialSettingState } from "../reducers/settingReducer";
 import { initialProxyState } from "../reducers/proxyReducer";
@@ -16,9 +16,8 @@ if (!localState || isDev) {
     setting: initialSettingState,
     proxy: initialProxyState
   });
-  // window.localStorage.setItem("state", localState);
   appConfig.set("state", localState);
-} else preloadedState = JSON.parse(localState) as AppState;
+} else preloadedState = localState;
 
 export const store = configureStore({
   reducer: rootReducer,
@@ -31,10 +30,8 @@ let currentValue: any;
 function handleChange() {
   let previousValue = currentValue;
   currentValue = store.getState();
-  console.log(currentValue);
   if (previousValue !== currentValue) {
     appConfig.set("state", currentValue);
-    // window.localStorage.setItem("state", JSON.stringify(currentValue));
   }
 }
 store.subscribe(handleChange);

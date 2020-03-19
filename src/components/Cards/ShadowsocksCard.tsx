@@ -11,11 +11,10 @@ import QRCode from "qrcode";
 
 type ShadowsocksCardProps = {
   shadowsocks: Shadowsocks;
-  delay?: string;
 };
 
 export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
-  const { id, name, host, regionCode } = props.shadowsocks;
+  const { id, name, host, regionCode, port } = props.shadowsocks;
   const dispatch = useDispatch();
 
   const proxyState = useSelector<AppState, ProxyState>(state => state.proxy);
@@ -97,7 +96,11 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
     const shadowsocks = getEditingShadowsocks();
     if (shadowsocks && isShowQrCode) {
       const url = encodeSsUrl(shadowsocks);
-      QRCode.toCanvas(document.getElementById("qr-code"), url).then();
+      QRCode.toCanvas(document.getElementById("qr-code"), url)
+        .then()
+        .catch(e => {
+          console.log(e);
+        });
     }
   }, [getEditingShadowsocks, isShowQrCode]);
 
@@ -117,7 +120,9 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
       <ServerCard
         id={id}
         onClick={onClick}
-        title={name || host}
+        name={name}
+        host={host}
+        port={port}
         regionCode={regionCode}
         menuItems={dropdownItems}
       />
