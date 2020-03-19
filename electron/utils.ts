@@ -12,6 +12,7 @@ import { lookupIp } from "../src/share";
 import Store from "electron-store";
 import { AppState } from "../src/reducers/rootReducer";
 import { getActivatedServer } from "../src/components/Proxies/util";
+import detectPort from "detect-port";
 
 function createTrayIconImage(imageName: string) {
   const image = nativeImage.createFromPath(
@@ -103,6 +104,15 @@ export const getConfig = async () => {
   const state = appConfig.get("state") as AppState;
   const activatedServer = getActivatedServer(state.proxy);
 
+  const shadowsocksLocalPort = state.setting.general.shadowsocksLocalPort;
+  const isShadowsocks = activatedServer.type === "shadowsocks";
+  if (isShadowsocks) {
+    const _port = await detectPort(shadowsocksLocalPort);
+    if (_port !== shadowsocksLocalPort)
+      throw new Error(
+        `port: ${shadowsocksLocalPort} was occupied, try port: ${_port}`
+      );
+  }
   const serverIp = await lookupIp(activatedServer.host);
   let dnsServers: string[],
     dnsWhiteListServers: string[],
@@ -132,6 +142,8 @@ export const getConfig = async () => {
       if (rule) rulePath = path.join(state.setting.rule.dirPath, rule);
     }
     if (!rulePath) throw new Error("The rule is invalid");
+    //Check whether rule path is valid
+    await fs.promises.access(rulePath);
     const customizedRule = await readRule(rulePath);
     if (customizedRule.isProxy) {
       proxyRoutes = customizedRule.subnets;
@@ -211,9 +223,11 @@ export const getConfig = async () => {
     route: { proxy: proxyRoutes, reserved: reservedRoutes },
     dns: { servers: dnsServers, whiteListServers: dnsWhiteListServers },
     isProxyUdp: state.setting.general.isProxyUdp,
-    remoteServer: {
-      ...activatedServer,
-      proxyPort: state.setting.general.shadowsocksLocalPort
-    }
+    remoteServer: isShadowsocks
+      ? {
+          ...activatedServer,
+          proxyPort: state.setting.general.shadowsocksLocalPort
+        }
+      : activatedServer
   };
 };
