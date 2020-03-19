@@ -101,7 +101,6 @@ export const readRule = async (path: string) => {
 export const getConfig = async () => {
   const appConfig = new Store();
   const state = appConfig.get("state") as AppState;
-  console.log(state);
   const activatedServer = getActivatedServer(state.proxy);
 
   const serverIp = await lookupIp(activatedServer.host);
@@ -117,16 +116,20 @@ export const getConfig = async () => {
   } else {
     const defaultRuleDirPath = path.join(getResourcesPath(), "defaultRules");
     const defaultRulePaths = await fs.promises.readdir(defaultRuleDirPath);
-    let rulePath = defaultRulePaths.find(
+    let rulePath;
+    let rule = defaultRulePaths.find(
       rulePath => path.basename(rulePath, ".rules") === currentRule
     );
-    if (!rulePath && state.setting.rule.dirPath) {
+
+    if (rule) rulePath = path.join(defaultRuleDirPath, rule);
+    if (!rule && state.setting.rule.dirPath) {
       const customizedRulePaths = await fs.promises.readdir(
         state.setting.rule.dirPath
       );
-      rulePath = customizedRulePaths.find(
+      rule = customizedRulePaths.find(
         rulePath => path.basename(rulePath, ".rules") === currentRule
       );
+      if (rule) rulePath = path.join(state.setting.rule.dirPath, rule);
     }
     if (!rulePath) throw new Error("The rule is invalid");
     const customizedRule = await readRule(rulePath);
