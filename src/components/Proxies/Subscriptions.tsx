@@ -2,10 +2,11 @@ import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { proxy, Subscription } from "../../reducers/proxyReducer";
-import { Dropdown, Icon, ICON_NAME } from "../Core";
+import { Dropdown, Icon, ICON_NAME, notifier } from "../Core";
 import styles from "./proxies.module.css";
 import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
 import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
+import { clipboard } from "electron";
 
 export const Subscriptions = React.memo(() => {
   const subscriptions = useSelector<AppState, Subscription[]>(
@@ -47,6 +48,16 @@ export const Subscriptions = React.memo(() => {
                     handleOnClick: () => {
                       setEditingId(subscription.id);
                       setIsShowDialog(true);
+                    }
+                  },
+                  {
+                    iconName: ICON_NAME.COPY,
+                    content: "Copy Url",
+                    handleOnClick: async () => {
+                      try {
+                        await clipboard.writeText(subscription.url);
+                        notifier.success("Copy Url successfully");
+                      } catch {}
                     }
                   },
                   {
