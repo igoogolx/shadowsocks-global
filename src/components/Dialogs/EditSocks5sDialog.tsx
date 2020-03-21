@@ -74,6 +74,7 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
           label={"Host"}
           className={styles.input}
           size={INPUT_SIZE.AUTO}
+          autoFocus={true}
         />
 
         <RegionCodeSelector />

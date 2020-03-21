@@ -103,6 +103,7 @@ export const EditSubscriptionDialog = React.memo(
             label={"Url"}
             className={styles.input}
             size={INPUT_SIZE.AUTO}
+            autoFocus={true}
           />
           <div className={styles.buttonContainer}>
             <Button

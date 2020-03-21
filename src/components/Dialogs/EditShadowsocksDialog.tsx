@@ -84,6 +84,7 @@ export const EditShadowsocksDialog = React.memo(
             className={styles.input}
             size={INPUT_SIZE.AUTO}
             validate={isEmpty}
+            autoFocus={true}
           />
           <FieldSelector
             name={"method"}
