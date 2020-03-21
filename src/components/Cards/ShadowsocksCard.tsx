@@ -84,6 +84,8 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         content: "Delete",
         handleOnClick: () => {
           dispatch(proxy.actions.delete({ type: "shadowsocks", id }));
+          //Reset activated id
+          if (isActivated) dispatch(proxy.actions.setActiveId(""));
         },
         disabled: isActivated
       }
