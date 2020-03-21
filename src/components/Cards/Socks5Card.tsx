@@ -17,7 +17,6 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
     dispatch,
     id
   ]);
-  const socks5s = useSelector<AppState, Socks5[]>(state => state.proxy.socks5s);
   const [isEditing, setIsEditing] = useState(false);
   const activatedId = useSelector<AppState, string>(
     state => state.proxy.activeId
@@ -47,16 +46,12 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
     ];
   }, [activatedId, dispatch, id, isStartedOrProcessing]);
 
-  const getEditSocks5 = () => socks5s.find(socks5 => socks5.id === id);
   const closeDialog = useCallback(() => setIsEditing(false), []);
 
   return (
     <>
       {isEditing && (
-        <EditSocks5sDialog
-          close={closeDialog}
-          initialValue={isEditing ? getEditSocks5() : undefined}
-        />
+        <EditSocks5sDialog close={closeDialog} initialValue={props.socks5} />
       )}
       <ServerCard
         regionCode={regionCode}
