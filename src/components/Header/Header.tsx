@@ -10,6 +10,7 @@ import path from "path";
 import { BUILD_IN_RULE, setting } from "../../reducers/settingReducer";
 import { proxy } from "../../reducers/proxyReducer";
 import { ipcRenderer } from "electron";
+import { useLocation } from "react-router-dom";
 
 const Header = () => {
   const customizedRulesDirPath = useSelector<AppState, string>(
@@ -130,6 +131,10 @@ const Header = () => {
     ],
     [rulePaths]
   );
+  const pingTest = useCallback(() => {
+    dispatch(proxy.actions.pingTest());
+  }, [dispatch]);
+  const location = useLocation();
   return (
     <div className={styles.container}>
       {isStarted ? (
@@ -163,6 +168,11 @@ const Header = () => {
         disabled={isLoadingRules || isStarted || isProcessing}
         isVirtualizedList={rulesOptions.length > 4}
       />
+      {location.pathname === "/proxies" && (
+        <Button onClick={pingTest} isPrimary={true} className={styles.button}>
+          Ping Test
+        </Button>
+      )}
     </div>
   );
 };

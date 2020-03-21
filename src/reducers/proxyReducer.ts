@@ -39,6 +39,10 @@ export type ProxyState = {
   isStarted: boolean;
   //Starting or Stopping
   isProcessing: boolean;
+  //The useEffect is used to listen the change of pintTestStatus.
+  //If the change is one of -1->0,-1->1,0<->1,the ping test will be fired.
+  //-1 means the ping test is disabled.
+  pingTestStatus: -1 | 0 | 1;
   activeId: string;
   shadowsockses: Shadowsocks[];
   subscriptions: Subscription[];
@@ -48,6 +52,7 @@ export type ProxyState = {
 export const initialProxyState: ProxyState = {
   isStarted: false,
   isProcessing: false,
+  pingTestStatus: -1,
   activeId: "",
   shadowsockses: [],
   subscriptions: [],
@@ -58,6 +63,14 @@ export const proxy = createSlice({
   name: "proxy",
   initialState: initialProxyState,
   reducers: {
+    pingTest: state => {
+      if (state.pingTestStatus === -1) state.pingTestStatus = 0;
+      else if (state.pingTestStatus === 0) state.pingTestStatus = 1;
+      else if (state.pingTestStatus === 1) state.pingTestStatus = 0;
+    },
+    resetPingTestStatus: state => {
+      if (state.pingTestStatus !== -1) state.pingTestStatus = -1;
+    },
     startVpn: state => {
       state.isStarted = true;
     },

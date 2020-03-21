@@ -27,12 +27,15 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
   const disabled = useSelector<AppState, boolean>(
     state => state.proxy.isStarted || state.proxy.isProcessing
   );
+  const pingTestStatus = useSelector<AppState, -1 | 0 | 1>(
+    state => state.proxy.pingTestStatus
+  );
   const ping = useCallback(
     async () =>
       await checkServer({
         address: host,
         port,
-        attempts: 5,
+        attempts: 10,
         timeout: 2000
       }),
 
@@ -51,10 +54,9 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
   );
   const isActive = activeId === id;
   useEffect(() => {
-    execute().catch(e => {
-      console.log(e);
-    });
-  }, [execute]);
+    if (pingTestStatus === -1) return;
+    execute();
+  }, [execute, pingTestStatus]);
   return (
     <div className={styles.server}>
       <Dropdown
