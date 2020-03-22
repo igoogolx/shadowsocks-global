@@ -7,7 +7,7 @@ import { Button, Icon, ICON_NAME } from "../index";
 type DialogProps = {
   children: React.ReactNode;
   disabled?: boolean;
-  close: () => void;
+  close?: () => void;
 };
 
 export const Dialog = React.memo((props: DialogProps) => {
@@ -15,13 +15,13 @@ export const Dialog = React.memo((props: DialogProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const handlerClose = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) close();
+      if (e.target === e.currentTarget && close) close();
     },
     [close]
   );
 
   const cls = classNames(styles.container, {
-    [styles.disabled]: disabled
+    [styles.disabled]: disabled,
   });
   useLockBodyScroll();
   return createPortal(
@@ -29,9 +29,11 @@ export const Dialog = React.memo((props: DialogProps) => {
       <div className={styles.mask} />
       <div className={cls} onClick={handlerClose}>
         <div className={styles.content}>
-          <Button className={styles.close} onClick={close}>
-            <Icon iconName={ICON_NAME.CLOSE} />
-          </Button>
+          {close && (
+            <Button className={styles.close} onClick={close}>
+              <Icon iconName={ICON_NAME.CLOSE} />
+            </Button>
+          )}
           <div className={styles.panel} ref={contentRef}>
             {children}
           </div>

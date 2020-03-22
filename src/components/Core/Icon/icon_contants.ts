@@ -11,10 +11,11 @@ export const ICON_SIZE = {
   SIZE48: "size-48",
   SIZE64: "size-64",
   SIZE96: "size-96",
-  SIZE128: "size-128"
+  SIZE128: "size-128",
 };
 
 export const ICON_NAME = {
+  UPDATE: "update",
   PLUS: "plus",
   CROSS: "cross",
   DELETE: "trash",
@@ -40,5 +41,5 @@ export const ICON_NAME = {
   FOLDER: "folder-open-fill",
   QRCODE: "qrcode",
   CLOSE: "close",
-  INFO_VARIANT: "information-variant"
+  INFO_VARIANT: "information-variant",
 };

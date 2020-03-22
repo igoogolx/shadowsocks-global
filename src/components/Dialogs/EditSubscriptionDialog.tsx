@@ -2,29 +2,25 @@ import { Button, Dialog, Field, Form, INPUT_SIZE, notifier } from "../Core";
 import React, { useCallback, useState } from "react";
 import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
-import { decodeSsUrl } from "../../utils/url";
-import { v4 as uuid } from "uuid";
 import styles from "./dialogs.module.css";
 import { useRedirect } from "./useRedirect";
 import { AppState } from "../../reducers/rootReducer";
-import { lookupRegionCodes } from "../../utils/helper";
-
-const UPDATE_SUBSCRIPTIONS_TIMEOUT_MS = 5000;
+import { updateSubscription } from "../../utils/helper";
 
 type EditSubscriptionDialogProps = {
   close: () => void;
   initialValue?: Subscription;
 };
 
+//Update or add the subscription
 export const EditSubscriptionDialog = React.memo(
   (props: EditSubscriptionDialogProps) => {
     const { close, initialValue } = props;
     const dispatch = useDispatch();
     const [value, setValue] = useState(initialValue || {});
     const [isLoading, setIsLoading] = useState(false);
-    const subscriptionUrls = useSelector<AppState, string[]>(state =>
-      state.proxy.subscriptions.map(subscription => subscription.url)
+    const subscriptions = useSelector<AppState, Subscription[]>(
+      (state) => state.proxy.subscriptions
     );
     const redirect = useRedirect();
     const onChange = useCallback(
@@ -39,25 +35,12 @@ export const EditSubscriptionDialog = React.memo(
       try {
         //Check whether the url has been added.
         if (!initialValue) {
-          if (subscriptionUrls.indexOf(subscription.url) !== -1)
+          if (subscriptions.some((item) => item.url === subscription.url))
             return notifier.error("Add the subscription repeatedly");
         }
         setIsLoading(true);
         const name = new URL(subscription.url).hostname;
-        const nodesBase64 = await axios(subscription.url, {
-          timeout: UPDATE_SUBSCRIPTIONS_TIMEOUT_MS
-        });
-        const nodes = Buffer.from(nodesBase64.data, "base64").toString();
-        const shadowsockses = decodeSsUrl(nodes);
-        const hosts = shadowsockses.map(shadowsocks => shadowsocks.host);
-        const regionCodes = await lookupRegionCodes(hosts);
-        const checkedShadowsockses = shadowsockses.map(
-          (shadowsocks, index) => ({
-            ...shadowsocks,
-            regionCode: regionCodes[index],
-            id: uuid()
-          })
-        );
+        const shadowsockses = await updateSubscription(subscription.url);
         if (initialValue)
           dispatch(
             proxy.actions.update({
@@ -66,8 +49,8 @@ export const EditSubscriptionDialog = React.memo(
                 ...subscription,
                 name,
                 id: initialValue.id,
-                shadowsockses: checkedShadowsockses
-              }
+                shadowsockses,
+              },
             })
           );
         else
@@ -77,8 +60,8 @@ export const EditSubscriptionDialog = React.memo(
               config: {
                 ...subscription,
                 name,
-                shadowsockses: checkedShadowsockses
-              }
+                shadowsockses,
+              },
             })
           );
         notifier.success("Update the subscription successfully!");

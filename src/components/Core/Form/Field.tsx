@@ -27,6 +27,7 @@ export const Field = (props: FieldProps) => {
     if (validate) {
       setIsValid(validate(value || ""));
     }
+    //TODO: fix incorrect deps
   }, [value, isSubmitted]); // eslint-disable-line
 
   return (
@@ -34,8 +35,7 @@ export const Field = (props: FieldProps) => {
       value={formData[name] || ""}
       onChange={e => {
         onChange({
-          //TODO: is this best to get number?
-          [name]: e.target.valueAsNumber || e.target.value
+          [name]: e.target.value
         });
       }}
       {...restProps}

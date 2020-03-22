@@ -7,35 +7,39 @@ import styles from "./proxies.module.css";
 import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
 import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
 import { clipboard } from "electron";
+import { LoadingDialog } from "../Dialogs/LoadingDialog";
+import { updateSubscription } from "../../utils/helper";
 
 export const Subscriptions = React.memo(() => {
   const subscriptions = useSelector<AppState, Subscription[]>(
-    state => state.proxy.subscriptions
+    (state) => state.proxy.subscriptions
   );
   const disabled = useSelector<AppState, boolean>(
-    state => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
   const dispatch = useDispatch();
-  const [isShowDialog, setIsShowDialog] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState("");
-  const closeDialog = useCallback(() => setIsShowDialog(false), []);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const closeEditDialog = useCallback(() => setIsEditing(false), []);
 
   return (
     <>
-      {isShowDialog && (
+      {isEditing && (
         <EditSubscriptionDialog
-          close={closeDialog}
+          close={closeEditDialog}
           initialValue={
-            isShowDialog
+            isEditing
               ? subscriptions.find(
-                  subscription => subscription.id === editingId
+                  (subscription) => subscription.id === editingId
                 )
               : undefined
           }
         />
       )}
+      {isUpdating && <LoadingDialog content={"Updating the subscription..."} />}
 
-      {subscriptions.map(subscription => {
+      {subscriptions.map((subscription) => {
         return (
           <div key={subscription.id}>
             <div className={styles.title}>
@@ -43,12 +47,37 @@ export const Subscriptions = React.memo(() => {
               <Dropdown
                 items={[
                   {
+                    iconName: ICON_NAME.UPDATE,
+                    content: "Update",
+                    handleOnClick: async () => {
+                      try {
+                        setIsUpdating(true);
+                        const shadowsockses = await updateSubscription(
+                          subscription.url
+                        );
+                        dispatch(
+                          proxy.actions.update({
+                            type: "subscription",
+                            config: {
+                              ...subscription,
+                              shadowsockses,
+                            },
+                          })
+                        );
+                      } catch {
+                        notifier.error("Fail to update the subscription!");
+                      } finally {
+                        setIsUpdating(false);
+                      }
+                    },
+                  },
+                  {
                     iconName: ICON_NAME.EDIT,
                     content: "Edit",
                     handleOnClick: () => {
                       setEditingId(subscription.id);
-                      setIsShowDialog(true);
-                    }
+                      setIsEditing(true);
+                    },
                   },
                   {
                     iconName: ICON_NAME.COPY,
@@ -58,7 +87,7 @@ export const Subscriptions = React.memo(() => {
                         await clipboard.writeText(subscription.url);
                         notifier.success("Copy Url successfully");
                       } catch {}
-                    }
+                    },
                   },
                   {
                     iconName: ICON_NAME.DELETE,
@@ -69,11 +98,11 @@ export const Subscriptions = React.memo(() => {
                       dispatch(
                         proxy.actions.delete({
                           type: "subscription",
-                          id: subscription.id
+                          id: subscription.id,
                         })
                       );
-                    }
-                  }
+                    },
+                  },
                 ]}
                 disabled={disabled}
               >
@@ -84,7 +113,7 @@ export const Subscriptions = React.memo(() => {
               </Dropdown>
             </div>
             <div className={styles.shadowsockses}>
-              {subscription.shadowsockses.map(shadowsocks => (
+              {subscription.shadowsockses.map((shadowsocks) => (
                 <ShadowsocksCard
                   shadowsocks={shadowsocks}
                   key={shadowsocks.id}
