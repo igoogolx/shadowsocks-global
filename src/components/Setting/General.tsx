@@ -10,10 +10,10 @@ import { FieldToggle } from "../Core/Toggle/Toggle";
 
 export const General = React.memo(() => {
   const general = useSelector<AppState, GeneralState>(
-    state => state.setting.general
+    (state) => state.setting.general
   );
   const disabled = useSelector<AppState, boolean>(
-    state => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
   const [value, setValue] = useState(general);
   const [isChanged, setIsChanged] = useState(false);
@@ -27,11 +27,8 @@ export const General = React.memo(() => {
     [value]
   );
   const onSubmit = useCallback(
-    data => {
-      dispatch(
-        setting.actions.setShadowsocksLocalPort(data.shadowsocksLocalPort)
-      );
-      dispatch(setting.actions.setIsProxyUdp(data.isProxyUdp));
+    (data) => {
+      dispatch(setting.actions.setGeneral(data));
       setIsChanged(false);
       notifier.success("Update setting successfully");
     },
@@ -58,8 +55,15 @@ export const General = React.memo(() => {
           validate={isPort as (port: number | string) => boolean}
         />
       </div>
-      <FieldToggle name={"isProxyUdp"} disabled={disabled}>
+      <FieldToggle
+        name={"isProxyUdp"}
+        disabled={disabled}
+        className={styles.item}
+      >
         Proxy Udp
+      </FieldToggle>
+      <FieldToggle name={"isUpdateSubscriptionsOnOpen"} disabled={disabled}>
+        Update Subscriptions On Open
       </FieldToggle>
       <div className={styles.footer}>
         <Button

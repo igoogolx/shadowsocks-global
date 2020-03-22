@@ -34,6 +34,7 @@ export type RuleState = {
 export type GeneralState = {
   shadowsocksLocalPort: number;
   isProxyUdp: boolean;
+  isUpdateSubscriptionsOnOpen: boolean;
 };
 
 export type SettingState = {
@@ -44,39 +45,41 @@ export type SettingState = {
 
 //Note: The state will be initialed in configureStore by preloadedState.
 export const initialSettingState: SettingState = {
-  general: { shadowsocksLocalPort: DEFAULT_LOCAL_PORT, isProxyUdp: true },
+  general: {
+    shadowsocksLocalPort: DEFAULT_LOCAL_PORT,
+    isProxyUdp: true,
+    isUpdateSubscriptionsOnOpen: false,
+  },
   dns: {
     type: DNS_SMART_TYPE,
     smart: {
       defaultWebsite: {
         isProxy: true,
-        dns: DNS_OPTIONS[0]
+        dns: DNS_OPTIONS[0],
       },
-      nativeWebsite: { isProxy: false, dns: DNS_OPTIONS[1] }
+      nativeWebsite: { isProxy: false, dns: DNS_OPTIONS[1] },
     },
     customized: {
       isProxy: true,
       preferredServer: "",
-      alternateServer: ""
-    }
+      alternateServer: "",
+    },
   },
   rule: {
     current: BUILD_IN_RULE,
     dirPath: "",
-    additionRoutes: []
-  }
+    additionRoutes: [],
+  },
 };
 
 export const setting = createSlice({
   name: "setting",
   initialState: initialSettingState,
   reducers: {
-    setIsProxyUdp: (state, action: PayloadAction<boolean>) => {
-      state.general.isProxyUdp = action.payload;
+    setGeneral: (state, action: PayloadAction<GeneralState>) => {
+      state.general = action.payload;
     },
-    setShadowsocksLocalPort: (state, action: PayloadAction<number>) => {
-      state.general.shadowsocksLocalPort = action.payload;
-    },
+
     setSmartDns: (
       state,
       action: PayloadAction<{
@@ -102,6 +105,6 @@ export const setting = createSlice({
       action: PayloadAction<{ ip: string; isProxy: boolean }>
     ) => {
       state.rule.additionRoutes = [action.payload];
-    }
-  }
+    },
+  },
 });

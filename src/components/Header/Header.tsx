@@ -8,27 +8,68 @@ import fs from "fs";
 import promiseIpc from "electron-promise-ipc";
 import path from "path";
 import { BUILD_IN_RULE, setting } from "../../reducers/settingReducer";
-import { proxy } from "../../reducers/proxyReducer";
+import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { ipcRenderer } from "electron";
 import { useLocation } from "react-router-dom";
+import { updateSubscription } from "../../utils/helper";
+import { useOnMount } from "../../hooks";
+import { LoadingDialog } from "../Dialogs/LoadingDialog";
 
 const Header = () => {
+  const subscriptions = useSelector<AppState, Subscription[]>(
+    (state) => state.proxy.subscriptions
+  );
+  const isUpdateSubscriptionsOnOpen = useSelector<AppState, boolean>(
+    (state) => state.setting.general.isUpdateSubscriptionsOnOpen
+  );
+  const [isUpdatingSubscriptions, setIsUpdatingSubscriptions] = useState(false);
+  const dispatch = useDispatch();
+  useOnMount(() => {
+    if (!isUpdateSubscriptionsOnOpen) return;
+    const updateSubscriptions = async () => {
+      await Promise.all(
+        subscriptions.map((subscription) =>
+          updateSubscription(subscription.url).then((shadowsockses) => {
+            dispatch(
+              proxy.actions.update({
+                type: "subscription",
+                config: { ...subscription, shadowsockses },
+              })
+            );
+          })
+        )
+      );
+    };
+
+    setIsUpdatingSubscriptions(true);
+    updateSubscriptions()
+      .then(() => {
+        notifier.success("Update subscriptions successfully");
+      })
+      .catch(() => {
+        notifier.error("Fail to update subscriptions");
+      })
+      .finally(() => {
+        setIsUpdatingSubscriptions(false);
+      });
+  });
   const customizedRulesDirPath = useSelector<AppState, string>(
-    state => state.setting.rule.dirPath
+    (state) => state.setting.rule.dirPath
   );
   const isStarted = useSelector<AppState, boolean>(
-    state => state.proxy.isStarted
+    (state) => state.proxy.isStarted
   );
   const isProcessing = useSelector<AppState, boolean>(
-    state => state.proxy.isProcessing
+    (state) => state.proxy.isProcessing
   );
-  const activeId = useSelector<AppState, string>(state => state.proxy.activeId);
+  const activeId = useSelector<AppState, string>(
+    (state) => state.proxy.activeId
+  );
   const currentRule = useSelector<AppState, string>(
-    state => state.setting.rule.current
+    (state) => state.setting.rule.current
   );
   const [rulePaths, setRulePaths] = useState<string[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);
-  const dispatch = useDispatch();
   const changeCurrentRule = useCallback(
     (rule: string) => dispatch(setting.actions.setCurrentRule(rule)),
     [dispatch]
@@ -83,7 +124,7 @@ const Header = () => {
         const resourcesPath = await promiseIpc.send("getResourcesPath");
         const defaultRuleDirPath = path.join(resourcesPath, "defaultRules");
         const defaultRules = await fs.promises.readdir(defaultRuleDirPath);
-        defaultRules.forEach(rule => {
+        defaultRules.forEach((rule) => {
           if (path.extname(rule) === ".rules")
             rulePaths.push(path.join(defaultRuleDirPath, rule));
         });
@@ -96,7 +137,7 @@ const Header = () => {
           const customizedRules = await fs.promises.readdir(
             customizedRulesDirPath
           );
-          customizedRules.forEach(rule => {
+          customizedRules.forEach((rule) => {
             if (path.extname(rule) === ".rules")
               rulePaths.push(path.join(customizedRulesDirPath, rule));
           });
@@ -125,9 +166,9 @@ const Header = () => {
   const rulesOptions = useMemo(
     () => [
       { value: BUILD_IN_RULE },
-      ...rulePaths.map(rulePath => ({
-        value: path.basename(rulePath, ".rules")
-      }))
+      ...rulePaths.map((rulePath) => ({
+        value: path.basename(rulePath, ".rules"),
+      })),
     ],
     [rulePaths]
   );
@@ -136,44 +177,49 @@ const Header = () => {
   }, [dispatch]);
   const location = useLocation();
   return (
-    <div className={styles.container}>
-      {isStarted ? (
-        <Button
-          isDanger={true}
-          className={styles.button}
-          onClick={stop}
-          isLoading={isProcessing}
-          disabled={isProcessing}
-        >
-          {isProcessing ? "Stopping" : "Stop"}
-        </Button>
-      ) : (
-        <Button
-          isPrimary={true}
-          className={styles.button}
-          onClick={start}
-          isLoading={isProcessing}
-          disabled={isProcessing}
-        >
-          {isProcessing ? "Starting" : "Start"}
-        </Button>
+    <>
+      {isUpdatingSubscriptions && (
+        <LoadingDialog content={"Updating subscriptions..."} />
       )}
+      <div className={styles.container}>
+        {isStarted ? (
+          <Button
+            isDanger={true}
+            className={styles.button}
+            onClick={stop}
+            isLoading={isProcessing}
+            disabled={isProcessing}
+          >
+            {isProcessing ? "Stopping" : "Stop"}
+          </Button>
+        ) : (
+          <Button
+            isPrimary={true}
+            className={styles.button}
+            onClick={start}
+            isLoading={isProcessing}
+            disabled={isProcessing}
+          >
+            {isProcessing ? "Starting" : "Start"}
+          </Button>
+        )}
 
-      <Selector
-        options={rulesOptions}
-        label={"Rule"}
-        value={currentRule}
-        onChange={changeCurrentRule}
-        className={styles.selector}
-        disabled={isLoadingRules || isStarted || isProcessing}
-        isVirtualizedList={rulesOptions.length > 4}
-      />
-      {location.pathname === "/proxies" && (
-        <Button onClick={pingTest} isPrimary={true} className={styles.button}>
-          Ping Test
-        </Button>
-      )}
-    </div>
+        <Selector
+          options={rulesOptions}
+          label={"Rule"}
+          value={currentRule}
+          onChange={changeCurrentRule}
+          className={styles.selector}
+          disabled={isLoadingRules || isStarted || isProcessing}
+          isVirtualizedList={rulesOptions.length > 4}
+        />
+        {location.pathname === "/proxies" && (
+          <Button onClick={pingTest} isPrimary={true} className={styles.button}>
+            Ping Test
+          </Button>
+        )}
+      </div>
+    </>
   );
 };
 
