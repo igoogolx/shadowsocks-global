@@ -56,25 +56,25 @@ export const initialProxyState: ProxyState = {
   activeId: "",
   shadowsockses: [],
   subscriptions: [],
-  socks5s: []
+  socks5s: [],
 };
 
 export const proxy = createSlice({
   name: "proxy",
   initialState: initialProxyState,
   reducers: {
-    pingTest: state => {
+    pingTest: (state) => {
       if (state.pingTestStatus === -1) state.pingTestStatus = 0;
       else if (state.pingTestStatus === 0) state.pingTestStatus = 1;
       else if (state.pingTestStatus === 1) state.pingTestStatus = 0;
     },
-    resetPingTestStatus: state => {
+    resetPingTestStatus: (state) => {
       if (state.pingTestStatus !== -1) state.pingTestStatus = -1;
     },
-    startVpn: state => {
+    startVpn: (state) => {
       state.isStarted = true;
     },
-    stopVpn: state => {
+    stopVpn: (state) => {
       state.isStarted = false;
     },
     setIsProcessing: (state, action: PayloadAction<boolean>) => {
@@ -104,8 +104,8 @@ export const proxy = createSlice({
           | { type: "subscription"; config: Omit<Subscription, "id"> }
           | { type: "socks5"; config: Omit<Socks5, "id"> }
       ) => ({
-        payload: { ...proxy, config: { id: uuid(), ...proxy.config } }
-      })
+        payload: { ...proxy, config: { id: uuid(), ...proxy.config } },
+      }),
     },
     update: (
       state,
@@ -120,7 +120,7 @@ export const proxy = createSlice({
         case "shadowsocks":
           {
             const shadowsocksIndex = state.shadowsockses.findIndex(
-              proxy => proxy.id === config.id
+              (proxy) => proxy.id === config.id
             );
             if (shadowsocksIndex === -1) {
               state.subscriptions.some((subscription, subscriptionIndex) =>
@@ -143,15 +143,22 @@ export const proxy = createSlice({
         case "subscription":
           {
             const index = state.subscriptions.findIndex(
-              subscription => subscription.id === config.id
+              (subscription) => subscription.id === config.id
             );
+            if (
+              state.subscriptions[index].shadowsockses.some(
+                (shadowsocks) => shadowsocks.id === state.activeId
+              )
+            )
+              //Reset activated id
+              state.activeId = "";
             state.subscriptions[index] = config as Subscription;
           }
           break;
         //Socks5
         default: {
           const index = state.socks5s.findIndex(
-            socks5 => socks5.id === config.id
+            (socks5) => socks5.id === config.id
           );
           state.socks5s[index] = config as Socks5;
         }
@@ -171,7 +178,7 @@ export const proxy = createSlice({
             //Reset activated id
             if (state.activeId === id) state.activeId = "";
             const shadowsocksIndex = state.shadowsockses.findIndex(
-              shadowsocks => shadowsocks.id === id
+              (shadowsocks) => shadowsocks.id === id
             );
             if (shadowsocksIndex === -1) {
               state.subscriptions.some((subscription, subscriptionIndex) =>
@@ -193,11 +200,11 @@ export const proxy = createSlice({
         case "subscription":
           {
             const index = state.subscriptions.findIndex(
-              subscription => subscription.id === id
+              (subscription) => subscription.id === id
             );
             if (
               state.subscriptions[index].shadowsockses.some(
-                shadowsocks => shadowsocks.id === state.activeId
+                (shadowsocks) => shadowsocks.id === state.activeId
               )
             )
               //Reset activated id
@@ -209,9 +216,9 @@ export const proxy = createSlice({
         default: {
           //Reset activated id
           if (state.activeId === id) state.activeId = "";
-          state.socks5s = state.socks5s.filter(socks5 => socks5.id !== id);
+          state.socks5s = state.socks5s.filter((socks5) => socks5.id !== id);
         }
       }
-    }
-  }
+    },
+  },
 });
