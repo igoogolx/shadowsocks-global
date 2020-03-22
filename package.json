@@ -71,7 +71,7 @@
     "electron-devtools-installer": "^2.2.4",
     "flag-icon-css": "^3.4.6",
     "nodemon": "^2.0.2",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.1",
     "qrcode": "^1.4.4",
     "react": "^16.13.0",
     "react-app-rewire-postcss": "^3.0.2",
