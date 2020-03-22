@@ -168,6 +168,8 @@ export const proxy = createSlice({
       switch (type) {
         case "shadowsocks":
           {
+            //Reset activated id
+            if (state.activeId === id) state.activeId = "";
             const shadowsocksIndex = state.shadowsockses.findIndex(
               shadowsocks => shadowsocks.id === id
             );
@@ -189,12 +191,24 @@ export const proxy = createSlice({
           }
           break;
         case "subscription":
-          state.subscriptions = state.subscriptions.filter(
-            subscription => subscription.id !== id
-          );
+          {
+            const index = state.subscriptions.findIndex(
+              subscription => subscription.id === id
+            );
+            if (
+              state.subscriptions[index].shadowsockses.some(
+                shadowsocks => shadowsocks.id === state.activeId
+              )
+            )
+              //Reset activated id
+              state.activeId = "";
+            state.subscriptions.splice(index, 1);
+          }
           break;
         //Socks5
         default: {
+          //Reset activated id
+          if (state.activeId === id) state.activeId = "";
           state.socks5s = state.socks5s.filter(socks5 => socks5.id !== id);
         }
       }
