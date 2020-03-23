@@ -12,17 +12,17 @@ const isDev = process.env.NODE_ENV !== "production";
 let localState = appConfig.get("state");
 let preloadedState;
 if (!localState || isDev) {
-  localState = JSON.stringify({
+  localState = {
     setting: initialSettingState,
-    proxy: initialProxyState
-  });
+    proxy: initialProxyState,
+  };
   appConfig.set("state", localState);
 } else preloadedState = localState;
 
 export const store = configureStore({
   reducer: rootReducer,
   devTools: isDev,
-  preloadedState
+  preloadedState,
 });
 
 //Store app state in localStorage, once it is changed.
