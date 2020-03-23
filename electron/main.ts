@@ -91,12 +91,6 @@ async function createWindow() {
 
 app.on("ready", createWindow);
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
 // Signals that the app is quitting and quits the app. This is necessary because we override the
 // window 'close' event to support minimizing to the system tray.
 async function quitApp() {
