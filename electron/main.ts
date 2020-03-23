@@ -5,7 +5,7 @@ import {
   Tray,
   Menu,
   MenuItemConstructorOptions,
-  ipcMain
+  ipcMain,
 } from "electron";
 import * as path from "path";
 import promiseIpc from "electron-promise-ipc";
@@ -13,7 +13,8 @@ import {
   setMenu,
   installExtensions,
   getResourcesPath,
-  trayIconImages
+  trayIconImages,
+  getAppConfig,
 } from "./utils";
 import { VpnManager } from "./vpnManager";
 
@@ -24,7 +25,7 @@ let isAppQuitting = false;
 let localizedStrings: { [key: string]: string } = {
   "connected-server-state": "Connected",
   "disconnected-server-state": "Disconnected",
-  quit: "Quit"
+  quit: "Quit",
 };
 
 const isDev = process.env.NODE_ENV === "development";
@@ -40,8 +41,8 @@ async function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       devTools: isDev,
-      webSecurity: !isDev
-    }
+      webSecurity: !isDev,
+    },
   });
 
   if (isDev) {
@@ -146,7 +147,7 @@ function createTray() {
   const quitString = localizedStrings["quit"];
   const menuTemplate = [
     { type: "separator" } as MenuItemConstructorOptions,
-    { label: quitString, click: quitApp }
+    { label: quitString, click: quitApp },
   ];
   tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
 }
@@ -163,7 +164,7 @@ promiseIpc.on("getCustomizedRulesDirPath", async (defaultPath: unknown) => {
     if (mainWindow) {
       const result = await dialog.showOpenDialog(mainWindow, {
         defaultPath: defaultPath as string,
-        properties: ["openDirectory"]
+        properties: ["openDirectory"],
       });
       if (result.canceled) return null;
       else return result.filePaths[0];
@@ -184,8 +185,15 @@ ipcMain.on("localizationResponse", (event, localizationResult) => {
   createTray();
 });
 
+ipcMain.on("setRunAtSystemStartup", () => {
+  const appConfig = getAppConfig();
+  if (appConfig.setting.general.isRunAtSystemStartup)
+    app.setLoginItemSettings({ openAtLogin: true });
+  else app.setLoginItemSettings({ openAtLogin: false });
+});
+
 //Avoid main process crash.
 //TODO: add system log
-process.on("uncaughtException", function(err) {
+process.on("uncaughtException", function (err) {
   console.log(err);
 });

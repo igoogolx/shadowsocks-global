@@ -24,6 +24,8 @@ const Header = () => {
   );
   const [isUpdatingSubscriptions, setIsUpdatingSubscriptions] = useState(false);
   const dispatch = useDispatch();
+
+  //Init app
   useOnMount(() => {
     if (!isUpdateSubscriptionsOnOpen) return;
     const updateSubscriptions = async () => {
@@ -52,6 +54,25 @@ const Header = () => {
       .finally(() => {
         setIsUpdatingSubscriptions(false);
       });
+    //TODO: use customized channel for "Disconnected" because there are others message.
+    ipcRenderer.on("message", (event, message) => {
+      if (message === "Disconnected") {
+        dispatch(proxy.actions.setIsProcessing(false));
+        dispatch(proxy.actions.stopVpn());
+      }
+    });
+
+    ipcRenderer.send("setRunAtSystemStartup");
+
+    //TODO:i18next
+    ipcRenderer.send("localizationResponse", null);
+    //If the app crashes unexpectedly, the "start" Button can be loading state after restarting app.
+    //To avoid that, the state mush be reset.
+    dispatch(proxy.actions.setIsProcessing(false));
+    dispatch(proxy.actions.stopVpn());
+    return () => {
+      ipcRenderer.removeAllListeners("message");
+    };
   });
   const customizedRulesDirPath = useSelector<AppState, string>(
     (state) => state.setting.rule.dirPath
@@ -92,28 +113,6 @@ const Header = () => {
       dispatch(proxy.actions.setIsProcessing(false));
     }
   }, [activeId, dispatch]);
-
-  useEffect(() => {
-    //TODO: use customized channel for "Disconnected" because there are others message.
-    ipcRenderer.on("message", (event, message) => {
-      if (message === "Disconnected") {
-        dispatch(proxy.actions.setIsProcessing(false));
-        dispatch(proxy.actions.stopVpn());
-      }
-    });
-    return () => {
-      ipcRenderer.removeAllListeners("message");
-    };
-  }, [dispatch]);
-
-  useEffect(() => {
-    //TODO:i18next
-    ipcRenderer.send("localizationResponse", null);
-    //If the app crashes unexpectedly, the "start" Button can be loading state after restarting app.
-    //To avoid that, the state mush be reset.
-    dispatch(proxy.actions.setIsProcessing(false));
-    dispatch(proxy.actions.stopVpn());
-  }, [dispatch]);
 
   useEffect(() => {
     const loadRulePath = async () => {

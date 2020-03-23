@@ -7,6 +7,7 @@ import { AppState } from "../../reducers/rootReducer";
 import { GeneralState, setting } from "../../reducers/settingReducer";
 import { notifier } from "../Core/Notification";
 import { FieldToggle } from "../Core/Toggle/Toggle";
+import { ipcRenderer } from "electron";
 
 export const General = React.memo(() => {
   const general = useSelector<AppState, GeneralState>(
@@ -30,9 +31,11 @@ export const General = React.memo(() => {
     (data) => {
       dispatch(setting.actions.setGeneral(data));
       setIsChanged(false);
+      if (general.isRunAtSystemStartup !== data.isRunAtSystemStartup)
+        ipcRenderer.send("setRunAtSystemStartup");
       notifier.success("Update setting successfully");
     },
-    [dispatch]
+    [dispatch, general.isRunAtSystemStartup]
   );
   const reset = useCallback(() => {
     setValue(general);
@@ -62,8 +65,19 @@ export const General = React.memo(() => {
       >
         Proxy Udp
       </FieldToggle>
-      <FieldToggle name={"isUpdateSubscriptionsOnOpen"} disabled={disabled}>
+      <FieldToggle
+        name={"isUpdateSubscriptionsOnOpen"}
+        disabled={disabled}
+        className={styles.item}
+      >
         Update Subscriptions On Open
+      </FieldToggle>
+      <FieldToggle
+        name={"isRunAtSystemStartup"}
+        disabled={disabled}
+        className={styles.item}
+      >
+        Run at system startup
       </FieldToggle>
       <div className={styles.footer}>
         <Button

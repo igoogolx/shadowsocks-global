@@ -35,6 +35,7 @@ export type GeneralState = {
   shadowsocksLocalPort: number;
   isProxyUdp: boolean;
   isUpdateSubscriptionsOnOpen: boolean;
+  isRunAtSystemStartup: boolean;
 };
 
 export type SettingState = {
@@ -49,6 +50,7 @@ export const initialSettingState: SettingState = {
     shadowsocksLocalPort: DEFAULT_LOCAL_PORT,
     isProxyUdp: true,
     isUpdateSubscriptionsOnOpen: false,
+    isRunAtSystemStartup: false,
   },
   dns: {
     type: DNS_SMART_TYPE,

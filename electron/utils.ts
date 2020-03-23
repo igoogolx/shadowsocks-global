@@ -6,7 +6,7 @@ import { DNS_SMART_TYPE, SMART_DNS_ADDRESS } from "../src/constants";
 import {
   GLOBAL_PROXY_ROUTES,
   GLOBAL_RESERVED_ROUTES,
-  SMART_DNS_WHITE_LIST_SERVERS
+  SMART_DNS_WHITE_LIST_SERVERS,
 } from "./constant";
 import { lookupIp } from "../src/share";
 import Store from "electron-store";
@@ -14,6 +14,10 @@ import { AppState } from "../src/reducers/rootReducer";
 import { getActivatedServer } from "../src/components/Proxies/util";
 import detectPort from "detect-port";
 
+export const getAppConfig = () => {
+  const appConfig = new Store();
+  return appConfig.get("state") as AppState;
+};
 function createTrayIconImage(imageName: string) {
   const image = nativeImage.createFromPath(
     path.join(app.getAppPath(), "resources", "tray", imageName)
@@ -25,7 +29,7 @@ function createTrayIconImage(imageName: string) {
 }
 export const trayIconImages = {
   connected: createTrayIconImage("connected.png"),
-  disconnected: createTrayIconImage("disconnected.png")
+  disconnected: createTrayIconImage("disconnected.png"),
 };
 export const setMenu = (mainWindow: BrowserWindow) => {
   if (process.env.NODE_ENV === "development") {
@@ -36,8 +40,8 @@ export const setMenu = (mainWindow: BrowserWindow) => {
           label: "Inspect element",
           click: () => {
             mainWindow.webContents.inspectElement(x, y);
-          }
-        }
+          },
+        },
       ]).popup({ window: mainWindow });
     });
   } else {
@@ -49,9 +53,9 @@ export const installExtensions = async () => {
   const devtoolsInstaller = require("electron-devtools-installer");
   const extensions = [
     devtoolsInstaller.REACT_DEVELOPER_TOOLS,
-    devtoolsInstaller.REDUX_DEVTOOLS
+    devtoolsInstaller.REDUX_DEVTOOLS,
   ];
-  await Promise.all(extensions.map(name => devtoolsInstaller.default(name)));
+  await Promise.all(extensions.map((name) => devtoolsInstaller.default(name)));
 };
 
 export interface RemoteServer {
@@ -100,8 +104,7 @@ export const readRule = async (path: string) => {
 };
 
 export const getConfig = async () => {
-  const appConfig = new Store();
-  const state = appConfig.get("state") as AppState;
+  const state = getAppConfig();
   const activatedServer = getActivatedServer(state.proxy);
 
   const shadowsocksLocalPort = state.setting.general.shadowsocksLocalPort;
@@ -128,7 +131,7 @@ export const getConfig = async () => {
     const defaultRulePaths = await fs.promises.readdir(defaultRuleDirPath);
     let rulePath;
     let rule = defaultRulePaths.find(
-      rulePath => path.basename(rulePath, ".rules") === currentRule
+      (rulePath) => path.basename(rulePath, ".rules") === currentRule
     );
 
     if (rule) rulePath = path.join(defaultRuleDirPath, rule);
@@ -137,7 +140,7 @@ export const getConfig = async () => {
         state.setting.rule.dirPath
       );
       rule = customizedRulePaths.find(
-        rulePath => path.basename(rulePath, ".rules") === currentRule
+        (rulePath) => path.basename(rulePath, ".rules") === currentRule
       );
       if (rule) rulePath = path.join(state.setting.rule.dirPath, rule);
     }
@@ -152,7 +155,7 @@ export const getConfig = async () => {
       reservedRoutes = [
         ...reservedRoutes,
         ...GLOBAL_RESERVED_ROUTES,
-        ...customizedRule.subnets
+        ...customizedRule.subnets,
       ];
     }
   }
@@ -165,45 +168,45 @@ export const getConfig = async () => {
       proxyRoutes = [
         ...proxyRoutes,
         dns.smart.defaultWebsite.dns.alternateServer + "/32",
-        dns.smart.defaultWebsite.dns.preferredServer + "/32"
+        dns.smart.defaultWebsite.dns.preferredServer + "/32",
       ];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
         dns.smart.defaultWebsite.dns.preferredServer + "/32",
-        dns.smart.defaultWebsite.dns.alternateServer + "/32"
+        dns.smart.defaultWebsite.dns.alternateServer + "/32",
       ];
     }
     if (dns.smart.nativeWebsite.isProxy) {
       proxyRoutes = [
         ...proxyRoutes,
         dns.smart.nativeWebsite.dns.alternateServer + "/32",
-        dns.smart.nativeWebsite.dns.preferredServer + "/32"
+        dns.smart.nativeWebsite.dns.preferredServer + "/32",
       ];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
         dns.smart.nativeWebsite.dns.preferredServer + "/32",
-        dns.smart.nativeWebsite.dns.alternateServer + "/32"
+        dns.smart.nativeWebsite.dns.alternateServer + "/32",
       ];
     }
     //Customized Dns
   } else {
     dnsWhiteListServers = dnsServers = [
       dns.customized.preferredServer,
-      dns.customized.alternateServer
+      dns.customized.alternateServer,
     ];
     if (dns.customized.isProxy) {
       proxyRoutes = [
         ...proxyRoutes,
         dns.customized.preferredServer + "/32",
-        dns.customized.alternateServer + "/32"
+        dns.customized.alternateServer + "/32",
       ];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
         dns.customized.preferredServer + "/32",
-        dns.customized.alternateServer + "/32"
+        dns.customized.alternateServer + "/32",
       ];
     }
   }
@@ -211,13 +214,13 @@ export const getConfig = async () => {
   const proxy: string[] = [],
     reserved: string[] = [];
   const additionalRoutes = state.setting.rule.additionRoutes;
-  additionalRoutes.forEach(route => {
+  additionalRoutes.forEach((route) => {
     if (route.isProxy) proxy.push(route.ip);
     else reserved.push(route.ip);
   });
 
-  proxyRoutes = [...proxyRoutes, ...proxy.map(ip => ip + "/32")];
-  reservedRoutes = [...reservedRoutes, ...reserved.map(ip => ip + "/32")];
+  proxyRoutes = [...proxyRoutes, ...proxy.map((ip) => ip + "/32")];
+  reservedRoutes = [...reservedRoutes, ...reserved.map((ip) => ip + "/32")];
 
   return {
     route: { proxy: proxyRoutes, reserved: reservedRoutes },
@@ -226,8 +229,8 @@ export const getConfig = async () => {
     remoteServer: isShadowsocks
       ? {
           ...activatedServer,
-          proxyPort: state.setting.general.shadowsocksLocalPort
+          proxyPort: state.setting.general.shadowsocksLocalPort,
         }
-      : activatedServer
+      : activatedServer,
   };
 };
