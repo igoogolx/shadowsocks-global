@@ -80,7 +80,12 @@ async function createWindow() {
   };
   vpnManager = new VpnManager(mainWindow, tray);
   mainWindow.on("minimize", minimizeWindowToTray);
-  mainWindow.on("close", minimizeWindowToTray);
+  mainWindow.on("close", async (event: Event) => {
+    const isHideWhenWindowIsClosed = getAppConfig().setting.general
+      .isHideWhenWindowIsClosed;
+    if (isHideWhenWindowIsClosed) minimizeWindowToTray(event);
+    else await quitApp();
+  });
   mainWindow.on("show", () => {
     if (vpnManager?.traffic) vpnManager.traffic.setIsCapturePockets = true;
   });

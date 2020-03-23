@@ -79,6 +79,9 @@ export const General = React.memo(() => {
       >
         Run at system startup
       </FieldToggle>
+      <FieldToggle name={"isHideWhenWindowIsClosed"} disabled={disabled}>
+        Hide when window is closed
+      </FieldToggle>
       <div className={styles.footer}>
         <Button
           type={"submit"}

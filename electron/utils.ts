@@ -14,10 +14,8 @@ import { AppState } from "../src/reducers/rootReducer";
 import { getActivatedServer } from "../src/components/Proxies/util";
 import detectPort from "detect-port";
 
-export const getAppConfig = () => {
-  const appConfig = new Store();
-  return appConfig.get("state") as AppState;
-};
+const appConfig = new Store();
+export const getAppConfig = () => appConfig.get("state") as AppState;
 function createTrayIconImage(imageName: string) {
   const image = nativeImage.createFromPath(
     path.join(app.getAppPath(), "resources", "tray", imageName)

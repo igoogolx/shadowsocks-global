@@ -36,6 +36,7 @@ export type GeneralState = {
   isProxyUdp: boolean;
   isUpdateSubscriptionsOnOpen: boolean;
   isRunAtSystemStartup: boolean;
+  isHideWhenWindowIsClosed: boolean;
 };
 
 export type SettingState = {
@@ -51,6 +52,7 @@ export const initialSettingState: SettingState = {
     isProxyUdp: true,
     isUpdateSubscriptionsOnOpen: false,
     isRunAtSystemStartup: false,
+    isHideWhenWindowIsClosed: true,
   },
   dns: {
     type: DNS_SMART_TYPE,
