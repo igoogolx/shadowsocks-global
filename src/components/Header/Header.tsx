@@ -27,33 +27,34 @@ const Header = () => {
 
   //Init app
   useOnMount(() => {
-    if (!isUpdateSubscriptionsOnOpen) return;
-    const updateSubscriptions = async () => {
-      await Promise.all(
-        subscriptions.map((subscription) =>
-          updateSubscription(subscription.url).then((shadowsockses) => {
-            dispatch(
-              proxy.actions.update({
-                type: "subscription",
-                config: { ...subscription, shadowsockses },
-              })
-            );
-          })
-        )
-      );
-    };
+    if (isUpdateSubscriptionsOnOpen) {
+      const updateSubscriptions = async () => {
+        await Promise.all(
+          subscriptions.map((subscription) =>
+            updateSubscription(subscription.url).then((shadowsockses) => {
+              dispatch(
+                proxy.actions.update({
+                  type: "subscription",
+                  config: { ...subscription, shadowsockses },
+                })
+              );
+            })
+          )
+        );
+      };
 
-    setIsUpdatingSubscriptions(true);
-    updateSubscriptions()
-      .then(() => {
-        notifier.success("Update subscriptions successfully");
-      })
-      .catch(() => {
-        notifier.error("Fail to update subscriptions");
-      })
-      .finally(() => {
-        setIsUpdatingSubscriptions(false);
-      });
+      setIsUpdatingSubscriptions(true);
+      updateSubscriptions()
+        .then(() => {
+          notifier.success("Update subscriptions successfully");
+        })
+        .catch(() => {
+          notifier.error("Fail to update subscriptions");
+        })
+        .finally(() => {
+          setIsUpdatingSubscriptions(false);
+        });
+    }
     //TODO: use customized channel for "Disconnected" because there are others message.
     ipcRenderer.on("message", (event, message) => {
       if (message === "Disconnected") {
