@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import styles from "./header.module.css";
 import { Button, Selector } from "../Core";
 import { notifier } from "../Core/Notification";
@@ -12,7 +18,6 @@ import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { ipcRenderer } from "electron";
 import { useLocation } from "react-router-dom";
 import { updateSubscription } from "../../utils/helper";
-import { useOnMount } from "../../hooks";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
 
 const Header = () => {
@@ -26,7 +31,7 @@ const Header = () => {
   const dispatch = useDispatch();
 
   //Init app
-  useOnMount(() => {
+  useLayoutEffect(() => {
     if (isUpdateSubscriptionsOnOpen) {
       const updateSubscriptions = async () => {
         await Promise.all(
@@ -74,7 +79,8 @@ const Header = () => {
     return () => {
       ipcRenderer.removeAllListeners("message");
     };
-  });
+    //Only be fired once to init app.
+  }, []);
   const customizedRulesDirPath = useSelector<AppState, string>(
     (state) => state.setting.rule.dirPath
   );
