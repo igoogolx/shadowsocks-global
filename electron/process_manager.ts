@@ -90,13 +90,11 @@ function testTapDevice() {
   //
   // popd
   // # End of IPv4 configuration
-  const lines = execSync(`netsh interface ipv4 dump`)
-    .toString()
-    .split("\n");
+  const lines = execSync(`netsh interface ipv4 dump`).toString().split("\n");
 
   // Find lines containing the TAP device name.
   const tapLines = lines.filter(
-    s => s.indexOf(TUN2SOCKS_TAP_DEVICE_NAME) !== -1
+    (s) => s.indexOf(TUN2SOCKS_TAP_DEVICE_NAME) !== -1
   );
   if (tapLines.length < 1) {
     throw new Error("TAP device not found");
@@ -104,7 +102,7 @@ function testTapDevice() {
 
   // Within those lines, search for the expected IP.
   if (
-    tapLines.filter(s => s.indexOf(TUN2SOCKS_TAP_DEVICE_IP) !== -1).length < 1
+    tapLines.filter((s) => s.indexOf(TUN2SOCKS_TAP_DEVICE_IP) !== -1).length < 1
   ) {
     throw new Error("TAP device has wrong IP");
   }
@@ -176,17 +174,17 @@ export class ConnectionManager {
     //  - once *all* helpers have stopped, we're done
     const exits = [
       this.routing.onceDisconnected,
-      new Promise<void>(fulfill => {
+      new Promise<void>((fulfill) => {
         this.tun2socksExitListener = fulfill;
         this.tun2socks.onExit = this.tun2socksExitListener;
-      })
+      }),
     ];
 
     if (this.ssLocal) {
       exits.push(
         // This Promise cant't be fulfilled when in Socks5 proxy mode,
         // so it must not be added to exits in the case.
-        new Promise<void>(fulfill => {
+        new Promise<void>((fulfill) => {
           if (this.ssLocal) this.ssLocal.onExit = fulfill;
         })
       );
@@ -195,7 +193,7 @@ export class ConnectionManager {
       exits.push(
         // This Promise cant't be fulfilled when the smartDns is enabled,
         // so it must not be added to exits in the case.
-        new Promise<void>(fulfill => {
+        new Promise<void>((fulfill) => {
           if (this.smartDns) this.smartDns.onExit = fulfill;
         })
       );
@@ -367,6 +365,9 @@ export class ConnectionManager {
 //       (which may be immediately after calling #startInternal if, e.g. the binary cannot be
 //       found).
 class ChildProcessHelper {
+  //Whether the process is killed by "this.stop"
+  private isExiting = false;
+
   private process?: ChildProcess;
 
   private exitListener?: () => void;
@@ -376,16 +377,16 @@ class ChildProcessHelper {
   protected launch(args: string[]) {
     this.process = spawn(this.path, args);
     if (this.process.stdout) {
-      this.process.stdout.on("data", data => {
+      this.process.stdout.on("data", (data) => {
         console.log(`stdout: ${data}`);
       });
     }
     if (this.process.stderr)
-      this.process.stderr.on("data", data => {
+      this.process.stderr.on("data", (data) => {
         console.log(`stderr: ${data}`);
       });
 
-    const onExit = () => {
+    const onError = () => {
       if (this.process) {
         this.process.removeAllListeners();
       }
@@ -394,10 +395,23 @@ class ChildProcessHelper {
         this.exitListener();
       }
     };
+    const onExit = () => {
+      if (this.process) {
+        this.process.removeAllListeners();
+      }
+      //Restarted the process if it's not killed by "this.stop"
+      if (!this.isExiting) {
+        this.launch(args);
+        return;
+      }
+      if (this.exitListener) {
+        this.exitListener();
+      }
+    };
 
     // We have to listen for both events: error means the process could not be launched and in that
     // case exit will not be invoked.
-    this.process.on("error", onExit.bind(this));
+    this.process.on("error", onError.bind(this));
     this.process.on("exit", onExit.bind(this));
   }
 
@@ -411,6 +425,7 @@ class ChildProcessHelper {
       return;
     }
 
+    this.isExiting = true;
     this.process.kill();
   }
 
