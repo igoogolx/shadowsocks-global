@@ -80,7 +80,7 @@ const Header = () => {
       ipcRenderer.removeAllListeners("message");
     };
     //Only be fired once to init app.
-  }, []);
+  }, []); // eslint-disable-line
   const customizedRulesDirPath = useSelector<AppState, string>(
     (state) => state.setting.rule.dirPath
   );
