@@ -4,6 +4,7 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 
 ![Running screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/Running.png)
 
+![Nodes screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/nodes.png)
 ## Features
 
 - Supports Shadowsocks and SOCKS5 protocol
