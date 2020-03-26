@@ -15,8 +15,10 @@ import {
   getResourcesPath,
   trayIconImages,
   getAppConfig,
+  isDev,
 } from "./utils";
 import { VpnManager } from "./vpnManager";
+import { logger } from "./log";
 
 let mainWindow: null | BrowserWindow;
 let tray: Tray | undefined;
@@ -27,8 +29,6 @@ let localizedStrings: { [key: string]: string } = {
   "disconnected-server-state": "Disconnected",
   quit: "Quit",
 };
-
-const isDev = process.env.NODE_ENV === "development";
 
 let vpnManager: VpnManager | undefined;
 
@@ -194,5 +194,5 @@ ipcMain.on("setRunAtSystemStartup", () => {
 //Avoid main process crash.
 //TODO: add system log
 process.on("uncaughtException", function (err) {
-  console.log(err);
+  logger.error(err);
 });

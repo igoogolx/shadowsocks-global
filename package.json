@@ -9,6 +9,7 @@
     "electron-promise-ipc": "^2.1.0",
     "electron-store": "^5.1.1",
     "geoip-country": "^4.0.9",
+    "log4js": "^6.1.2",
     "socks": "^2.3.3",
     "sudo-prompt": "^9.1.1"
   },

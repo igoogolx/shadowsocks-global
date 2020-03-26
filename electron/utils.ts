@@ -69,7 +69,7 @@ export interface RemoteServer {
   plugin?: string;
   plugin_opts?: string;
 }
-const isDev = process.env.NODE_ENV === "development";
+export const isDev = process.env.NODE_ENV === "development";
 
 export const getResourcesPath = () => {
   const appPath = app.getAppPath();

@@ -1,6 +1,7 @@
 import * as dgram from "dgram";
 import { SocksClient } from "socks";
 import * as net from "net";
+import { logger } from "./log";
 
 const UDP_FORWARDING_TEST_TIMEOUT_MS = 5000;
 const UDP_FORWARDING_TEST_RETRY_INTERVAL_MS = 1000;
@@ -38,7 +39,7 @@ const DNS_REQUEST = Buffer.from([
   0,
   1, // QTYPE, set to A
   0,
-  1 // QCLASS, set to 1 = IN (Internet)
+  1, // QCLASS, set to 1 = IN (Internet)
 ]);
 
 export function isServerReachable(
@@ -84,21 +85,21 @@ export async function checkUdpForwardingEnabled(
     proxy: {
       host: address,
       port,
-      type: 5
+      type: 5,
     },
     command: "associate",
-    destination: { host: "0.0.0.0", port: 0 } // Specify the actual target once we get a response.
+    destination: { host: "0.0.0.0", port: 0 }, // Specify the actual target once we get a response.
   });
 
-  return await new Promise<boolean>(fulfill => {
+  return await new Promise<boolean>((fulfill) => {
     client.on("error", () => {
       fulfill(false);
     });
 
-    client.on("established", info => {
+    client.on("established", (info) => {
       const packet = SocksClient.createUDPFrame({
         remoteHost: { host: "8.8.8.8", port: 53 },
-        data: DNS_REQUEST
+        data: DNS_REQUEST,
       });
       const udpSocket = dgram.createSocket("udp4");
 
@@ -121,14 +122,14 @@ export async function checkUdpForwardingEnabled(
               packet,
               info.remoteHost.port,
               info.remoteHost.host,
-              err => {
+              (err) => {
                 if (err) {
-                  console.error(`Failed to send data through UDP: ${err}`);
+                  logger.error(`Failed to send data through UDP: ${err}`);
                 }
               }
             );
         } catch (e) {
-          console.error(`Failed to send data through UDP ${e}`);
+          logger.error(`Failed to send data through UDP ${e}`);
         }
       }, UDP_FORWARDING_TEST_RETRY_INTERVAL_MS);
       const stopUdp = () => {

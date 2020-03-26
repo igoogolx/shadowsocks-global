@@ -24,6 +24,8 @@ import { validateServerCredentials } from "../src/share";
 import Store from "electron-store";
 import { getActivatedServer } from "../src/components/Proxies/util";
 import { AppState } from "../src/reducers/rootReducer";
+import { logger } from "./log";
+import * as path from "path";
 
 export type Dns =
   | {
@@ -199,12 +201,12 @@ export class ConnectionManager {
       );
 
     Promise.race(exits).then(() => {
-      console.log("a helper has exited, disconnecting");
+      logger.info("a helper has exited, disconnecting");
       this.isDisconnecting = true;
       this.stop();
     });
     this.onAllHelpersStopped = Promise.all(exits).then(() => {
-      console.log("all helpers have exited");
+      logger.info("all helpers have exited");
       this.terminated = true;
     });
 
@@ -216,20 +218,20 @@ export class ConnectionManager {
   private suspendListener() {
     // Swap out the current listener, restart once the system resumes.
     this.tun2socks.onExit = () => {
-      console.log("stopped tun2socks in preparation for suspend");
+      logger.info("stopped tun2socks in preparation for suspend");
     };
   }
 
   private resumeListener() {
     if (this.terminated) {
       // NOTE: Cannot remove resume listeners - Electron bug?
-      console.error(
+      logger.error(
         "resume event invoked but this connection is terminated - doing nothing"
       );
       return;
     }
 
-    console.log("restarting tun2socks after resume");
+    logger.info("restarting tun2socks after resume");
 
     this.tun2socks.onExit = this.tun2socksExitListener;
     this.tun2socks.start(this.isProxyUdp && this.isUdpEnabled);
@@ -332,7 +334,7 @@ export class ConnectionManager {
     } catch (e) {
       // This can happen for several reasons, e.g. the daemon may have stopped while we were
       // connected.
-      console.error(`could not stop routing: ${e.message}`);
+      logger.error(`could not stop routing: ${e.message}`);
     }
 
     if (this.ssLocal) this.ssLocal.stop();
@@ -378,12 +380,12 @@ class ChildProcessHelper {
     this.process = spawn(this.path, args);
     if (this.process.stdout) {
       this.process.stdout.on("data", (data) => {
-        console.log(`stdout: ${data}`);
+        logger.info(`stdout: ${data}`);
       });
     }
     if (this.process.stderr)
       this.process.stderr.on("data", (data) => {
-        console.log(`stderr: ${data}`);
+        logger.error(`stderr: ${data}`);
       });
 
     const onError = () => {
@@ -401,6 +403,7 @@ class ChildProcessHelper {
       }
       //Restarted the process if it's not killed by "this.stop"
       if (!this.isExiting) {
+        logger.info(`Restart ${path.basename(this.path)}`);
         this.launch(args);
         return;
       }
