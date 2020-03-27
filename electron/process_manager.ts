@@ -27,27 +27,6 @@ import { AppState } from "../src/reducers/rootReducer";
 import { logger } from "./log";
 import * as path from "path";
 
-export type Dns =
-  | {
-      type: "smart";
-      defaultWebsite: {
-        isProxy: boolean;
-        preferredServer: string;
-        alternateServer: string;
-      };
-      nativeWebsite: {
-        isProxy: boolean;
-        preferredServer: string;
-        alternateServer: string;
-      };
-    }
-  | {
-      type: "customized";
-      isProxy: boolean;
-      preferredServer: string;
-      alternateServer: string;
-    };
-
 export type Route = {
   proxy: string[];
   reserved: string[];
