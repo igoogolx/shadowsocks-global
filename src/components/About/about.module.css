@@ -3,3 +3,10 @@
   font-weight: 600;
   margin-bottom: 20px;
 }
+
+.buttons {
+  margin-top: 10px;
+  & button {
+    margin-right: 10px;
+  }
+}

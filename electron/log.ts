@@ -5,13 +5,14 @@ import { isDev } from "./utils";
 
 const MAX_LOG_FILE_SIZE_MB = 1;
 const LOG_BACKUPS = 3;
+export const LOG_FILE_PATH = path.join(app.getPath("userData"), "app.log");
 
 log4js.configure({
   appenders: {
     out: { type: "stdout" },
     app: {
       type: "file",
-      filename: path.join(app.getPath("userData"), "app.log"),
+      filename: LOG_FILE_PATH,
       maxLogSize: MAX_LOG_FILE_SIZE_MB * 1024 * 1024,
       backups: LOG_BACKUPS,
       compress: true,

@@ -6,6 +6,7 @@ import {
   Menu,
   MenuItemConstructorOptions,
   ipcMain,
+  shell,
 } from "electron";
 import * as path from "path";
 import promiseIpc from "electron-promise-ipc";
@@ -18,7 +19,7 @@ import {
   isDev,
 } from "./utils";
 import { VpnManager } from "./vpnManager";
-import { logger } from "./log";
+import { LOG_FILE_PATH, logger } from "./log";
 
 let mainWindow: null | BrowserWindow;
 let tray: Tray | undefined;
@@ -191,7 +192,11 @@ ipcMain.on("setRunAtSystemStartup", () => {
   else app.setLoginItemSettings({ openAtLogin: false });
 });
 
-//Avoid main process crash.
+ipcMain.on("openLogFile", () => {
+  shell.openItem(LOG_FILE_PATH);
+});
+
+//Prevent main process from crashing.
 //TODO: add system log
 process.on("uncaughtException", function (err) {
   logger.error(err);
