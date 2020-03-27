@@ -53,7 +53,7 @@ export class VpnManager {
 
   start = async () => {
     try {
-      const { route, dns, isProxyUdp, remoteServer } = await getConfig();
+      const { route, dns, isProxyUdp, remoteServer, rule } = await getConfig();
       this.currentConnection = new ConnectionManager(
         //@ts-ignore
         remoteServer,
@@ -89,7 +89,9 @@ ${
   remoteServer.name
     ? `${remoteServer?.name}(${remoteServer.host}:${remoteServer.port})`
     : `${remoteServer.host}:${remoteServer.port}`
-}`
+}
+Rule:${rule}
+`
       );
       this.traffic?.start();
       this.updateTrafficTimer = setInterval(async () => {
@@ -97,21 +99,21 @@ ${
         let sentBytesPerSecond = 0;
         let receivedBytesPerSecond = 0;
         const portUsages: { port: number; bytesPerSecond: number }[] = [];
-        this.traffic?.getPockets.forEach(pocket => {
+        this.traffic?.getPockets.forEach((pocket) => {
           if (pocket.type === "sent") sentBytesPerSecond += pocket.length;
           else receivedBytesPerSecond += pocket.length;
           const index = portUsages.findIndex(
-            portUsage => portUsage.port === pocket.port
+            (portUsage) => portUsage.port === pocket.port
           );
           if (index === -1)
             portUsages.push({
               port: pocket.port,
-              bytesPerSecond: pocket.length
+              bytesPerSecond: pocket.length,
             });
           else
             portUsages[index] = {
               port: pocket.port,
-              bytesPerSecond: portUsages[index].bytesPerSecond + pocket.length
+              bytesPerSecond: portUsages[index].bytesPerSecond + pocket.length,
             };
         });
         this.traffic?.resetPockets();
@@ -122,7 +124,7 @@ ${
         await this.mainWindow?.webContents.send("netSpeed", {
           sentBytesPerSecond,
           receivedBytesPerSecond,
-          time: Date.now()
+          time: Date.now(),
         });
 
         //TODO: Port to process. Note: "find-process"(https://www.npmjs.com/package/find-process)

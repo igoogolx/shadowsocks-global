@@ -221,6 +221,7 @@ export const getConfig = async () => {
   reservedRoutes = [...reservedRoutes, ...reserved.map((ip) => ip + "/32")];
 
   return {
+    rule: state.setting.rule.current,
     route: { proxy: proxyRoutes, reserved: reservedRoutes },
     dns: { servers: dnsServers, whiteListServers: dnsWhiteListServers },
     isProxyUdp: state.setting.general.isProxyUdp,
