@@ -163,29 +163,19 @@ export const getConfig = async () => {
     dnsServers = [SMART_DNS_ADDRESS];
     dnsWhiteListServers = SMART_DNS_WHITE_LIST_SERVERS;
     if (dns.smart.defaultWebsite.isProxy) {
-      proxyRoutes = [
-        ...proxyRoutes,
-        dns.smart.defaultWebsite.dns.alternateServer + "/32",
-        dns.smart.defaultWebsite.dns.preferredServer + "/32",
-      ];
+      proxyRoutes = [...proxyRoutes, dns.smart.defaultWebsite.server + "/32"];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
-        dns.smart.defaultWebsite.dns.preferredServer + "/32",
-        dns.smart.defaultWebsite.dns.alternateServer + "/32",
+        dns.smart.defaultWebsite.server + "/32",
       ];
     }
     if (dns.smart.nativeWebsite.isProxy) {
-      proxyRoutes = [
-        ...proxyRoutes,
-        dns.smart.nativeWebsite.dns.alternateServer + "/32",
-        dns.smart.nativeWebsite.dns.preferredServer + "/32",
-      ];
+      proxyRoutes = [...proxyRoutes, dns.smart.nativeWebsite.server + "/32"];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
-        dns.smart.nativeWebsite.dns.preferredServer + "/32",
-        dns.smart.nativeWebsite.dns.alternateServer + "/32",
+        dns.smart.nativeWebsite.server + "/32",
       ];
     }
     //Customized Dns

@@ -1,41 +1,37 @@
 import React, { useCallback, useMemo, useState } from "react";
 import styles from "./setting.module.css";
 import { FieldToggle } from "../Core/Toggle/Toggle";
-import { Button, Field, Form } from "../Core";
+import { Button, Field, Form, INPUT_SIZE } from "../Core";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { DnsSettingState, setting } from "../../reducers/settingReducer";
 import { FieldSelector } from "../Core/Selector/Selector";
 import { isIPv4 } from "net";
-import {
-  DNS_CUSTOMIZED_TYPE,
-  DNS_OPTIONS,
-  DNS_SMART_TYPE
-} from "../../constants";
+import { DNS_CUSTOMIZED_TYPE, DNS_SMART_TYPE } from "../../constants";
 import { notifier } from "../Core/Notification";
 
 const typeOptions = [{ value: DNS_SMART_TYPE }, { value: DNS_CUSTOMIZED_TYPE }];
 export const Dns = React.memo(() => {
   const dnsState = useSelector<AppState, DnsSettingState>(
-    state => state.setting.dns
+    (state) => state.setting.dns
   );
   const initValue = useMemo(() => {
     const dns = dnsState;
     return {
       type: dns.type,
-      defaultWebsiteDns: dns.smart.defaultWebsite.dns.name,
+      defaultWebsiteDns: dns.smart.defaultWebsite.server,
       isProxyDefaultWebsiteDns: dns.smart.defaultWebsite.isProxy,
-      nativeWebsiteDns: dns.smart.nativeWebsite.dns.name,
+      nativeWebsiteDns: dns.smart.nativeWebsite.server,
       isProxyNativeWebsiteDns: dns.smart.nativeWebsite.isProxy,
       preferredCustomizedServer: dns.customized.preferredServer,
       alternateCustomizedServer: dns.customized.alternateServer,
-      isProxyCustomizedDns: dns.customized.isProxy
+      isProxyCustomizedDns: dns.customized.isProxy,
     };
   }, [dnsState]);
   const [dnsSetting, setDnsSetting] = useState(initValue);
   const isSmartDns = dnsSetting.type === DNS_SMART_TYPE;
   const disabled = useSelector<AppState, boolean>(
-    state => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
   const [isChanged, setIsChanged] = useState(false);
   const dispatch = useDispatch();
@@ -54,18 +50,18 @@ export const Dns = React.memo(() => {
     [dnsSetting]
   );
   const onSubmit = useCallback(
-    data => {
+    (data) => {
       if (data.type === "smart")
         dispatch(
           setting.actions.setSmartDns({
             defaultWebsite: {
               isProxy: data.isProxyDefaultWebsiteDns,
-              dns: DNS_OPTIONS[0]
+              server: data.defaultWebsiteDns,
             },
             nativeWebsite: {
               isProxy: data.isProxyNativeWebsiteDns,
-              dns: DNS_OPTIONS[1]
-            }
+              server: data.nativeWebsiteDns,
+            },
           })
         );
       else
@@ -73,7 +69,7 @@ export const Dns = React.memo(() => {
           setting.actions.setCustomizedDns({
             isProxy: data.isProxyCustomizedDns,
             preferredServer: data.preferredCustomizedServer,
-            alternateServer: data.alternateCustomizedServer
+            alternateServer: data.alternateCustomizedServer,
           })
         );
 
@@ -97,10 +93,11 @@ export const Dns = React.memo(() => {
         <>
           <div className={styles.item}>
             <div className={styles.title}>Default dns:</div>
-            <FieldSelector
+            <Field
               name={"defaultWebsiteDns"}
-              options={[{ value: "Google dns" }]}
               disabled={true}
+              className={styles.input}
+              size={INPUT_SIZE.M}
             />
             <FieldToggle name={"isProxyDefaultWebsiteDns"} disabled={disabled}>
               Proxy this dns
@@ -108,10 +105,11 @@ export const Dns = React.memo(() => {
           </div>
           <div className={styles.item}>
             <div className={styles.title}>Dns for native website:</div>
-            <FieldSelector
+            <Field
               name={"nativeWebsiteDns"}
-              options={[{ value: "DNSPod" }]}
               disabled={true}
+              className={styles.input}
+              size={INPUT_SIZE.M}
             />
             <FieldToggle name={"isProxyNativeWebsiteDns"} disabled={disabled}>
               Proxy this dns

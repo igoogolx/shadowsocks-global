@@ -17,23 +17,9 @@ export const ENCRYPTION_METHODS = [
   "xchacha20-ietf-poly1305",
   "salsa20",
   "chacha20",
-  "chacha20-ietf"
+  "chacha20-ietf",
 ];
 
 export const SMART_DNS_ADDRESS = "127.0.0.1";
 export const DNS_SMART_TYPE = "smart";
 export const DNS_CUSTOMIZED_TYPE = "customized";
-//Note: To reduce installer.exe size,
-// the alternateServer will be aborted for nativeWebsite of SmartDns
-export const DNS_OPTIONS = [
-  {
-    name: "Google dns",
-    preferredServer: "8.8.8.8",
-    alternateServer: "8.8.4.4"
-  },
-  {
-    name: "DNSPod",
-    preferredServer: "119.29.29.29",
-    alternateServer: "119.28.28.28"
-  }
-];

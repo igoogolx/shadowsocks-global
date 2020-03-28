@@ -1,9 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DNS_OPTIONS, DNS_SMART_TYPE } from "../constants";
+import { DNS_SMART_TYPE } from "../constants";
 
 const DEFAULT_LOCAL_PORT = 1081;
 
 export const BUILD_IN_RULE = "Global";
+const GOOGLE_DNS = "8.8.8.8";
+const DNS_POD = "119.29.29.29";
 
 type CustomizedDns = {
   isProxy: boolean;
@@ -13,7 +15,7 @@ type CustomizedDns = {
 
 type SmartDnsField = {
   isProxy: boolean;
-  dns: { name: string; preferredServer: string; alternateServer: string };
+  server: string;
 };
 
 export type DnsSettingState = {
@@ -59,9 +61,9 @@ export const initialSettingState: SettingState = {
     smart: {
       defaultWebsite: {
         isProxy: true,
-        dns: DNS_OPTIONS[0],
+        server: GOOGLE_DNS,
       },
-      nativeWebsite: { isProxy: false, dns: DNS_OPTIONS[1] },
+      nativeWebsite: { isProxy: false, server: DNS_POD },
     },
     customized: {
       isProxy: true,
