@@ -15,6 +15,48 @@
     }
   }
 }
+
+.divider {
+  margin-top: 20px;
+  height: 1px;
+  background: linear-gradient(to right, #dcdcdc, rgba(220, 220, 220, 0));
+}
+
+.menu {
+  box-shadow: none;
+  max-height: 200px;
+  border-radius: unset;
+  & .item {
+    position: relative;
+    display: flex;
+
+    & button {
+      visibility: hidden;
+      margin: auto;
+    }
+    &:hover {
+      & button {
+        visibility: visible;
+      }
+    }
+    & .action {
+      position: absolute;
+      left: 140px;
+    }
+    & .delete {
+      position: absolute;
+      right: 0;
+      height: auto;
+      top: 60%;
+      padding: 0;
+      transform: translate(-50%, -50%);
+      & svg {
+        color: var(--error-color);
+      }
+    }
+  }
+}
+
 .adornment {
   &:hover {
     color: rgba(17, 17, 17, 0.44);

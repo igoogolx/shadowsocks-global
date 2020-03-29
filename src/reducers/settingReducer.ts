@@ -27,10 +27,12 @@ export type DnsSettingState = {
   customized: CustomizedDns;
 };
 
+export type Route = { ip: string; isProxy: boolean };
+
 export type RuleState = {
   current: string;
   dirPath: string;
-  additionRoutes: { ip: string; isProxy: boolean }[];
+  additionalRoutes: Route[];
 };
 
 export type GeneralState = {
@@ -74,7 +76,7 @@ export const initialSettingState: SettingState = {
   rule: {
     current: BUILD_IN_RULE,
     dirPath: "",
-    additionRoutes: [],
+    additionalRoutes: [],
   },
 };
 
@@ -106,11 +108,13 @@ export const setting = createSlice({
     setCustomizedRulesDirPath: (state, action: PayloadAction<string>) => {
       state.rule.dirPath = action.payload;
     },
-    addAdditionRoute: (
-      state,
-      action: PayloadAction<{ ip: string; isProxy: boolean }>
-    ) => {
-      state.rule.additionRoutes = [action.payload];
+    addAdditionalRoute: (state, action: PayloadAction<Route>) => {
+      state.rule.additionalRoutes.push(action.payload);
+    },
+    deleteAdditionalRoute: (state, action: PayloadAction<string>) => {
+      state.rule.additionalRoutes = state.rule.additionalRoutes.filter(
+        (route) => route.ip !== action.payload
+      );
     },
   },
 });

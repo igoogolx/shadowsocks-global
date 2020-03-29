@@ -24,10 +24,14 @@
       }
       & .content {
         margin: auto 8px;
+        display: flex;
+        flex-grow: 1;
       }
 
       & .text {
         margin-left: 8px;
+        flex-grow: 1;
+        display: inline-block;
       }
 
       &:hover {

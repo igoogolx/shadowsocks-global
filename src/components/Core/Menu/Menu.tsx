@@ -12,7 +12,7 @@ export type MenuItemProps = {
   content?: React.ReactNode;
   iconType?: "iconFont" | "flag";
   iconName?: string;
-  handleOnClick: () => void;
+  handleOnClick?: () => void;
   isDivider?: boolean;
   isDanger?: boolean;
   style?: any;
@@ -42,11 +42,11 @@ export const Menu = React.memo((props: MenuProps) => {
           {VirtualizedItem}
         </List>
       ) : (
-        <ul className={styles.list}>
+        <div className={styles.list}>
           {items.map((itemProps, index) => (
             <Item {...itemProps} key={index} />
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
@@ -67,23 +67,23 @@ const Item = React.memo((props: MenuItemProps) => {
     content,
     isDanger,
     style,
-    disabled
+    disabled,
   } = props;
 
   return (
-    <li
+    <div
       style={style}
       className={classNames(styles.item, {
         [styles.danger]: isDanger,
-        [styles.disabled]: disabled
+        [styles.disabled]: disabled,
       })}
       onClick={handleOnClick}
     >
       {isDivider && <div className={styles.divider} />}
       <div className={styles.content}>
         {iconName && <Icon iconName={iconName} type={iconType} />}
-        <span className={styles.text}>{content}</span>
+        <div className={styles.text}>{content}</div>
       </div>
-    </li>
+    </div>
   );
 });

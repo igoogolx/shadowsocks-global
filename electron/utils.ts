@@ -201,7 +201,7 @@ export const getConfig = async () => {
 
   const proxy: string[] = [],
     reserved: string[] = [];
-  const additionalRoutes = state.setting.rule.additionRoutes;
+  const additionalRoutes = state.setting.rule.additionalRoutes;
   additionalRoutes.forEach((route) => {
     if (route.isProxy) proxy.push(route.ip);
     else reserved.push(route.ip);
