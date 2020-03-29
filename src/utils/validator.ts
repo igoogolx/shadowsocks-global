@@ -1,4 +1,5 @@
-export const isPort = (port: number) => isInt(port, { max: 65535, min: 0 });
+export const isPort = (port: string) =>
+  isInt(Number(port), { max: 65535, min: 0 });
 export const isURL = (url: string) => {
   try {
     new URL(url);

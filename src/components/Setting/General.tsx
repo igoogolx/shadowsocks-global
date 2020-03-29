@@ -54,8 +54,7 @@ export const General = React.memo(() => {
           placeholder={"0-65535"}
           className={styles.input}
           disabled={disabled}
-          //TODO:Remove improper type assertion, because the input value must be number .
-          validate={isPort as (port: number | string) => boolean}
+          validate={isPort}
         />
       </div>
       <FieldToggle
