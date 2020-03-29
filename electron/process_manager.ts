@@ -345,9 +345,12 @@ export class ConnectionManager {
 //       #startInternal always succeeds; use #onExit to be notified when the process has exited
 //       (which may be immediately after calling #startInternal if, e.g. the binary cannot be
 //       found).
+const MAX_RESTART_INTERVAL_MS = 2000;
 class ChildProcessHelper {
   //Whether the process is killed by "this.stop"
   private isExiting = false;
+
+  private lastExitTime: number | undefined;
 
   private process?: ChildProcess;
 
@@ -380,11 +383,22 @@ class ChildProcessHelper {
       if (this.process) {
         this.process.removeAllListeners();
       }
-      //Restarted the process if it's not killed by "this.stop"
-      if (!this.isExiting) {
+      const restart = () => {
         logger.info(`Restart ${path.basename(this.path)}`);
         this.launch(args);
-        return;
+      };
+      //Restarted the process if it's not killed by "this.stop"
+      if (!this.isExiting) {
+        if (!this.lastExitTime) {
+          this.lastExitTime = Date.now();
+          return restart();
+        }
+        const currentExitTime = Date.now();
+        const internal = currentExitTime - this.lastExitTime;
+        if (internal > MAX_RESTART_INTERVAL_MS) {
+          this.lastExitTime = currentExitTime;
+          return restart();
+        }
       }
       if (this.exitListener) {
         this.exitListener();
