@@ -141,7 +141,7 @@ export class ConnectionManager {
     this.routing = new RoutingDaemon(route, dns);
 
     this.proxyPort = isSocks5
-      ? activatedServer.port
+      ? Number(activatedServer.port)
       : state.setting.general.shadowsocksLocalPort || PROXY_PORT;
 
     this.tun2socks = new Tun2socks(this.proxyAddress, this.proxyPort);

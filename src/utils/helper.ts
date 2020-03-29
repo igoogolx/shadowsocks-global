@@ -24,9 +24,10 @@ export const lookupRegionCodes = async (hosts: string[]) => {
     ips.map(
       (ip) =>
         new Promise<string | undefined>((fulfill) => {
-          if (!ip) return undefined;
+          if (!ip) fulfill(undefined);
           const result = geoip.lookup(ip);
           if (result) fulfill(result.country);
+          else fulfill(undefined);
         })
     )
   );
