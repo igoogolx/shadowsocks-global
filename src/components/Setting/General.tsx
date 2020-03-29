@@ -63,14 +63,14 @@ export const General = React.memo(() => {
         disabled={disabled}
         className={styles.item}
       >
-        Proxy Udp
+        Proxy udp
       </FieldToggle>
       <FieldToggle
         name={"isUpdateSubscriptionsOnOpen"}
         disabled={disabled}
         className={styles.item}
       >
-        Update Subscriptions On Open
+        Update subscriptions on open
       </FieldToggle>
       <FieldToggle
         name={"isRunAtSystemStartup"}
