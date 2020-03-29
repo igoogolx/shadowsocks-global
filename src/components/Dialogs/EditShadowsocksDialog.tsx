@@ -23,7 +23,7 @@ export const EditShadowsocksDialog = React.memo(
       initialValue || { regionCode: "Auto", method: ENCRYPTION_METHODS[0] }
     );
     const methodsOptions = useRef(
-      ENCRYPTION_METHODS.map(METHOD => ({ value: METHOD }))
+      ENCRYPTION_METHODS.map((METHOD) => ({ value: METHOD }))
     );
     const [isChanged, setIsChanged] = useState(false);
     const [isShowPassword, setIsShowPassword] = useState(false);
@@ -42,7 +42,7 @@ export const EditShadowsocksDialog = React.memo(
       if (shadowsocks.regionCode === "Auto")
         try {
           searchedRegionCode = await lookupRegionCodes([shadowsocks.host]).then(
-            regionCodes => regionCodes[0]
+            (regionCodes) => regionCodes[0]
           );
         } catch (e) {}
       if (initialValue)
@@ -52,8 +52,8 @@ export const EditShadowsocksDialog = React.memo(
             config: {
               ...shadowsocks,
               id: initialValue.id,
-              regionCode: searchedRegionCode || shadowsocks.regionCode
-            }
+              regionCode: searchedRegionCode || shadowsocks.regionCode,
+            },
           })
         );
       else
@@ -62,8 +62,8 @@ export const EditShadowsocksDialog = React.memo(
             type: "shadowsocks",
             config: {
               ...shadowsocks,
-              regionCode: searchedRegionCode || shadowsocks.regionCode
-            }
+              regionCode: searchedRegionCode || shadowsocks.regionCode,
+            },
           })
         );
       close();
@@ -99,8 +99,7 @@ export const EditShadowsocksDialog = React.memo(
             className={styles.input}
             size={INPUT_SIZE.AUTO}
             type={"number"}
-            //TODO:Remove improper type assertions, because the input value must be number .
-            validate={isPort as (value: string | number) => boolean}
+            validate={isPort}
           />
           <Field
             name={"password"}
