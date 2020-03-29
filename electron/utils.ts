@@ -3,11 +3,7 @@ import { app } from "electron";
 import path from "path";
 import fs from "fs";
 import { DNS_SMART_TYPE, SMART_DNS_ADDRESS } from "../src/constants";
-import {
-  GLOBAL_PROXY_ROUTES,
-  GLOBAL_RESERVED_ROUTES,
-  SMART_DNS_WHITE_LIST_SERVERS,
-} from "./constant";
+import { GLOBAL_PROXY_ROUTES, GLOBAL_RESERVED_ROUTES } from "./constant";
 import { lookupIp } from "../src/share";
 import Store from "electron-store";
 import { AppState } from "../src/reducers/rootReducer";
@@ -161,7 +157,11 @@ export const getConfig = async () => {
   const dns = state.setting.dns;
   if (dns.type === DNS_SMART_TYPE) {
     dnsServers = [SMART_DNS_ADDRESS];
-    dnsWhiteListServers = SMART_DNS_WHITE_LIST_SERVERS;
+    dnsWhiteListServers = [
+      SMART_DNS_ADDRESS,
+      dns.smart.defaultWebsite.server,
+      dns.smart.nativeWebsite.server,
+    ];
     if (dns.smart.defaultWebsite.isProxy) {
       proxyRoutes = [...proxyRoutes, dns.smart.defaultWebsite.server + "/32"];
     } else {

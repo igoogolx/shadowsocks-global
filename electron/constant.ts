@@ -1,5 +1,3 @@
-import { SMART_DNS_ADDRESS } from "../src/constants";
-
 export const GLOBAL_PROXY_ROUTES = ["0.0.0.0/1", "128.0.0.0/1"];
 
 export const GLOBAL_RESERVED_ROUTES = [
@@ -18,13 +16,5 @@ export const GLOBAL_RESERVED_ROUTES = [
   "198.18.0.0/15",
   "198.51.100.0/24",
   "203.0.113.0/24",
-  "240.0.0.0/4"
-];
-//TODO: Customized smart dns servers
-export const SMART_DNS__CHINA_SERVES = ["119.29.29.29", "119.28.28.28"];
-export const SMART_DNS__OTHERS_SERVERS = ["8.8.8.8", "8.8.4.4"];
-export const SMART_DNS_WHITE_LIST_SERVERS = [
-  ...SMART_DNS__CHINA_SERVES,
-  ...SMART_DNS__OTHERS_SERVERS,
-  SMART_DNS_ADDRESS
+  "240.0.0.0/4",
 ];
