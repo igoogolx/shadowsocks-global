@@ -32,10 +32,14 @@ export const lookupRegionCodes = async (hosts: string[]) => {
   );
 };
 
+const KB = 1024;
+const MB = 1024 * KB;
+const GB = 1024 * MB;
 export const convertTrafficData = (data: number) => {
-  if (data < 1024) return `${financial(data)} B`;
-  if (data < 1024 * 1024) return `${financial(data / 1024)} KB`;
-  else return `${financial(data / 1024 / 1024)} MB`;
+  if (data < KB) return `${financial(data)} B`;
+  if (data < MB) return `${financial(data / KB)} KB`;
+  if (data < GB) return `${financial(data / MB)} MB`;
+  else return `${financial(data / GB)} GB`;
 };
 
 export const updateSubscription = async (url: string) => {
