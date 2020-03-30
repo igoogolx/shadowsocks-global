@@ -96,6 +96,9 @@ const Header = () => {
   const currentRule = useSelector<AppState, string>(
     (state) => state.setting.rule.current
   );
+  const isHideAfterConnection = useSelector<AppState, boolean>(
+    (state) => state.setting.general.isHideAfterConnection
+  );
   const [rulePaths, setRulePaths] = useState<string[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);
   const changeCurrentRule = useCallback(
@@ -113,13 +116,14 @@ const Header = () => {
       //@ts-ignore
       await promiseIpc.send("start");
       dispatch(proxy.actions.startVpn());
+      if (isHideAfterConnection) ipcRenderer.send("hideWindow");
     } catch (e) {
       if (e.message && typeof e.message === "string") notifier.error(e.message);
       else notifier.error("Unknown error");
     } finally {
       dispatch(proxy.actions.setIsProcessing(false));
     }
-  }, [activeId, dispatch]);
+  }, [activeId, dispatch, isHideAfterConnection]);
 
   useEffect(() => {
     const loadRulePath = async () => {

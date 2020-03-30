@@ -78,8 +78,15 @@ export const General = React.memo(() => {
       >
         Run at system startup
       </FieldToggle>
-      <FieldToggle name={"isHideWhenWindowIsClosed"} disabled={disabled}>
+      <FieldToggle
+        name={"isHideWhenWindowIsClosed"}
+        disabled={disabled}
+        className={styles.item}
+      >
         Hide when window is closed
+      </FieldToggle>
+      <FieldToggle name={"isHideAfterConnection"} disabled={disabled}>
+        Hide after connection
       </FieldToggle>
       <div className={styles.footer}>
         <Button

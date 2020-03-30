@@ -41,6 +41,7 @@ export type GeneralState = {
   isUpdateSubscriptionsOnOpen: boolean;
   isRunAtSystemStartup: boolean;
   isHideWhenWindowIsClosed: boolean;
+  isHideAfterConnection: boolean;
 };
 
 export type SettingState = {
@@ -57,6 +58,7 @@ export const initialSettingState: SettingState = {
     isUpdateSubscriptionsOnOpen: false,
     isRunAtSystemStartup: false,
     isHideWhenWindowIsClosed: true,
+    isHideAfterConnection: false,
   },
   dns: {
     type: DNS_SMART_TYPE,

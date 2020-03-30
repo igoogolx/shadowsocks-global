@@ -196,6 +196,10 @@ ipcMain.on("openLogFile", () => {
   shell.openItem(LOG_FILE_PATH);
 });
 
+ipcMain.on("hideWindow", () => {
+  mainWindow?.hide();
+});
+
 //Prevent main process from crashing.
 //TODO: add system log
 process.on("uncaughtException", function (err) {
