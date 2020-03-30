@@ -95,7 +95,7 @@ export const Dns = React.memo(() => {
             <div className={styles.title}>Default dns:</div>
             <Field
               name={"defaultWebsiteDns"}
-              disabled={true}
+              disabled={disabled}
               className={styles.input}
               size={INPUT_SIZE.M}
             />
@@ -107,7 +107,7 @@ export const Dns = React.memo(() => {
             <div className={styles.title}>Dns for native website:</div>
             <Field
               name={"nativeWebsiteDns"}
-              disabled={true}
+              disabled={disabled}
               className={styles.input}
               size={INPUT_SIZE.M}
             />

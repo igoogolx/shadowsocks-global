@@ -19,13 +19,11 @@ import { checkUdpForwardingEnabled, isServerReachable } from "./connectivity";
 import { ChildProcess, spawn } from "child_process";
 import { pathToEmbeddedBinary, RemoteServer, pathToConfig } from "./utils";
 import { SMART_DNS_ADDRESS } from "../src/constants";
-import { BrowserWindow } from "electron";
+import { BrowserWindow, app } from "electron";
 import { validateServerCredentials } from "../src/share";
-import Store from "electron-store";
-import { getActivatedServer } from "../src/components/Proxies/util";
-import { AppState } from "../src/reducers/rootReducer";
 import { logger } from "./log";
 import * as path from "path";
+import * as fs from "fs";
 
 export type Route = {
   proxy: string[];
@@ -128,25 +126,36 @@ export class ConnectionManager {
     private remoteServer: RemoteServer,
     private isProxyUdp: boolean,
     private route: Route,
-    private dns: { servers: string[]; whiteListServers: string[] },
+    private dns:
+      | {
+          type: "smart";
+          server: { native: string; default: string };
+          whiteListServers: string[];
+        }
+      | {
+          type: "customized";
+          server: { alternate: string; preferred: string };
+          whiteListServers: string[];
+        },
     private mainWindow: BrowserWindow | null
   ) {
-    const appConfig = new Store();
-    const state = appConfig.get("state") as AppState;
-    const activatedServer = getActivatedServer(state.proxy);
-    const isSocks5 = activatedServer.type === "socks5";
+    const isSocks5 = remoteServer.type === "socks5";
+    const isSmartDns = dns.type === "smart";
 
-    this.proxyAddress = isSocks5 ? activatedServer.host : PROXY_ADDRESS;
+    this.routing = new RoutingDaemon(route, {
+      servers: isSmartDns ? [SMART_DNS_ADDRESS] : Object.values(dns.server),
+      whiteListServers: dns.whiteListServers,
+    });
 
-    this.routing = new RoutingDaemon(route, dns);
-
+    this.proxyAddress = isSocks5 ? remoteServer.host : PROXY_ADDRESS;
     this.proxyPort = isSocks5
-      ? Number(activatedServer.port)
-      : state.setting.general.shadowsocksLocalPort || PROXY_PORT;
+      ? Number(remoteServer.port)
+      : remoteServer.local_port || PROXY_PORT;
 
     this.tun2socks = new Tun2socks(this.proxyAddress, this.proxyPort);
-    this.smartDns =
-      this.dns.servers[0] === SMART_DNS_ADDRESS ? new SmartDns() : null;
+    this.smartDns = isSmartDns
+      ? new SmartDns(dns.server as { native: string; default: string })
+      : null;
     this.ssLocal = isSocks5 ? null : new SsLocal(this.proxyPort);
 
     // This trio of Promises, each tied to a helper process' exit, is key to the instance's
@@ -274,7 +283,7 @@ export class ConnectionManager {
         "message",
         "Starting SmartDns..."
       );
-      this.smartDns.start();
+      await this.smartDns.start();
     }
 
     if (this.isDisconnecting)
@@ -431,11 +440,41 @@ class ChildProcessHelper {
 }
 
 class SmartDns extends ChildProcessHelper {
-  constructor() {
+  private confPath = path.join(
+    app.getPath("userData"),
+    "accelerated-domains.china.conf"
+  );
+  constructor(private server: { default: string; native: string }) {
     super(pathToEmbeddedBinary("unbound", "unbound"));
   }
-  start() {
-    const args = ["-c", pathToConfig("unbound", "service.conf")];
+  async makeConf() {
+    const rawConfPath = pathToConfig(
+      "unbound",
+      "accelerated-domains.china.raw.txt"
+    );
+    const txt = await fs.promises.readFile(rawConfPath);
+    const domains = txt.toString().trim().split("\n");
+    let conf = "";
+    domains.forEach((domain) => {
+      conf += `
+forward-zone:
+  name:"${domain}."
+  forward-addr: ${this.server.native}`;
+    });
+    conf =
+      `
+server:
+	  # verbosity level 0-4 of logging
+	  verbosity: 0
+forward-zone:
+  name:"."
+  forward-addr: ${this.server.default}
+  ` + conf;
+    await fs.promises.writeFile(this.confPath, conf.trim());
+  }
+  async start() {
+    await this.makeConf();
+    const args = ["-c", this.confPath];
     this.launch(args);
   }
 }

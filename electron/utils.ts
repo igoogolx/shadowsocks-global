@@ -64,6 +64,8 @@ export interface RemoteServer {
 
   plugin?: string;
   plugin_opts?: string;
+
+  local_port?: number;
 }
 export const isDev = process.env.NODE_ENV === "development";
 
@@ -111,7 +113,7 @@ export const getConfig = async () => {
       );
   }
   const serverIp = await lookupIp(activatedServer.host);
-  let dnsServers: string[],
+  let dnsServer: {},
     dnsWhiteListServers: string[],
     proxyRoutes: string[],
     reservedRoutes = [serverIp + "/32"];
@@ -156,45 +158,43 @@ export const getConfig = async () => {
   //Smart Dns
   const dns = state.setting.dns;
   if (dns.type === DNS_SMART_TYPE) {
-    dnsServers = [SMART_DNS_ADDRESS];
-    dnsWhiteListServers = [
-      SMART_DNS_ADDRESS,
-      dns.smart.defaultWebsite.server,
-      dns.smart.nativeWebsite.server,
-    ];
+    const defaultServer = dns.smart.defaultWebsite.server;
+    const nativeServer = dns.smart.nativeWebsite.server;
+    dnsServer = {
+      type: "smart",
+      server: { native: nativeServer, default: defaultServer },
+    };
+    dnsWhiteListServers = [SMART_DNS_ADDRESS, defaultServer, nativeServer];
     if (dns.smart.defaultWebsite.isProxy) {
-      proxyRoutes = [...proxyRoutes, dns.smart.defaultWebsite.server + "/32"];
+      proxyRoutes = [...proxyRoutes, defaultServer + "/32"];
     } else {
-      reservedRoutes = [
-        ...reservedRoutes,
-        dns.smart.defaultWebsite.server + "/32",
-      ];
+      reservedRoutes = [...reservedRoutes, defaultServer + "/32"];
     }
     if (dns.smart.nativeWebsite.isProxy) {
-      proxyRoutes = [...proxyRoutes, dns.smart.nativeWebsite.server + "/32"];
+      proxyRoutes = [...proxyRoutes, nativeServer + "/32"];
     } else {
-      reservedRoutes = [
-        ...reservedRoutes,
-        dns.smart.nativeWebsite.server + "/32",
-      ];
+      reservedRoutes = [...reservedRoutes, nativeServer + "/32"];
     }
     //Customized Dns
   } else {
-    dnsWhiteListServers = dnsServers = [
-      dns.customized.preferredServer,
-      dns.customized.alternateServer,
-    ];
+    const preferredServer = dns.customized.preferredServer;
+    const alternateServer = dns.customized.alternateServer;
+    dnsServer = {
+      type: "customized",
+      server: { preferred: preferredServer, alternate: alternateServer },
+    };
+    dnsWhiteListServers = [preferredServer, alternateServer];
     if (dns.customized.isProxy) {
       proxyRoutes = [
         ...proxyRoutes,
-        dns.customized.preferredServer + "/32",
-        dns.customized.alternateServer + "/32",
+        preferredServer + "/32",
+        alternateServer + "/32",
       ];
     } else {
       reservedRoutes = [
         ...reservedRoutes,
-        dns.customized.preferredServer + "/32",
-        dns.customized.alternateServer + "/32",
+        preferredServer + "/32",
+        alternateServer + "/32",
       ];
     }
   }
@@ -213,12 +213,12 @@ export const getConfig = async () => {
   return {
     rule: state.setting.rule.current,
     route: { proxy: proxyRoutes, reserved: reservedRoutes },
-    dns: { servers: dnsServers, whiteListServers: dnsWhiteListServers },
+    dns: { ...dnsServer, whiteListServers: dnsWhiteListServers },
     isProxyUdp: state.setting.general.isProxyUdp,
     remoteServer: isShadowsocks
       ? {
           ...activatedServer,
-          proxyPort: state.setting.general.shadowsocksLocalPort,
+          local_port: state.setting.general.shadowsocksLocalPort,
         }
       : activatedServer,
   };
