@@ -16,6 +16,7 @@ import { createConnection, Socket } from "net";
 import { platform } from "os";
 import { Route } from "./process_manager";
 import { installWindowsService } from "./customInstall";
+import { logger } from "./log";
 
 const SERVICE_NAME =
   platform() === "win32"
@@ -25,7 +26,7 @@ const SERVICE_NAME =
 export enum ConnectionStatus {
   CONNECTED,
   DISCONNECTED,
-  RECONNECTING
+  RECONNECTING,
 }
 
 interface RoutingServiceRequest {
@@ -52,13 +53,13 @@ interface RoutingServiceResponse {
 enum RoutingServiceAction {
   CONFIGURE_ROUTING = "configureRouting",
   RESET_ROUTING = "resetRouting",
-  STATUS_CHANGED = "statusChanged"
+  STATUS_CHANGED = "statusChanged",
 }
 
 enum RoutingServiceStatusCode {
   SUCCESS = 0,
   GENERIC_FAILURE = 1,
-  UNSUPPORTED_ROUTING_TABLE = 2
+  UNSUPPORTED_ROUTING_TABLE = 2,
 }
 
 // Communicates with the Outline routing daemon via a Unix socket.
@@ -79,7 +80,7 @@ export class RoutingDaemon {
 
   private fulfillDisconnect!: () => void;
 
-  private disconnected = new Promise<void>(F => {
+  private disconnected = new Promise<void>((F) => {
     this.fulfillDisconnect = F;
   });
 
@@ -101,13 +102,13 @@ export class RoutingDaemon {
             newSocket.removeAllListeners();
             this.fulfillDisconnect();
           } catch (e) {
-            console.log(e);
+            logger.error(e);
           }
         };
         newSocket.once("close", cleanup);
         newSocket.once("error", cleanup);
 
-        newSocket.once("data", data => {
+        newSocket.once("data", (data) => {
           const message = RoutingDaemon.parseRoutingServiceResponse(data);
           if (
             !message ||
@@ -138,12 +139,12 @@ export class RoutingDaemon {
           proxyRoutes: this.routes.proxy,
           reservedRoutes: this.routes.reserved,
           dnsServers: this.dns.servers,
-          whiteDnsServers: this.dns.whiteListServers
+          whiteDnsServers: this.dns.whiteListServers,
         };
         newSocket.write(
           JSON.stringify({
             action: RoutingServiceAction.CONFIGURE_ROUTING,
-            parameters
+            parameters,
           } as RoutingServiceRequest)
         );
       }));
@@ -154,13 +155,13 @@ export class RoutingDaemon {
           return;
         }
 
-        console.info(`(re-)installing routing daemon`);
+        logger.info(`(re-)installing routing daemon`);
         installWindowsService()
           .then(() => {
             fulfill(this.start(false));
           })
-          .catch(e => {
-            console.log(e);
+          .catch((e) => {
+            logger.error(e);
           });
       };
 
@@ -183,7 +184,7 @@ export class RoutingDaemon {
       case RoutingServiceAction.RESET_ROUTING:
         // TODO: examine statusCode
         if (this.socket) {
-          console.log("Close socket");
+          logger.info("Close socket");
           this.socket.end();
         }
         break;
@@ -200,14 +201,14 @@ export class RoutingDaemon {
     data: Buffer
   ): RoutingServiceResponse | undefined {
     if (!data) {
-      console.error("received empty response from routing service");
+      logger.error("received empty response from routing service");
       return undefined;
     }
     let response: RoutingServiceResponse | undefined = undefined;
     try {
       response = JSON.parse(data.toString());
     } catch (error) {
-      console.error(
+      logger.error(
         `failed to parse routing service response: ${data.toString()}`
       );
     }
@@ -225,7 +226,7 @@ export class RoutingDaemon {
     this.socket.write(
       JSON.stringify({
         action: RoutingServiceAction.RESET_ROUTING,
-        parameters: {}
+        parameters: {},
       })
     );
   }
