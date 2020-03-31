@@ -17,7 +17,11 @@ import { ConnectionStatus, RoutingDaemon } from "./routing_service";
 import { powerMonitor } from "electron";
 import { checkUdpForwardingEnabled, isServerReachable } from "./connectivity";
 import { ChildProcess, spawn } from "child_process";
-import { pathToEmbeddedBinary, RemoteServer, pathToConfig } from "./utils";
+import {
+  pathToEmbeddedBinary,
+  RemoteServer,
+  DNS_NATIVE_WEBSITES_FILE_PATH,
+} from "./utils";
 import { SMART_DNS_ADDRESS } from "../src/constants";
 import { BrowserWindow, app } from "electron";
 import { validateServerCredentials } from "../src/share";
@@ -448,11 +452,7 @@ class SmartDns extends ChildProcessHelper {
     super(pathToEmbeddedBinary("unbound", "unbound"));
   }
   async makeConf() {
-    const rawConfPath = pathToConfig(
-      "unbound",
-      "accelerated-domains.china.raw.txt"
-    );
-    const txt = await fs.promises.readFile(rawConfPath);
+    const txt = await fs.promises.readFile(DNS_NATIVE_WEBSITES_FILE_PATH);
     const domains = txt.toString().trim().split("\n");
     let conf = "";
     domains.forEach((domain) => {

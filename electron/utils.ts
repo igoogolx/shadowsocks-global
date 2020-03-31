@@ -223,3 +223,8 @@ export const getConfig = async () => {
       : activatedServer,
   };
 };
+
+export const DNS_NATIVE_WEBSITES_FILE_PATH = pathToConfig(
+  "unbound",
+  "accelerated-domains.china.raw.txt"
+);

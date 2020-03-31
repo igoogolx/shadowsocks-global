@@ -9,6 +9,7 @@ import { FieldSelector } from "../Core/Selector/Selector";
 import { isIPv4 } from "net";
 import { DNS_CUSTOMIZED_TYPE, DNS_SMART_TYPE } from "../../constants";
 import { notifier } from "../Core/Notification";
+import { ipcRenderer } from "electron";
 
 const typeOptions = [{ value: DNS_SMART_TYPE }, { value: DNS_CUSTOMIZED_TYPE }];
 export const Dns = React.memo(() => {
@@ -79,6 +80,10 @@ export const Dns = React.memo(() => {
     [dispatch]
   );
 
+  const openNativeWebsitesFile = useCallback(() => {
+    ipcRenderer.send("openDnsNativeWebsitesFile");
+  }, []);
+
   return (
     <Form onSubmit={onSubmit} onChange={onChange} value={dnsSetting}>
       <div className={styles.item}>
@@ -114,6 +119,11 @@ export const Dns = React.memo(() => {
             <FieldToggle name={"isProxyNativeWebsiteDns"} disabled={disabled}>
               Proxy this dns
             </FieldToggle>
+          </div>
+          <div className={styles.item}>
+            <Button isPrimary={true} onClick={openNativeWebsitesFile}>
+              Open native websites file
+            </Button>
           </div>
         </>
       )}

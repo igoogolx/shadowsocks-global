@@ -17,6 +17,7 @@ import {
   trayIconImages,
   getAppConfig,
   isDev,
+  DNS_NATIVE_WEBSITES_FILE_PATH,
 } from "./utils";
 import { VpnManager } from "./vpnManager";
 import { LOG_FILE_PATH, logger } from "./log";
@@ -194,6 +195,10 @@ ipcMain.on("setRunAtSystemStartup", () => {
 
 ipcMain.on("openLogFile", () => {
   shell.openItem(LOG_FILE_PATH);
+});
+
+ipcMain.on("openDnsNativeWebsitesFile", () => {
+  shell.openItem(DNS_NATIVE_WEBSITES_FILE_PATH);
 });
 
 ipcMain.on("hideWindow", () => {
