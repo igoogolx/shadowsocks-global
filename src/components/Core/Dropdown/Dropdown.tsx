@@ -2,7 +2,6 @@ import React, { useCallback, useRef, useState } from "react";
 import styles from "./dropdown.module.css";
 import classNames from "classnames";
 import { Menu } from "..";
-import { useOnClickOutside } from "../../../hooks";
 import { MenuItemProps } from "../Menu/Menu";
 import { Popup } from "../Popup/Popup";
 
@@ -15,7 +14,6 @@ export type DropdownProps = {
   onChange?: (isOpen: boolean) => void;
   disabled?: boolean;
   isVirtualizedList?: boolean;
-  isLockBodyScroll?: boolean;
 };
 
 export const Dropdown = React.memo((props: DropdownProps) => {
@@ -26,14 +24,11 @@ export const Dropdown = React.memo((props: DropdownProps) => {
     menuClassName,
     children,
     disabled,
-    isVirtualizedList
+    isVirtualizedList,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
   const targetRef = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-  useOnClickOutside(targetRef, close);
+
   let handleOnClick = useCallback(() => {
     if (showWhenHover || disabled) return;
     setIsOpen(!isOpen);
@@ -42,7 +37,7 @@ export const Dropdown = React.memo((props: DropdownProps) => {
   const cls = classNames(styles.container, className);
 
   const menuCls = classNames(styles.menu, menuClassName, {
-    [styles.hiddenWhenNotHover]: showWhenHover
+    [styles.hiddenWhenNotHover]: showWhenHover,
   });
 
   return (

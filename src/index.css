@@ -11,7 +11,10 @@ body {
   background-color: var(--main-background-color);
 }
 body::-webkit-scrollbar {
-  width: 8px;
+  background-color: lightgray;
+  width: 10px;
+  height: 10px;
+  background-clip: padding-box;
 }
 
 body::-webkit-scrollbar-thumb {

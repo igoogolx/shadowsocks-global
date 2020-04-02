@@ -23,12 +23,14 @@ type ServerCardProps = {
 
 export const ServerCard = React.memo((props: ServerCardProps) => {
   const { name, host, regionCode, onClick, id, menuItems, port } = props;
-  const activeId = useSelector<AppState, string>(state => state.proxy.activeId);
+  const activeId = useSelector<AppState, string>(
+    (state) => state.proxy.activeId
+  );
   const disabled = useSelector<AppState, boolean>(
-    state => state.proxy.isStarted || state.proxy.isProcessing
+    (state) => state.proxy.isStarted || state.proxy.isProcessing
   );
   const pingTestStatus = useSelector<AppState, -1 | 0 | 1>(
-    state => state.proxy.pingTestStatus
+    (state) => state.proxy.pingTestStatus
   );
   const ping = useCallback(
     async () =>
@@ -36,7 +38,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
         address: host,
         port,
         attempts: 10,
-        timeout: 2000
+        timeout: 2000,
       }),
 
     [host, port]
@@ -46,7 +48,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
   const handleOnClickDelay = useCallback(
     (e: any) => {
       e.stopPropagation();
-      execute().catch(e => {
+      execute().catch((e) => {
         console.log(e);
       });
     },
@@ -59,11 +61,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
   }, [execute, pingTestStatus]);
   return (
     <div className={styles.server}>
-      <Dropdown
-        items={menuItems}
-        className={styles.dropdown}
-        isLockBodyScroll={true}
-      >
+      <Dropdown items={menuItems} className={styles.dropdown}>
         <Icon iconName={ICON_NAME.OMIT} />
       </Dropdown>
       <Card
@@ -87,7 +85,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
           className={classNames(styles.delay, {
             [styles.timeout]: error,
             [styles.fast]: delay && Number(delay) <= 500,
-            [styles.slow]: delay && Number(delay) > 500
+            [styles.slow]: delay && Number(delay) > 500,
           })}
           onClick={handleOnClickDelay}
           isLoading={pending}

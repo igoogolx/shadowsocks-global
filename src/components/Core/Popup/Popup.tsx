@@ -16,7 +16,7 @@ export const Popup = (props: PopupProps) => {
     top: 0,
     bottom: 0,
     height: 0,
-    width: 0
+    width: 0,
   });
 
   useLayoutEffect(() => {
@@ -35,7 +35,7 @@ export const Popup = (props: PopupProps) => {
     left: 0,
     right: 0,
     bottom: 0,
-    top: 0
+    top: 0,
   };
   if (target.current) {
     fixedRect.left = targetRect.left;
@@ -56,7 +56,7 @@ export const Popup = (props: PopupProps) => {
         position: "fixed",
         top: fixedRect.top,
         left: fixedRect.left,
-        zIndex: 2 //var(--z-index-top)
+        zIndex: 2, //var(--z-index-top)
       }}
       ref={popupRef}
     >
