@@ -7,6 +7,10 @@
   background-color: transparent;
   padding: 0;
 
+  & .content {
+    display: inline-block;
+  }
+
   &[disabled] {
     cursor: default;
     color: var(--disabled-color) !important;

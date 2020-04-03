@@ -21,6 +21,7 @@
       color: var(--text-color);
       & svg {
         color: var(--main-color);
+        margin: auto 0;
       }
       & .content {
         margin: auto 8px;

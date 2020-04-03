@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 import { Transition } from "react-transition-group";
 import { useOnMount } from "../../../hooks";
 
-const TRANSITION_TIMEOUT_MS = 240;
+const TRANSITION_TIMEOUT_MS = 200;
 const DURATION_MS = 2000;
 
 export type NotificationType = {
@@ -32,7 +32,7 @@ export const Notification = (props: Notification) => {
   }
 
   ReactDOM.render(
-    notifications.map(notification => (
+    notifications.map((notification) => (
       <Transition
         appear={true}
         unmountOnExit={true}
@@ -41,7 +41,7 @@ export const Notification = (props: Notification) => {
         in={notification.isShow}
         key={notification.id}
       >
-        {state => (
+        {(state) => (
           <div data-state={state} className={styles.animation}>
             <MessageWithDuration
               title={notification.title}
@@ -67,13 +67,16 @@ const MessageWithDuration = (props: {
 }) => {
   const { title, close, type, duration, id } = props;
   const closeTimer = useRef<NodeJS.Timeout | null>(null);
+  const handleClose = useCallback(() => {
+    close(id);
+  }, [close, id]);
   const startCloseTimer = useCallback(() => {
     if (duration) {
       closeTimer.current = setTimeout(() => {
-        close(id);
+        handleClose();
       }, duration);
     }
-  }, [close, duration, id]);
+  }, [duration, handleClose]);
 
   const clearCloseTimer = useCallback(() => {
     if (closeTimer.current) {
@@ -93,6 +96,7 @@ const MessageWithDuration = (props: {
       type={type}
       onMouseEnter={clearCloseTimer}
       onMouseLeave={startCloseTimer}
+      close={handleClose}
     />
   );
 };

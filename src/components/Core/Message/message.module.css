@@ -10,10 +10,6 @@
   display: flex;
   pointer-events: auto;
   user-select: text;
-  & .button {
-    margin: auto;
-    color: white;
-  }
 
   & .popup {
     padding: 8px 0;
@@ -38,5 +34,14 @@
   }
   & .waring {
     color: var(--warning-color);
+  }
+}
+
+.close {
+  margin: auto 10px;
+  padding: 0;
+  height: auto;
+  &:hover {
+    background-color: var(--line-color);
   }
 }

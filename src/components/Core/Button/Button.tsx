@@ -46,7 +46,7 @@ export const Button = React.memo((props: ButtonProps) => {
     [styles.primary]: isPrimary,
     [styles.border]: isBorder,
     [styles.link]: isLink,
-    [styles.danger]: isDanger
+    [styles.danger]: isDanger,
   });
 
   return (
@@ -65,7 +65,7 @@ export const Button = React.memo((props: ButtonProps) => {
           size={ICON_SIZE.SIZE14}
         />
       )}
-      {children && <span>{children}</span>}
+      {children && <span className={styles.content}>{children}</span>}
     </button>
   );
 });
