@@ -1,15 +1,29 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useLockBodyScroll, useOnClickOutside } from "../../../hooks";
 import * as React from "react";
+const OFFSET = 4;
 
-type PopupProps = {
+export type PopupProps = {
   children: React.ReactNode;
-  setIsShow: (isShow: boolean) => void;
+  setIsShow?: (isShow: boolean) => void;
   target: React.RefObject<any>;
+  placement:
+    | "top-start"
+    | "top"
+    | "top-end"
+    | "bottom-start"
+    | "bottom"
+    | "bottom-end"
+    | "left-start"
+    | "left"
+    | "left-end"
+    | "right-start"
+    | "right"
+    | "right-end";
 };
 
 export const Popup = (props: PopupProps) => {
-  const { children, setIsShow, target } = props;
+  const { children, setIsShow, target, placement } = props;
   const [targetRect, setTargetRect] = useState({
     left: 0,
     right: 0,
@@ -26,37 +40,82 @@ export const Popup = (props: PopupProps) => {
   useLockBodyScroll();
 
   const closePopup = useCallback(() => {
-    setIsShow(false);
+    setIsShow && setIsShow(false);
   }, [setIsShow]);
 
   useOnClickOutside(target, closePopup);
 
-  const fixedRect = {
-    left: 0,
-    right: 0,
-    bottom: 0,
+  const popupPosition = {
     top: 0,
+    left: 0,
   };
-  if (target.current) {
-    fixedRect.left = targetRect.left;
-    fixedRect.top = targetRect.top + targetRect.height;
-    fixedRect.bottom = window.innerHeight - targetRect.bottom;
-    fixedRect.right = window.innerWidth - targetRect.right;
-    if (popupRef.current) {
-      const popupRect = popupRef.current.getBoundingClientRect();
-      if (popupRect.height > fixedRect.bottom)
-        fixedRect.top = fixedRect.top - popupRect.height - targetRect.height;
-      if (popupRect.width > fixedRect.right)
-        fixedRect.left = targetRect.right - popupRect.width;
+  if (target.current && target.current && popupRef.current) {
+    const popupRect = popupRef.current.getBoundingClientRect();
+    const widthShortage = (targetRect.width - popupRect.width) / 2;
+    const heightShortage = (targetRect.height - popupRect.height) / 2;
+    switch (placement) {
+      case "top-start":
+        popupPosition.left = targetRect.left;
+        popupPosition.top = targetRect.top - OFFSET - popupRect.height;
+        break;
+      case "top":
+        popupPosition.left = targetRect.left + widthShortage;
+        popupPosition.top = targetRect.top - OFFSET - popupRect.height;
+        break;
+      case "top-end":
+        popupPosition.left = targetRect.right - popupRect.width;
+        popupPosition.top = targetRect.top - OFFSET - popupRect.height;
+        break;
+      case "bottom-start":
+        popupPosition.top = targetRect.bottom + OFFSET;
+        popupPosition.left = targetRect.left;
+        break;
+      case "bottom":
+        popupPosition.left = targetRect.left + widthShortage;
+        popupPosition.top = targetRect.bottom + OFFSET;
+        break;
+      case "bottom-end":
+        popupPosition.top = targetRect.bottom + OFFSET;
+        popupPosition.left = targetRect.right - popupRect.width;
+        break;
+      case "left-start":
+        popupPosition.left = targetRect.left - OFFSET - popupRect.width;
+        popupPosition.top = targetRect.top;
+        break;
+      case "left":
+        popupPosition.left = targetRect.left - OFFSET - popupRect.width;
+        popupPosition.top = targetRect.top + heightShortage;
+        break;
+      case "left-end":
+        popupPosition.left = targetRect.left - OFFSET - popupRect.width;
+        popupPosition.top = targetRect.bottom - popupRect.height;
+        break;
+      case "right-start":
+        popupPosition.left = targetRect.right + OFFSET;
+        popupPosition.top = targetRect.top;
+        break;
+      case "right":
+        popupPosition.left = targetRect.right + OFFSET;
+        popupPosition.top = targetRect.top + heightShortage;
+        break;
+      case "right-end":
+        popupPosition.left = targetRect.right + OFFSET;
+        popupPosition.top = targetRect.bottom - popupRect.height;
+        break;
+      default:
+        break;
     }
+    if (popupRect.height > window.innerHeight - popupPosition.top)
+      popupPosition.top = targetRect.top - OFFSET - popupRect.height;
+    if (popupRect.width > window.innerWidth - popupPosition.left)
+      popupPosition.left = targetRect.right - popupRect.width;
   }
   return (
     <div
       style={{
         position: "fixed",
-        top: fixedRect.top,
-        left: fixedRect.left,
         zIndex: 2, //var(--z-index-top)
+        ...popupPosition,
       }}
       ref={popupRef}
     >

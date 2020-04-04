@@ -23,7 +23,7 @@ export const LatencyCard = () => {
 
 export const ToSeverCard = () => {
   const isStarted = useSelector<AppState, boolean>(
-    state => state.proxy.isStarted
+    (state) => state.proxy.isStarted
   );
   const check = useCallback(async () => {
     const proxy = store.getState().proxy;
@@ -32,7 +32,7 @@ export const ToSeverCard = () => {
       address: activatedServer.host,
       port: activatedServer.port,
       attempts: 1,
-      timeout: 2000
+      timeout: 2000,
     });
   }, []);
   const { execute, pending, value, error } = useAsync(check, false);
@@ -55,6 +55,7 @@ export const ToSeverCard = () => {
       <Tooltip
         content={"The time of connecting to proxy server"}
         target={tooltipRef}
+        placement={"bottom"}
       />
       <StatusCard
         iconName={ICON_NAME.PAPER_PLANE}
@@ -78,7 +79,7 @@ export const ToSeverCard = () => {
 
 export const ToDnsCard = () => {
   const isStarted = useSelector<AppState, boolean>(
-    state => state.proxy.isStarted
+    (state) => state.proxy.isStarted
   );
   const { execute, pending, value, error } = useAsync(checkDns, false);
   const disabled = !isStarted || pending;
@@ -100,6 +101,7 @@ export const ToDnsCard = () => {
       <Tooltip
         content={"The time of connecting to Google Dns"}
         target={tooltipRef}
+        placement={"bottom"}
       />
       <StatusCard
         iconName={ICON_NAME.DNS}
@@ -123,10 +125,10 @@ export const ToDnsCard = () => {
 
 export const ToInternetCard = () => {
   const shadowsocksLocalPort = useSelector<AppState, number>(
-    state => state.setting.general.shadowsocksLocalPort
+    (state) => state.setting.general.shadowsocksLocalPort
   );
   const isStarted = useSelector<AppState, boolean>(
-    state => state.proxy.isStarted
+    (state) => state.proxy.isStarted
   );
   const check = useCallback(async () => {
     const proxy = store.getState().proxy;
@@ -159,7 +161,7 @@ export const ToInternetCard = () => {
       <Tooltip
         content={"The time of connecting to Google.com"}
         target={tooltipRef}
-        type={"left"}
+        placement={"left"}
       />
       <StatusCard
         iconName={ICON_NAME.INTERNET}

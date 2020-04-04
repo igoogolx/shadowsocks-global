@@ -1,7 +1,7 @@
 import styles from "./menu.module.css";
 import { Icon } from "..";
 import classNames from "classnames";
-import React from "react";
+import React, { RefObject } from "react";
 import { FixedSizeList as List } from "react-window";
 
 const VIRTUALIZED_ITEM_SIZE = 40;
@@ -23,13 +23,14 @@ type MenuProps = {
   items: MenuItemProps[];
   className?: string;
   isVirtualized?: boolean;
+  menuRef?: RefObject<HTMLDivElement>;
 };
 
 //TODO: Refactor Menu to improve performance
 export const Menu = React.memo((props: MenuProps) => {
-  const { items, className, isVirtualized } = props;
+  const { items, className, isVirtualized, menuRef } = props;
   return (
-    <div className={classNames(styles.container, className)}>
+    <div className={classNames(styles.container, className)} ref={menuRef}>
       {isVirtualized ? (
         <List
           itemCount={items.length}

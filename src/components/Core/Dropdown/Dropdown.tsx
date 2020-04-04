@@ -46,7 +46,11 @@ export const Dropdown = React.memo((props: DropdownProps) => {
         {children}
       </div>
       {isOpen && (
-        <Popup setIsShow={setIsOpen} target={targetRef}>
+        <Popup
+          setIsShow={setIsOpen}
+          target={targetRef}
+          placement={"bottom-start"}
+        >
           <Menu
             items={items}
             className={menuCls}
