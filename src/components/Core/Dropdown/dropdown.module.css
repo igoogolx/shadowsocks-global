@@ -4,6 +4,7 @@
   & .menu {
     margin-top: 8px;
     max-height: 200px;
+    min-width: 150px;
   }
   & .content {
     display: flex;
