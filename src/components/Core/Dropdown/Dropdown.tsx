@@ -29,12 +29,14 @@ export const Dropdown = React.memo((props: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const targetRef = useRef<HTMLDivElement>(null);
 
-  let handleOnClick = useCallback(() => {
-    if (showWhenHover || disabled) return;
+  const handleOnClick = useCallback(() => {
+    if (showWhenHover) return;
     setIsOpen(!isOpen);
-  }, [disabled, isOpen, showWhenHover]);
+  }, [isOpen, showWhenHover]);
 
-  const cls = classNames(styles.container, className);
+  const cls = classNames(styles.container, className, {
+    [styles.disabled]: disabled,
+  });
 
   const menuCls = classNames(styles.menu, menuClassName, {
     [styles.hiddenWhenNotHover]: showWhenHover,
