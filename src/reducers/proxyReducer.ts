@@ -161,7 +161,14 @@ export const proxy = createSlice({
       const { type, id } = action.payload;
       switch (type) {
         case "shadowsocks":
-          {
+          //Delete all
+          if (id === "") {
+            const isActivated = state.shadowsockses.some(
+              (shadowsocks) => (shadowsocks.id = state.activeId)
+            );
+            if (isActivated) state.activeId = "";
+            state.shadowsockses = [];
+          } else {
             //Reset activated id
             if (state.activeId === id) state.activeId = "";
             const shadowsocksIndex = state.shadowsockses.findIndex(
@@ -201,6 +208,15 @@ export const proxy = createSlice({
           break;
         //Socks5
         default: {
+          //Delete all
+          if (id === "") {
+            const isActivated = state.socks5s.some(
+              (socks5) => socks5.id === state.activeId
+            );
+            if (isActivated) state.activeId = "";
+            state.socks5s = [];
+          }
+
           //Reset activated id
           if (state.activeId === id) state.activeId = "";
           state.socks5s = state.socks5s.filter((socks5) => socks5.id !== id);
