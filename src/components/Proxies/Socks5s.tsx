@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { proxy, Socks5 } from "../../reducers/proxyReducer";
@@ -14,29 +14,30 @@ export const Socks5s = React.memo(() => {
     (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
   const dispatch = useDispatch();
+  const dropdownItems = useMemo(
+    () => [
+      {
+        iconName: ICON_NAME.DELETE,
+        content: "Delete",
+        isDanger: true,
+        handleOnClick: () => {
+          dispatch(
+            proxy.actions.delete({
+              type: "socks5",
+              id: "",
+            })
+          );
+        },
+      },
+    ],
+    [dispatch]
+  );
   return (
     <>
       {socks5s.length !== 0 && (
         <div className={styles.title}>
           Sock5s
-          <Dropdown
-            items={[
-              {
-                iconName: ICON_NAME.DELETE,
-                content: "Delete",
-                isDanger: true,
-                handleOnClick: () => {
-                  dispatch(
-                    proxy.actions.delete({
-                      type: "socks5",
-                      id: "",
-                    })
-                  );
-                },
-              },
-            ]}
-            disabled={disabled}
-          >
+          <Dropdown items={dropdownItems} disabled={disabled}>
             <Icon iconName={ICON_NAME.OMIT} className={styles.dropdownToggle} />
           </Dropdown>
         </div>

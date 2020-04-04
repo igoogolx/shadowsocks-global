@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
@@ -14,29 +14,30 @@ export const Shadowsockses = React.memo(() => {
   const disabled = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
+  const dropdownItems = useMemo(
+    () => [
+      {
+        iconName: ICON_NAME.DELETE,
+        content: "Delete",
+        isDanger: true,
+        handleOnClick: () => {
+          dispatch(
+            proxy.actions.delete({
+              type: "shadowsocks",
+              id: "",
+            })
+          );
+        },
+      },
+    ],
+    [dispatch]
+  );
   return (
     <>
       {shadowsockses.length !== 0 && (
         <div className={styles.title}>
           Shadowsockses
-          <Dropdown
-            items={[
-              {
-                iconName: ICON_NAME.DELETE,
-                content: "Delete",
-                isDanger: true,
-                handleOnClick: () => {
-                  dispatch(
-                    proxy.actions.delete({
-                      type: "shadowsocks",
-                      id: "",
-                    })
-                  );
-                },
-              },
-            ]}
-            disabled={disabled}
-          >
+          <Dropdown items={dropdownItems} disabled={disabled}>
             <Icon iconName={ICON_NAME.OMIT} className={styles.dropdownToggle} />
           </Dropdown>
         </div>
