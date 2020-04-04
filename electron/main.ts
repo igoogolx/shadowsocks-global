@@ -80,7 +80,6 @@ async function createWindow() {
     event.preventDefault(); // Prevent the app from exiting on the 'close' event.
     mainWindow.hide();
   };
-  vpnManager = new VpnManager(mainWindow, tray);
   mainWindow.on("minimize", minimizeWindowToTray);
   mainWindow.on("close", async (event: Event) => {
     const isHideWhenWindowIsClosed = getAppConfig().setting.general
@@ -154,10 +153,14 @@ function createTray() {
 }
 
 promiseIpc.on("start", async () => {
-  if (vpnManager) await vpnManager.start();
+  vpnManager = new VpnManager(mainWindow, tray);
+  await vpnManager.start();
 });
 promiseIpc.on("stop", async () => {
-  if (vpnManager) await vpnManager.stop();
+  if (vpnManager) {
+    await vpnManager.stop();
+    vpnManager = undefined;
+  }
 });
 
 promiseIpc.on("getCustomizedRulesDirPath", async (defaultPath: unknown) => {

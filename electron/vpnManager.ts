@@ -1,9 +1,10 @@
 import { ConnectionManager } from "./process_manager";
 import { getConfig, trayIconImages } from "./utils";
-import { BrowserWindow } from "electron";
+import { BrowserWindow, powerMonitor } from "electron";
 import { ConnectionStatus } from "./routing_service";
 import { Traffic } from "./traffic";
 import { Tray } from "electron";
+import { logger } from "./log";
 
 const UPDATE_TRAFFIC_INTERVAL_MS = 1000;
 
@@ -16,8 +17,73 @@ export class VpnManager {
     private mainWindow: BrowserWindow | null,
     private tray: Tray | undefined
   ) {
-    this.traffic = new Traffic();
+    powerMonitor.on("suspend", this.suspendListener);
+    powerMonitor.on("resume", this.resumeListener);
   }
+  private suspendListener = () => {
+    if (this.traffic) {
+      this.traffic.stop();
+      logger.info("suspend traffic");
+    }
+  };
+  private resumeListener = () => {
+    if (this.traffic) {
+      this.traffic.start();
+      logger.info("resume traffic");
+    }
+  };
+
+  private startTrafficStatistics = () => {
+    this.traffic = new Traffic();
+    this.traffic?.start();
+    this.updateTrafficTimer = setInterval(async () => {
+      if (!this.mainWindow?.isVisible() || !this.traffic || !this.mainWindow)
+        return;
+      let sentBytesPerSecond = 0;
+      let receivedBytesPerSecond = 0;
+      const portUsages: { port: number; bytesPerSecond: number }[] = [];
+      this.traffic.getPockets.forEach((pocket) => {
+        if (pocket.type === "sent") sentBytesPerSecond += pocket.length;
+        else receivedBytesPerSecond += pocket.length;
+        const index = portUsages.findIndex(
+          (portUsage) => portUsage.port === pocket.port
+        );
+        if (index === -1)
+          portUsages.push({
+            port: pocket.port,
+            bytesPerSecond: pocket.length,
+          });
+        else
+          portUsages[index] = {
+            port: pocket.port,
+            bytesPerSecond: portUsages[index].bytesPerSecond + pocket.length,
+          };
+      });
+      this.traffic.resetPockets();
+      await this.mainWindow.webContents.send(
+        "totalTrafficUsage",
+        this.traffic.getTotalUsage
+      );
+      await this.mainWindow.webContents.send("netSpeed", {
+        sentBytesPerSecond,
+        receivedBytesPerSecond,
+        time: Date.now(),
+      });
+
+      //TODO: Port to process. Note: "find-process"(https://www.npmjs.com/package/find-process)
+      // is not improper to be used to find multiple ports at the same time,
+      // because of high usage of cpu.
+      await this.mainWindow.webContents.send("portNetSpeeds", portUsages);
+    }, UPDATE_TRAFFIC_INTERVAL_MS);
+  };
+
+  private stopTrafficStatistics = () => {
+    powerMonitor.removeListener("suspend", this.suspendListener);
+    powerMonitor.removeListener("resume", this.resumeListener);
+    if (this.updateTrafficTimer) clearInterval(this.updateTrafficTimer);
+    this.traffic?.stop();
+    this.traffic = undefined;
+  };
 
   private setTayImage = (status: ConnectionStatus) => {
     const isConnected = status === ConnectionStatus.CONNECTED;
@@ -93,45 +159,7 @@ ${
 Rule:${rule}
 `
       );
-      this.traffic?.start();
-      this.updateTrafficTimer = setInterval(async () => {
-        if (!this.mainWindow?.isVisible()) return;
-        let sentBytesPerSecond = 0;
-        let receivedBytesPerSecond = 0;
-        const portUsages: { port: number; bytesPerSecond: number }[] = [];
-        this.traffic?.getPockets.forEach((pocket) => {
-          if (pocket.type === "sent") sentBytesPerSecond += pocket.length;
-          else receivedBytesPerSecond += pocket.length;
-          const index = portUsages.findIndex(
-            (portUsage) => portUsage.port === pocket.port
-          );
-          if (index === -1)
-            portUsages.push({
-              port: pocket.port,
-              bytesPerSecond: pocket.length,
-            });
-          else
-            portUsages[index] = {
-              port: pocket.port,
-              bytesPerSecond: portUsages[index].bytesPerSecond + pocket.length,
-            };
-        });
-        this.traffic?.resetPockets();
-        await this.mainWindow?.webContents.send(
-          "totalTrafficUsage",
-          this.traffic?.getTotalUsage
-        );
-        await this.mainWindow?.webContents.send("netSpeed", {
-          sentBytesPerSecond,
-          receivedBytesPerSecond,
-          time: Date.now(),
-        });
-
-        //TODO: Port to process. Note: "find-process"(https://www.npmjs.com/package/find-process)
-        // is not improper to be used to find multiple ports at the same time,
-        // because of high usage of cpu.
-        await this.mainWindow?.webContents.send("portNetSpeeds", portUsages);
-      }, UPDATE_TRAFFIC_INTERVAL_MS);
+      this.startTrafficStatistics();
     } catch (e) {
       await this.stop();
       throw new Error(e);
@@ -139,8 +167,7 @@ Rule:${rule}
   };
   stop = async () => {
     try {
-      if (this.updateTrafficTimer) clearInterval(this.updateTrafficTimer);
-      this.traffic?.stop();
+      this.stopTrafficStatistics();
       if (!this.currentConnection) return;
       this.currentConnection.stop();
       await this.currentConnection.onceStopped;
