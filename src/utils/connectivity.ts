@@ -13,7 +13,7 @@
 // limitations under the License.
 import * as net from "net";
 import * as dns from "dns";
-import { financial, NS_PER_MILLI_SECOND, timeoutPromise } from "../share";
+import { financial, timeoutPromise } from "../share";
 
 const DNS_TEST_SERVER = "8.8.8.8";
 const DNS_TEST_DOMAIN = "google.com";
@@ -30,17 +30,17 @@ const check = (options: { address: string; port: number; timeout: number }) =>
   new Promise<number>((resolve, reject) => {
     const start = process.hrtime();
     const s = new net.Socket();
-    s.connect(options.port, options.address, function() {
+    s.connect(options.port, options.address, function () {
       const timeArr = process.hrtime(start);
       const time = financial((timeArr[0] * 1e9 + timeArr[1]) / 1e6, 0);
       resolve(time);
       s.destroy();
     });
-    s.on("error", function(e) {
+    s.on("error", function (e) {
       reject(e);
       s.destroy();
     });
-    s.setTimeout(options.timeout, function() {
+    s.setTimeout(options.timeout, function () {
       reject("Timeout");
       s.destroy();
     });
@@ -51,7 +51,7 @@ export const checkServer = async (options: Options) => {
     address = "localhost",
     port = 80,
     attempts = 5,
-    timeout = 2000
+    timeout = 2000,
   } = options;
   for (let i = 0; i < attempts; i++) {
     try {
@@ -68,14 +68,12 @@ export const checkDns = () =>
       const resolver = new dns.Resolver();
       resolver.setServers([DNS_TEST_SERVER]);
 
-      const lastTime = process.hrtime();
+      const lastTime = Date.now();
 
       resolver.resolve(DNS_TEST_DOMAIN, (err, address) => {
         if (err || !address) reject("Fail to lookup dns");
         else {
-          fulfill(
-            financial(process.hrtime(lastTime)[1] / NS_PER_MILLI_SECOND, 0)
-          );
+          fulfill(Date.now() - lastTime);
         }
       });
     }),
