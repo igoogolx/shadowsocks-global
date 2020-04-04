@@ -1,4 +1,5 @@
 import { financial, lookupIp } from "../share";
+import EventEmitter from "events";
 
 //@ts-ignore
 import geoip from "geoip-country";
@@ -58,3 +59,6 @@ export const updateSubscription = async (url: string) => {
     id: uuid(),
   }));
 };
+
+class Ping extends EventEmitter {}
+export const pingEventEmitter = new Ping();

@@ -9,6 +9,7 @@ import { MenuItemProps } from "../Core/Menu/Menu";
 import { checkServer } from "../../utils/connectivity";
 import { useAsync } from "../../hooks";
 import classNames from "classnames";
+import { pingEventEmitter } from "../../utils/helper";
 
 type ServerCardProps = {
   id: string;
@@ -29,9 +30,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
   const disabled = useSelector<AppState, boolean>(
     (state) => state.proxy.isStarted || state.proxy.isProcessing
   );
-  const pingTestStatus = useSelector<AppState, -1 | 0 | 1>(
-    (state) => state.proxy.pingTestStatus
-  );
+
   const ping = useCallback(
     async () =>
       await checkServer({
@@ -55,10 +54,13 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
     [execute]
   );
   const isActive = activeId === id;
+
   useEffect(() => {
-    if (pingTestStatus === -1) return;
-    execute();
-  }, [execute, pingTestStatus]);
+    pingEventEmitter.on("test", execute);
+    return () => {
+      pingEventEmitter.removeListener("test", execute);
+    };
+  }, [execute]);
   return (
     <div className={styles.server}>
       <Dropdown items={menuItems} className={styles.dropdown}>

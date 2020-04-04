@@ -17,7 +17,7 @@ import { BUILD_IN_RULE, setting } from "../../reducers/settingReducer";
 import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { ipcRenderer } from "electron";
 import { useLocation } from "react-router-dom";
-import { updateSubscription } from "../../utils/helper";
+import { pingEventEmitter, updateSubscription } from "../../utils/helper";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
 
 const Header = () => {
@@ -183,8 +183,8 @@ const Header = () => {
     [rulePaths]
   );
   const pingTest = useCallback(() => {
-    dispatch(proxy.actions.pingTest());
-  }, [dispatch]);
+    pingEventEmitter.emit("test");
+  }, []);
   const location = useLocation();
   return (
     <>
