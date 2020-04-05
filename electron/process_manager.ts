@@ -321,6 +321,9 @@ export class ConnectionManager {
 
   // Use #onceStopped to be notified when the connection terminates.
   stop() {
+    powerMonitor.removeAllListeners("suspend");
+    powerMonitor.removeAllListeners("resume");
+
     try {
       this.routing.stop();
     } catch (e) {
