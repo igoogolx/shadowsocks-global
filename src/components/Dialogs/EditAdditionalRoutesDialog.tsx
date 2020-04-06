@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { Route, setting } from "../../reducers/settingReducer";
@@ -10,13 +10,12 @@ import {
   Icon,
   ICON_NAME,
   INPUT_SIZE,
-  Menu,
   notifier,
 } from "../Core";
 import { isIPv4 } from "net";
 import { FieldToggle } from "../Core/Toggle/Toggle";
 import styles from "./dialogs.module.css";
-import { MenuItemProps } from "../Core/Menu/Menu";
+import { Table, Cell, Column, Tobody, Thead, Row } from "../Core/Table";
 
 type EditAdditionalRoutesDialogDialogProps = {
   close: () => void;
@@ -29,16 +28,10 @@ export const EditAdditionalRoutesDialog = (
   const additionalRoutes = useSelector<AppState, Route[]>(
     (state) => state.setting.rule.additionalRoutes
   );
-  const menuItems: MenuItemProps[] = useMemo(
-    () =>
-      additionalRoutes.map((route) => ({
-        content: <RouteItem ip={route.ip} isProxy={route.isProxy} />,
-      })),
-    [additionalRoutes]
-  );
   const dispatch = useDispatch();
   const [route, setRoute] = useState({ ip: "", isProxy: false });
   const [isChanged, setIsChanged] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const onSubmit = useCallback(
     (data) => {
       if (additionalRoutes.some((route) => route.ip === data.ip))
@@ -46,6 +39,7 @@ export const EditAdditionalRoutesDialog = (
       else {
         dispatch(setting.actions.addAdditionalRoute(data));
         setRoute({ ip: "", isProxy: false });
+        setIsEditing(false);
       }
     },
     [additionalRoutes, dispatch]
@@ -58,38 +52,60 @@ export const EditAdditionalRoutesDialog = (
     [route]
   );
 
+  const onAddClick = useCallback(() => {
+    setIsEditing(true);
+  }, []);
+
+  const closeEditForm = useCallback(() => {
+    setIsEditing(false);
+  }, []);
+
   return (
     <Dialog close={close}>
-      <div className={styles.container}>
-        <Form onSubmit={onSubmit} onChange={onChange} value={route}>
+      <Table className={styles.table}>
+        <Thead>
+          <Column>Ip</Column>
+          <Column>Action</Column>
+        </Thead>
+        <Tobody>
+          {additionalRoutes.map((route) => (
+            <RouteItem {...route} key={route.ip} />
+          ))}
+        </Tobody>
+      </Table>
+      {isEditing ? (
+        <Form
+          onSubmit={onSubmit}
+          onChange={onChange}
+          value={route}
+          className={styles.editRouteForm}
+        >
           <Field
             name={"ip"}
-            placeholder={"XXXX.XXXX.XXXX.XXXX"}
             validate={(ip) => isIPv4(ip) || ip.length === 0}
             className={styles.input}
             size={INPUT_SIZE.AUTO}
           />
-          <FieldToggle name={"isProxy"}>Proxy this route</FieldToggle>
-          <div className={styles.buttonContainer}>
-            <Button
-              isPrimary={true}
-              className={styles.button}
-              disabled={!isChanged}
-              type={"submit"}
-            >
-              Save
-            </Button>
-            <Button isPrimary={true} onClick={close} className={styles.button}>
-              Cancel
-            </Button>
-          </div>
+          <FieldToggle name={"isProxy"} className={styles.toggle}>
+            Proxy
+          </FieldToggle>
+          <Button
+            className={styles.button}
+            disabled={!isChanged}
+            type={"submit"}
+          >
+            Save
+          </Button>
+          <Button onClick={closeEditForm} className={styles.button}>
+            Cancel
+          </Button>
         </Form>
-      </div>
-      {additionalRoutes.length !== 0 && (
-        <>
-          <div className={styles.divider} />
-          <Menu items={menuItems} className={styles.menu} />
-        </>
+      ) : (
+        <div className={styles.add}>
+          <Button onClick={onAddClick}>
+            <Icon iconName={ICON_NAME.PLUS} />
+          </Button>
+        </div>
       )}
     </Dialog>
   );
@@ -102,12 +118,14 @@ const RouteItem = React.memo((props: Route) => {
     dispatch(setting.actions.deleteAdditionalRoute(ip));
   }, [dispatch, ip]);
   return (
-    <div className={styles.item}>
-      <span>{ip}</span>
-      <span className={styles.action}>{isProxy ? "proxy" : "direct"}</span>
-      <Button onClick={deleteRoute} className={styles.delete}>
-        <Icon iconName={ICON_NAME.DELETE} />
-      </Button>
-    </div>
+    <Row className={styles.row}>
+      <Cell className={styles.cell}>{ip}</Cell>
+      <Cell className={styles.cell}>{isProxy ? "proxy" : "direct"}</Cell>
+      <Cell className={styles.cell}>
+        <Button onClick={deleteRoute} className={styles.delete}>
+          <Icon iconName={ICON_NAME.DELETE} />
+        </Button>
+      </Cell>
+    </Row>
   );
 });

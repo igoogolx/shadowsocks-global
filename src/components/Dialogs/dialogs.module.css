@@ -16,43 +16,107 @@
   }
 }
 
-.divider {
-  margin-top: 20px;
-  height: 1px;
-  background: linear-gradient(to right, #dcdcdc, rgba(220, 220, 220, 0));
-}
-
-.menu {
+.table {
   box-shadow: none;
-  max-height: 200px;
-  border-radius: unset;
-  & .item {
-    position: relative;
-    display: flex;
+  width: 346px;
+  & tbody {
+    max-height: 200px;
+    overflow-y: auto;
+    display: block;
+    &::-webkit-scrollbar {
+      background-color: lightgray;
+      width: 10px;
+      height: 10px;
+      background-clip: padding-box;
+    }
 
+    &::-webkit-scrollbar-thumb {
+      background-color: darkgrey;
+      outline: 1px solid slategrey;
+      border-radius: 5px;
+    }
+  }
+
+  & thead {
+    & tr {
+      display: block;
+      & th:nth-child(1) {
+        width: 120px;
+      }
+      & th:nth-child(2) {
+        width: 60px;
+      }
+    }
+  }
+  & .row {
+    cursor: pointer;
     & button {
       visibility: hidden;
-      margin: auto;
+      transition: none;
+      &:hover {
+        background-color: var(--line-color);
+        border-radius: 50%;
+      }
     }
     &:hover {
       & button {
         visibility: visible;
       }
     }
-    & .action {
-      position: absolute;
-      left: 140px;
+    & td:nth-child(1) {
+      width: 120px;
     }
+    & td:nth-child(2) {
+      width: 60px;
+    }
+    & td:nth-child(3) {
+      width: 60px;
+    }
+
     & .delete {
-      position: absolute;
-      right: 0;
       height: auto;
-      top: 60%;
-      padding: 0;
-      transform: translate(-50%, -50%);
+      padding: 5px;
       & svg {
         color: var(--error-color);
       }
+    }
+  }
+}
+
+.editRouteForm {
+  flex-direction: row;
+  & .input {
+    width: 136px;
+    font-size: 16px;
+    margin-left: 16px;
+  }
+  & .toggle {
+    margin: auto 0;
+    padding-left: 16px;
+  }
+  & .button {
+    transform: translate(0, 3px);
+    margin: auto 0 auto 5px;
+    padding: 0;
+    width: 46px;
+    &:hover {
+      color: var(--main-color);
+    }
+  }
+}
+
+.add {
+  display: flex;
+  margin-top: 10px;
+  & button {
+    padding: 5px;
+    height: auto;
+    margin: 0 auto;
+    background-color: var(--line-color);
+    box-shadow: 0 0 5px #bbbdc9;
+    border-radius: 50%;
+    &:hover {
+      background-color: #d6d8e6;
     }
   }
 }
