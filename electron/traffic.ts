@@ -39,7 +39,7 @@ export class Traffic {
         this.pockets.push({
           type: packetType,
           length: numberOfBytes,
-          port: packetType === "sent" ? ret.info.srcport : ret.info.dstport
+          port: packetType === "sent" ? ret.info.srcport : ret.info.dstport,
         });
       } else
         console.log(
@@ -58,7 +58,6 @@ export class Traffic {
   public stop() {
     if (this.cap) this.cap.close();
     this.linkType = null;
-    this.totalUsage = 0;
   }
   public resetPockets() {
     this.pockets = [];
