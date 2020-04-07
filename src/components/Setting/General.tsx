@@ -45,7 +45,7 @@ export const General = React.memo(() => {
 
   return (
     <Form onSubmit={onSubmit} onChange={onChange} value={value}>
-      <div className={styles.item}>
+      <div>
         <div className={styles.title}>Shadowsocks running port:</div>
         <Field
           name={"shadowsocksLocalPort"}
@@ -85,9 +85,26 @@ export const General = React.memo(() => {
       >
         Hide when window is closed
       </FieldToggle>
-      <FieldToggle name={"isHideAfterConnection"} disabled={disabled}>
+      <FieldToggle
+        name={"isHideAfterConnection"}
+        disabled={disabled}
+        className={styles.item}
+      >
         Hide after connection
       </FieldToggle>
+      <FieldToggle name={"isAutoConnect"} disabled={disabled}>
+        Automatically establish connection after startup
+      </FieldToggle>
+      <div className={styles.delayInput}>
+        <div className={styles.label}>Delayed connect:</div>
+        <Field
+          name={"autoConnectDelay"}
+          className={styles.field}
+          type={"number"}
+          disabled={disabled}
+        />
+        <div className={styles.label}>seconds</div>
+      </div>
       <div className={styles.footer}>
         <Button
           type={"submit"}

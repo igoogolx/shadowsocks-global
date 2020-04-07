@@ -32,3 +32,20 @@
   }
   padding: 0;
 }
+
+.delayInput {
+  position: relative;
+  display: flex;
+  left: 25px;
+  & .label {
+    margin: auto 10px;
+  }
+  & .field {
+    width: 40px;
+    text-align: center;
+    & input {
+      text-align: center;
+      font-size: var(--font-size-larger);
+    }
+  }
+}

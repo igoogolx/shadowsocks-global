@@ -42,6 +42,8 @@ export type GeneralState = {
   isRunAtSystemStartup: boolean;
   isHideWhenWindowIsClosed: boolean;
   isHideAfterConnection: boolean;
+  isAutoConnect: boolean;
+  autoConnectDelay: number; //Seconds
 };
 
 export type SettingState = {
@@ -59,6 +61,8 @@ export const initialSettingState: SettingState = {
     isRunAtSystemStartup: false,
     isHideWhenWindowIsClosed: true,
     isHideAfterConnection: false,
+    isAutoConnect: false,
+    autoConnectDelay: 5,
   },
   dns: {
     type: DNS_SMART_TYPE,

@@ -28,10 +28,20 @@ const Header = () => {
     (state) => state.setting.general.isUpdateSubscriptionsOnOpen
   );
   const [isUpdatingSubscriptions, setIsUpdatingSubscriptions] = useState(false);
+  const [autoConnectTimer, setConnectTimer] = useState<NodeJS.Timeout>();
+  const isAutoConnect = useSelector<AppState, boolean>(
+    (state) => state.setting.general.isAutoConnect
+  );
+  const autoConnectDelay = useSelector<AppState, number>(
+    (state) => state.setting.general.autoConnectDelay
+  );
   const dispatch = useDispatch();
 
   //Init app
   useLayoutEffect(() => {
+    const autoConnect = () => {
+      setConnectTimer(setTimeout(start, autoConnectDelay * 1000));
+    };
     if (isUpdateSubscriptionsOnOpen) {
       const updateSubscriptions = async () => {
         await Promise.all(
@@ -58,7 +68,10 @@ const Header = () => {
         })
         .finally(() => {
           setIsUpdatingSubscriptions(false);
+          if (isAutoConnect) autoConnect();
         });
+    } else if (isAutoConnect) {
+      autoConnect();
     }
     //TODO: use customized channel for "Disconnected" because there are others message.
     ipcRenderer.on("message", (event, message) => {
@@ -108,6 +121,7 @@ const Header = () => {
 
   const start = useCallback(async () => {
     try {
+      if (autoConnectTimer) clearTimeout(autoConnectTimer);
       if (!activeId) {
         notifier.error("No server has been selected!");
         return;
@@ -123,7 +137,7 @@ const Header = () => {
     } finally {
       dispatch(proxy.actions.setIsProcessing(false));
     }
-  }, [activeId, dispatch, isHideAfterConnection]);
+  }, [activeId, autoConnectTimer, dispatch, isHideAfterConnection]);
 
   useEffect(() => {
     const loadRulePath = async () => {
