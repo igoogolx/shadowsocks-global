@@ -21,7 +21,7 @@
     "build": "yarn electron-build && yarn react-build && yarn electron-builder && yarn rebuild",
     "react-start": "react-app-rewired start",
     "electron-start:watch": "nodemon --exec npm run electron-start",
-    "electron-builder": "electron-builder --win --publish never --config electron/builder.json",
+    "electron-builder": "electron-builder --win --publish never --config electron/builder.json --config.extraMetadata.name ShadowsocksGlobal",
     "electron-start": "electron .",
     "electron-build": " rollup -c",
     "electron-build:dev": "rollup -c -w --environment IS_DEV",
