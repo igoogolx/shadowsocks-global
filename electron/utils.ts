@@ -101,8 +101,9 @@ export const readRule = async (path: string) => {
 
 export const getConfig = async () => {
   const state = getAppConfig();
-  const activatedServer = getActivatedServer(state.proxy);
-
+  let activatedServer = getActivatedServer(state.proxy);
+  const serverIp = await lookupIp(activatedServer.host);
+  activatedServer = { ...activatedServer, host: serverIp };
   const shadowsocksLocalPort = state.setting.general.shadowsocksLocalPort;
   const isShadowsocks = activatedServer.type === "shadowsocks";
   if (isShadowsocks) {
@@ -112,7 +113,6 @@ export const getConfig = async () => {
         `port: ${shadowsocksLocalPort} was occupied, try port: ${_port}`
       );
   }
-  const serverIp = await lookupIp(activatedServer.host);
   let dnsServer: {},
     dnsWhiteListServers: string[],
     proxyRoutes: string[],
