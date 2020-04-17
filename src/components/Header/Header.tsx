@@ -237,7 +237,7 @@ const Header = () => {
           disabled={isLoadingRules || isStarted || isProcessing}
           isVirtualizedList={rulesOptions.length > 4}
         />
-        {location.pathname === "/proxies" && (
+        {location.pathname === "/proxies" && !isStarted && !isProcessing && (
           <Button onClick={pingTest} isPrimary={true} className={styles.button}>
             Ping Test
           </Button>

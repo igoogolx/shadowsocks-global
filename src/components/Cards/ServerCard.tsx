@@ -82,7 +82,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
         {isActive && <Dot type={"enabled"} className={styles.dot} />}
       </Card>
 
-      {(delay || error || pending) && (
+      {(delay || error || pending) && !disabled && (
         <Button
           className={classNames(styles.delay, {
             [styles.timeout]: error,
@@ -91,6 +91,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
           })}
           onClick={handleOnClickDelay}
           isLoading={pending}
+          disabled={disabled}
         >
           {pending ? "" : error ? "Timeout" : delay + "ms"}
         </Button>
