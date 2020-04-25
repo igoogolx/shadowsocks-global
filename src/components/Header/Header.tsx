@@ -6,7 +6,15 @@ import React, {
   useLayoutEffect,
 } from "react";
 import styles from "./header.module.css";
-import { Button, Selector } from "../Core";
+import {
+  Button,
+  Dialog,
+  Dropdown,
+  Icon,
+  ICON_NAME,
+  ICON_SIZE,
+  Selector,
+} from "../Core";
 import { notifier } from "../Core/Notification";
 import { AppState } from "../../reducers/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,12 +22,25 @@ import fs from "fs";
 import promiseIpc from "electron-promise-ipc";
 import path from "path";
 import { BUILD_IN_RULE, setting } from "../../reducers/settingReducer";
-import { proxy, Subscription } from "../../reducers/proxyReducer";
-import { ipcRenderer } from "electron";
-import { useLocation } from "react-router-dom";
-import { pingEventEmitter, updateSubscription } from "../../utils/helper";
+import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
+import { clipboard, ipcRenderer } from "electron";
+import {
+  lookupRegionCodes,
+  pingEventEmitter,
+  updateSubscription,
+} from "../../utils/helper";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
+import { decodeSsUrl } from "../../utils/url";
+import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
+import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
+import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
+import Dashboard from "../Dashboard/Dashboard";
+import Setting from "../Setting/Setting";
+import About from "../About/About";
+import Store from "electron-store";
 
+const PROXY_TYPES = ["Shadowsocks", "Socks5", "Subscription"];
+const MANGE_TYPES = ["Statistics", "Setting", "About"];
 const Header = () => {
   const subscriptions = useSelector<AppState, Subscription[]>(
     (state) => state.proxy.subscriptions
@@ -114,6 +135,66 @@ const Header = () => {
   );
   const [rulePaths, setRulePaths] = useState<string[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);
+  const [currentDialogType, setCurrentDialogType] = useState("");
+  const addProxyDropdownItems = useMemo(
+    () => [
+      ...PROXY_TYPES.map((type) => ({
+        content: type,
+        handleOnClick: () => {
+          setCurrentDialogType(type);
+        },
+      })),
+      {
+        content: "Import URL from Clipboard",
+        handleOnClick: async () => {
+          try {
+            const url = clipboard.readText();
+            let shadowsockses = decodeSsUrl(url);
+            if (shadowsockses.length === 0) return;
+            const hosts = shadowsockses.map((shadowsocks) => shadowsocks.host);
+            const regionCodes = await lookupRegionCodes(hosts);
+            shadowsockses = shadowsockses.map((shadowsocks, index) => ({
+              ...shadowsocks,
+              regionCode: regionCodes[index],
+            }));
+            (shadowsockses as Shadowsocks[]).forEach((shadowsocks) =>
+              dispatch(
+                proxy.actions.add({ type: "shadowsocks", config: shadowsocks })
+              )
+            );
+          } catch (e) {}
+        },
+      },
+    ],
+    [dispatch]
+  );
+  const manageDropdownItems = useMemo(
+    () => [
+      ...MANGE_TYPES.map((type) => ({
+        content: type,
+        handleOnClick: () => {
+          setCurrentDialogType(type);
+        },
+      })),
+      {
+        content: "Open the log file",
+        handleOnClick: () => {
+          ipcRenderer.send("openLogFile");
+        },
+      },
+      {
+        content: "Open the configuration file",
+        handleOnClick: () => {
+          const store = new Store();
+          store.openInEditor();
+        },
+      },
+    ],
+    []
+  );
+  const closeDialog = useCallback(() => {
+    setCurrentDialogType("");
+  }, []);
   const changeCurrentRule = useCallback(
     (rule: string) => dispatch(setting.actions.setCurrentRule(rule)),
     [dispatch]
@@ -199,9 +280,32 @@ const Header = () => {
   const pingTest = useCallback(() => {
     pingEventEmitter.emit("test");
   }, []);
-  const location = useLocation();
   return (
     <>
+      {currentDialogType === PROXY_TYPES[0] && (
+        <EditShadowsocksDialog close={closeDialog} />
+      )}
+      {currentDialogType === PROXY_TYPES[1] && (
+        <EditSocks5sDialog close={closeDialog} />
+      )}
+      {currentDialogType === PROXY_TYPES[2] && (
+        <EditSubscriptionDialog close={closeDialog} />
+      )}
+      {currentDialogType === MANGE_TYPES[0] && (
+        <Dialog close={closeDialog}>
+          <Dashboard />
+        </Dialog>
+      )}
+      {currentDialogType === MANGE_TYPES[1] && (
+        <Dialog close={closeDialog}>
+          <Setting />
+        </Dialog>
+      )}
+      {currentDialogType === MANGE_TYPES[2] && (
+        <Dialog close={closeDialog}>
+          <About />
+        </Dialog>
+      )}
       {isUpdatingSubscriptions && (
         <LoadingDialog content={"Updating subscriptions..."} />
       )}
@@ -237,11 +341,23 @@ const Header = () => {
           disabled={isLoadingRules || isStarted || isProcessing}
           isVirtualizedList={rulesOptions.length > 4}
         />
-        {location.pathname === "/proxies" && !isStarted && !isProcessing && (
+        {!isStarted && !isProcessing && (
           <Button onClick={pingTest} isPrimary={true} className={styles.button}>
             Ping Test
           </Button>
         )}
+        <div className={styles.iconButtons}>
+          <Dropdown items={addProxyDropdownItems}>
+            <Button className={styles.item}>
+              <Icon iconName={ICON_NAME.PLUS} size={ICON_SIZE.SIZE24} />
+            </Button>
+          </Dropdown>
+          <Dropdown items={manageDropdownItems}>
+            <Button className={styles.item}>
+              <Icon iconName={ICON_NAME.SETTING} size={ICON_SIZE.SIZE24} />
+            </Button>
+          </Dropdown>
+        </div>
       </div>
     </>
   );

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import styles from "./about.module.css";
-import { shell, ipcRenderer } from "electron";
+import { shell } from "electron";
 import { Button, notifier } from "../Core";
 import { useOnMount } from "../../hooks";
 import promiseIpc from "electron-promise-ipc";
-import Store from "electron-store";
 
 const About = () => {
   const [appVersion, setAppVersion] = useState();
@@ -60,25 +59,6 @@ const About = () => {
           isLink={true}
         >
           https://github.com/igoogolx/shadowsocks-global/releases
-        </Button>
-      </div>
-      <div className={styles.buttons}>
-        <Button
-          onClick={() => {
-            ipcRenderer.send("openLogFile");
-          }}
-          isPrimary={true}
-        >
-          Open Log File
-        </Button>
-        <Button
-          onClick={() => {
-            const store = new Store();
-            store.openInEditor();
-          }}
-          isPrimary={true}
-        >
-          Open Config File
         </Button>
       </div>
     </div>

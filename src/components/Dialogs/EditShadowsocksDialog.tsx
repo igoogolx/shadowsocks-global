@@ -8,7 +8,6 @@ import { Button, Dialog, Icon, ICON_NAME, INPUT_SIZE } from "../Core";
 import { isEmpty, isPort } from "../../utils/validator";
 import { FieldSelector } from "../Core/Selector/Selector";
 import { RegionCodeSelector } from "./RegioncodeSelector";
-import { useRedirect } from "./useRedirect";
 import { lookupRegionCodes } from "../../utils/helper";
 
 type EditShadowsocksDialogProps = {
@@ -35,7 +34,6 @@ export const EditShadowsocksDialog = React.memo(
       [value]
     );
     const dispatch = useDispatch();
-    const redirect = useRedirect();
 
     const onSubmit = async (shadowsocks: Omit<Shadowsocks, "id">) => {
       let searchedRegionCode;
@@ -67,7 +65,6 @@ export const EditShadowsocksDialog = React.memo(
           })
         );
       close();
-      redirect();
     };
 
     return (

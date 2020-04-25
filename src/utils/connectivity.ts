@@ -13,7 +13,7 @@
 // limitations under the License.
 import * as net from "net";
 import * as dns from "dns";
-import { financial, timeoutPromise } from "../share";
+import { timeoutPromise } from "../share";
 
 const DNS_TEST_SERVER = "8.8.8.8";
 const DNS_TEST_DOMAIN = "google.com";
@@ -28,11 +28,11 @@ type Options = {
 
 const check = (options: { address: string; port: number; timeout: number }) =>
   new Promise<number>((resolve, reject) => {
-    const start = process.hrtime();
     const s = new net.Socket();
+    const startTime = Date.now();
     s.connect(options.port, options.address, function () {
-      const timeArr = process.hrtime(start);
-      const time = financial((timeArr[0] * 1e9 + timeArr[1]) / 1e6, 0);
+      const endTime = Date.now();
+      const time = endTime - startTime;
       resolve(time);
       s.destroy();
     });

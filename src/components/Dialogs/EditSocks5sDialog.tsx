@@ -6,7 +6,6 @@ import styles from "./dialogs.module.css";
 import { Button, Dialog, INPUT_SIZE } from "../Core";
 import { RegionCodeSelector } from "./RegioncodeSelector";
 import { isPort } from "../../utils/validator";
-import { useRedirect } from "./useRedirect";
 import { lookupRegionCodes } from "../../utils/helper";
 
 type EditSocks5sDialogProps = {
@@ -20,7 +19,6 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
   const [isChanged, setIsChanged] = useState(false);
   const [value, setValue] = useState(initialValue || { regionCode: "Auto" });
   const dispatch = useDispatch();
-  const redirect = useRedirect();
 
   const onChange = useCallback(
     (filedValue: { [key: string]: any }) => {
@@ -34,7 +32,7 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
     if (socks5.regionCode === "Auto")
       try {
         searchedRegionCode = await lookupRegionCodes([socks5.host]).then(
-          regionCodes => regionCodes[0]
+          (regionCodes) => regionCodes[0]
         );
       } catch (e) {}
     if (initialValue)
@@ -44,8 +42,8 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
           config: {
             ...socks5,
             id: initialValue.id,
-            regionCode: searchedRegionCode || socks5.regionCode
-          }
+            regionCode: searchedRegionCode || socks5.regionCode,
+          },
         })
       );
     else
@@ -54,12 +52,11 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
           type: "socks5",
           config: {
             ...socks5,
-            regionCode: searchedRegionCode || socks5.regionCode
-          }
+            regionCode: searchedRegionCode || socks5.regionCode,
+          },
         })
       );
     close();
-    redirect();
   };
   return (
     <Dialog close={close}>

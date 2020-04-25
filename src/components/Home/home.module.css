@@ -3,9 +3,9 @@
 
 .container {
   display: flex;
-  margin: 50px 0 25px 150px;
+  margin: 50px 0 25px 0;
   height: calc(100vh - 75px);
-  width: calc(100vw - 150px);
+  width: 100vw;
   & .body {
     position: relative;
     display: flex;

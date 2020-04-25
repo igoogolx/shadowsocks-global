@@ -15,4 +15,18 @@
     margin: auto 20px auto 0;
     width: 100px;
   }
+  & .iconButtons {
+    position: absolute;
+    left: 10px;
+    display: flex;
+    top: 50%;
+    transform: translate(0, -50%);
+    & .item {
+      margin: auto 10px;
+      padding: 0;
+      &:hover {
+        color: var(--main-hover-color);
+      }
+    }
+  }
 }

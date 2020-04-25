@@ -9,11 +9,21 @@
   left: 0;
   height: 25px;
   width: 100vw;
-  & .content {
+  & .udp {
     margin: auto 20px;
     & span {
       display: inline-block;
       width: 50px;
     }
+  }
+  & .traffic {
+    margin: auto 0;
+    min-width: 150px;
+  }
+  & .message {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    left: 10px;
   }
 }

@@ -36,8 +36,9 @@ let vpnManager: VpnManager | undefined;
 
 async function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
+    width: 850,
     height: 600,
+    useContentSize: true,
     fullscreen: isDev,
     resizable: isDev,
     webPreferences: {

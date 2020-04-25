@@ -45,10 +45,6 @@ export function lookupIp(hostname: string) {
   );
 }
 
-export function financial(x: number, fractionDigits = 2) {
-  return Number(Number.parseFloat(x.toString()).toFixed(fractionDigits));
-}
-
 // Resolves with true iff a response can be received from a semi-randomly-chosen website through the
 // Shadowsocks proxy.
 export const validateServerCredentials = (address: string, port: number) =>

@@ -60,11 +60,8 @@ export class VpnManager {
           };
       });
       this.traffic.resetPockets();
-      await this.mainWindow.webContents.send(
-        "totalTrafficUsage",
-        this.traffic.getTotalUsage
-      );
-      await this.mainWindow.webContents.send("netSpeed", {
+      await this.mainWindow.webContents.send("updateTrafficStatistics", {
+        usage: this.traffic.getTotalUsage,
         sentBytesPerSecond,
         receivedBytesPerSecond,
         time: Date.now(),

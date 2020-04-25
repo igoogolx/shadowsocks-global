@@ -4,6 +4,7 @@
   border-radius: 5px;
   box-shadow: 0 0 5px #bbbdc9;
   overflow: auto;
+  white-space: nowrap;
   & .list {
     padding: 4px;
     list-style: none;

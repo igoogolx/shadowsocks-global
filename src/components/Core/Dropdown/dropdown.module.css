@@ -3,7 +3,7 @@
   display: flex;
   & .menu {
     margin-top: 8px;
-    max-height: 200px;
+    max-height: 250px;
     min-width: 150px;
   }
   & .content {

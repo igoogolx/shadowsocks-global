@@ -1,4 +1,4 @@
-import { financial, lookupIp } from "../share";
+import { lookupIp } from "../share";
 import EventEmitter from "events";
 
 //@ts-ignore
@@ -38,6 +38,9 @@ const KB = 1024;
 const MB = 1024 * KB;
 const GB = 1024 * MB;
 export const convertTrafficData = (data: number) => {
+  function financial(x: number, fractionDigits = 2) {
+    return Number(Number.parseFloat(x.toString()).toFixed(fractionDigits));
+  }
   if (data < KB) return `${financial(data)} B`;
   if (data < MB) return `${financial(data / KB)} KB`;
   if (data < GB) return `${financial(data / MB)} MB`;

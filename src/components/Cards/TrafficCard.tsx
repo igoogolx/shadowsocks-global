@@ -1,69 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Card } from "../Core/Card/Card";
 import styles from "./cards.module.css";
-import { ipcRenderer } from "electron";
-import { useSelector } from "react-redux";
-import { AppState } from "../../reducers/rootReducer";
+import { useTrafficStatistics } from "../../hooks";
 import { convertTrafficData } from "../../utils/helper";
 
 export const TrafficCard = React.memo(() => {
-  const [netSpeed, setNetSpeed] = useState<{
-    upload: string;
-    download: string;
-    [key: string]: string;
-  }>({
-    upload: "0",
-    download: "0"
-  });
-  const [usage, setUsage] = useState("0");
-  const isStarted = useSelector<AppState, boolean>(
-    state => state.proxy.isStarted
-  );
-  useEffect(() => {
-    if (!isStarted) {
-      setNetSpeed(netSpeed => {
-        if (Number(netSpeed.upload) !== 0 && Number(netSpeed.download) !== 0)
-          return {
-            upload: "0",
-            download: "0"
-          };
-        return netSpeed;
-      });
-      setUsage("0");
-    }
-  }, [isStarted]);
-  useEffect(() => {
-    ipcRenderer.on("netSpeed", (event, traffic) => {
-      if (traffic) {
-        const { receivedBytesPerSecond, sentBytesPerSecond } = traffic;
-        setNetSpeed({
-          upload: convertTrafficData(sentBytesPerSecond) + "/S",
-          download: convertTrafficData(receivedBytesPerSecond) + "/S"
-        });
-      }
-    });
-    ipcRenderer.on("totalTrafficUsage", (event, usage) => {
-      setUsage(convertTrafficData(usage));
-    });
-    return () => {
-      ipcRenderer.removeAllListeners("netSpeed");
-      ipcRenderer.removeAllListeners("totalTrafficUsage");
-    };
-  }, []);
+  const trafficStatistics = useTrafficStatistics();
 
   return (
     <Card className={styles.traffic}>
       <div className={styles.statistic}>
         <div className={styles.title}>download</div>
-        <div className={styles.data}>{netSpeed.download}</div>
+        <div className={styles.data}>
+          {convertTrafficData(trafficStatistics.receivedBytesPerSecond)}
+        </div>
       </div>
       <div className={styles.statistic}>
         <div className={styles.title}>upload</div>
-        <div className={styles.data}>{netSpeed.upload}</div>
+        <div className={styles.data}>
+          {convertTrafficData(trafficStatistics.sentBytesPerSecond)}
+        </div>
       </div>
       <div className={styles.statistic}>
         <div className={styles.title}>usage</div>
-        <div className={styles.data}>{usage}</div>
+        <div className={styles.data}>
+          {convertTrafficData(trafficStatistics.usage)}
+        </div>
       </div>
     </Card>
   );

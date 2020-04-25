@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  height: 100%;
+  width: 610px;
+  height: 450px;
 
   & .flexContainer {
     display: flex;

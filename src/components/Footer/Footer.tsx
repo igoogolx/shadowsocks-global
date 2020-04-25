@@ -5,6 +5,8 @@ import { ipcRenderer } from "electron";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { proxy } from "../../reducers/proxyReducer";
+import { useTrafficStatistics } from "../../hooks";
+import { convertTrafficData } from "../../utils/helper";
 
 const Footer = () => {
   const [udpStatus, setUdpStatus] = useState<
@@ -13,8 +15,10 @@ const Footer = () => {
   const dispatch = useDispatch();
   const [message, setMessage] = useState("");
   const isStarted = useSelector<AppState, boolean>(
-    state => state.proxy.isStarted
+    (state) => state.proxy.isStarted
   );
+
+  const trafficStatistics = useTrafficStatistics();
 
   useEffect(() => {
     if (!isStarted) setUdpStatus(undefined);
@@ -37,11 +41,22 @@ const Footer = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.content}>
+      <div className={styles.udp}>
         <span>UDP:</span>
         <Dot type={udpStatus} />
       </div>
-      <div className={styles.content}>{message}</div>
+      <div className={styles.traffic}>
+        usage: {convertTrafficData(trafficStatistics.usage)}
+      </div>
+      <div className={styles.traffic}>
+        download:{" "}
+        {convertTrafficData(trafficStatistics.receivedBytesPerSecond) + "/S"}
+      </div>
+      <div className={styles.traffic}>
+        upload:{" "}
+        {convertTrafficData(trafficStatistics.sentBytesPerSecond) + "/S"}
+      </div>
+      <div className={styles.message}>{message}</div>
     </div>
   );
 };

@@ -3,7 +3,6 @@ import React, { useCallback, useState } from "react";
 import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./dialogs.module.css";
-import { useRedirect } from "./useRedirect";
 import { AppState } from "../../reducers/rootReducer";
 import { updateSubscription } from "../../utils/helper";
 
@@ -22,7 +21,6 @@ export const EditSubscriptionDialog = React.memo(
     const subscriptions = useSelector<AppState, Subscription[]>(
       (state) => state.proxy.subscriptions
     );
-    const redirect = useRedirect();
     const onChange = useCallback(
       (fieldValue: { [key: string]: any }) => {
         setValue({ ...value, ...fieldValue });
@@ -66,7 +64,6 @@ export const EditSubscriptionDialog = React.memo(
           );
         notifier.success("Update the subscription successfully!");
         close();
-        redirect();
       } catch (e) {
         notifier.error("Fail to update the subscription!");
         setIsLoading(false);
