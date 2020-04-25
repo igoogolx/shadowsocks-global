@@ -39,4 +39,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: ShadowsocksGlobal
-          path: dist/Shadowsocks-Global.exe
+          path: dist/*.exe
