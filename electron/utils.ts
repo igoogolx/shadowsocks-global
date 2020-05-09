@@ -1,4 +1,4 @@
-import { BrowserWindow, Menu, nativeImage } from "electron";
+import { BrowserWindow, Menu } from "electron";
 import { app } from "electron";
 import path from "path";
 import fs from "fs";
@@ -12,19 +12,7 @@ import detectPort from "detect-port";
 
 const appConfig = new Store();
 export const getAppConfig = () => appConfig.get("state") as AppState;
-function createTrayIconImage(imageName: string) {
-  const image = nativeImage.createFromPath(
-    path.join(app.getAppPath(), "resources", "tray", imageName)
-  );
-  if (image.isEmpty()) {
-    throw new Error(`cannot find ${imageName} tray icon image`);
-  }
-  return image;
-}
-export const trayIconImages = {
-  connected: createTrayIconImage("connected.png"),
-  disconnected: createTrayIconImage("disconnected.png"),
-};
+
 export const setMenu = (mainWindow: BrowserWindow) => {
   if (process.env.NODE_ENV === "development") {
     mainWindow.webContents.on("context-menu", (e, props) => {

@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { proxy } from "../../reducers/proxyReducer";
 import { useTrafficStatistics } from "../../hooks";
-import { convertTrafficData } from "../../utils/helper";
+import { convertTrafficData } from "../../share";
 
 const Footer = () => {
   const [udpStatus, setUdpStatus] = useState<

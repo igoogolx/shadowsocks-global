@@ -1,10 +1,11 @@
 import { ConnectionManager } from "./process_manager";
-import { getConfig, trayIconImages } from "./utils";
+import { getConfig } from "./utils";
 import { BrowserWindow, powerMonitor } from "electron";
 import { ConnectionStatus } from "./routing_service";
 import { Traffic } from "./traffic";
-import { Tray } from "electron";
 import { logger } from "./log";
+import { AppTray } from "./tray";
+import { convertTrafficData } from "../src/share";
 
 const UPDATE_TRAFFIC_INTERVAL_MS = 1000;
 
@@ -15,7 +16,7 @@ export class VpnManager {
 
   constructor(
     private mainWindow: BrowserWindow | null,
-    private tray: Tray | undefined
+    private tray: AppTray | undefined
   ) {
     powerMonitor.on("suspend", this.suspendListener);
     powerMonitor.on("resume", this.resumeListener);
@@ -33,12 +34,11 @@ export class VpnManager {
     }
   };
 
-  private startTrafficStatistics = () => {
+  private startTrafficStatistics = (defaultTooltip: string) => {
     this.traffic = new Traffic();
     this.traffic?.start();
     this.updateTrafficTimer = setInterval(async () => {
-      if (!this.mainWindow?.isVisible() || !this.traffic || !this.mainWindow)
-        return;
+      if (!this.traffic || !this.mainWindow) return;
       let sentBytesPerSecond = 0;
       let receivedBytesPerSecond = 0;
       const portUsages: { port: number; bytesPerSecond: number }[] = [];
@@ -59,7 +59,14 @@ export class VpnManager {
             bytesPerSecond: portUsages[index].bytesPerSecond + pocket.length,
           };
       });
+      this.tray?.setToolTip(
+        defaultTooltip +
+          `download: ${convertTrafficData(
+            receivedBytesPerSecond
+          )}/S  upload: ${convertTrafficData(sentBytesPerSecond)}/S`
+      );
       this.traffic.resetPockets();
+      if (!this.mainWindow?.isVisible()) return;
       await this.mainWindow.webContents.send("updateTrafficStatistics", {
         usage: this.traffic.getTotalUsage,
         sentBytesPerSecond,
@@ -84,10 +91,8 @@ export class VpnManager {
 
   private setTayImage = (status: ConnectionStatus) => {
     const isConnected = status === ConnectionStatus.CONNECTED;
-    const trayIconImage = isConnected
-      ? trayIconImages.connected
-      : trayIconImages.disconnected;
-    this.tray?.setImage(trayIconImage);
+    const trayIconImageType = isConnected ? "connected" : "disconnected";
+    this.tray?.setImage(trayIconImageType);
   };
   private sendConnectionStatus = (status: ConnectionStatus) => {
     let statusString;
@@ -146,17 +151,15 @@ export class VpnManager {
       await this.mainWindow?.webContents.send("message", "Connected!");
       this.sendConnectionStatus(ConnectionStatus.CONNECTED);
 
-      this.tray?.setToolTip(
-        `Shadowsocks-global
-${
-  remoteServer.name
-    ? `${remoteServer?.name}(${remoteServer.host}:${remoteServer.port})`
-    : `${remoteServer.host}:${remoteServer.port}`
-}
-Rule:${rule}
-`
-      );
-      this.startTrafficStatistics();
+      const defaultTooltip =
+        (remoteServer.name
+          ? `${remoteServer?.name}(${remoteServer.host}:${remoteServer.port})`
+          : `${remoteServer.host}:${remoteServer.port}`) +
+        "\n" +
+        `Rule:${rule}` +
+        "\n";
+      this.tray?.setToolTip(defaultTooltip);
+      this.startTrafficStatistics(defaultTooltip);
     } catch (e) {
       await this.stop();
       throw new Error(e);
@@ -172,7 +175,7 @@ Rule:${rule}
       this.currentConnection = undefined;
       this.sendConnectionStatus(ConnectionStatus.DISCONNECTED);
       await this.mainWindow?.webContents.send("message", "Disconnected");
-      this.tray?.setToolTip("Shadowsocks-global");
+      this.tray?.setToolTip();
     } catch (e) {
       console.log(e);
     }

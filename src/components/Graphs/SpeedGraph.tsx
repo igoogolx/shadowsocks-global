@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { ChartConfiguration } from "chart.js";
 import { Graph } from "../Core";
-import { convertTrafficData } from "../../utils/helper";
+import { convertTrafficData } from "../../share";
 
 type SpeedGraphProps = {
   statistics: { download: number; upload: number; time: number }[];
@@ -13,25 +13,25 @@ export const SpeedGraph = (props: SpeedGraphProps) => {
     () => ({
       type: "line",
       data: {
-        labels: statistics.map(statistic => statistic.time.toString()),
+        labels: statistics.map((statistic) => statistic.time.toString()),
         datasets: [
           {
             label: "Download",
             borderColor: "#280AB2",
             borderWidth: 1,
-            data: statistics.map(statistic => statistic.download),
+            data: statistics.map((statistic) => statistic.download),
             fill: false,
-            pointRadius: 0
+            pointRadius: 0,
           },
           {
             label: "Upload",
             borderColor: "#fe8b56",
             borderWidth: 1,
-            data: statistics.map(statistic => statistic.upload),
+            data: statistics.map((statistic) => statistic.upload),
             fill: false,
-            pointRadius: 0
-          }
-        ]
+            pointRadius: 0,
+          },
+        ],
       },
       options: {
         animation: {},
@@ -41,29 +41,29 @@ export const SpeedGraph = (props: SpeedGraphProps) => {
           xAxes: [
             {
               gridLines: {
-                display: false
+                display: false,
               },
               ticks: {
-                display: false
-              }
-            }
+                display: false,
+              },
+            },
           ],
           yAxes: [
             {
               gridLines: {
-                drawBorder: false
+                drawBorder: false,
               },
               ticks: {
-                callback(value): string | number {
+                callback(value: number) {
                   return convertTrafficData(value);
                 },
                 autoSkip: true,
-                maxTicksLimit: 6
-              }
-            }
-          ]
-        }
-      }
+                maxTicksLimit: 6,
+              },
+            },
+          ],
+        },
+      },
     }),
     [statistics]
   );

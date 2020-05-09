@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "../Core/Card/Card";
 import styles from "./cards.module.css";
 import { useTrafficStatistics } from "../../hooks";
-import { convertTrafficData } from "../../utils/helper";
+import { convertTrafficData } from "../../share";
 
 export const TrafficCard = React.memo(() => {
   const trafficStatistics = useTrafficStatistics();

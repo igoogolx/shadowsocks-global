@@ -4,17 +4,17 @@ import { Card } from "../Core/Card/Card";
 import { ipcRenderer } from "electron";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import { convertTrafficData } from "../../utils/helper";
+import { convertTrafficData } from "../../share";
 export const PortNetSpeedCard = () => {
   const [netSpeeds, setNetSpeeds] = useState<{ port: number; speed: string }[]>(
     []
   );
   const isStarted = useSelector<AppState, boolean>(
-    state => state.proxy.isStarted
+    (state) => state.proxy.isStarted
   );
   useEffect(() => {
     if (!isStarted)
-      setNetSpeeds(netSpeeds => {
+      setNetSpeeds((netSpeeds) => {
         if (netSpeeds.length !== 0) return [];
         return netSpeeds;
       });
@@ -31,9 +31,9 @@ export const PortNetSpeedCard = () => {
           })
           .slice(0, 5);
         setNetSpeeds(
-          sortedPortTraffics.map(portTraffic => ({
+          sortedPortTraffics.map((portTraffic) => ({
             port: portTraffic.port,
-            speed: convertTrafficData(portTraffic.bytesPerSecond) + "/S"
+            speed: convertTrafficData(portTraffic.bytesPerSecond) + "/S",
           }))
         );
       }
@@ -48,7 +48,7 @@ export const PortNetSpeedCard = () => {
         <div className={styles.title}>Port</div>
         <div className={styles.title}>Speed</div>
       </div>
-      {netSpeeds.map(netSpeed => (
+      {netSpeeds.map((netSpeed) => (
         <div className={styles.item} key={netSpeed.port}>
           <div>{netSpeed.port}</div>
           <div>{netSpeed.speed}</div>

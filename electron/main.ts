@@ -1,29 +1,20 @@
-import {
-  app,
-  BrowserWindow,
-  dialog,
-  Tray,
-  Menu,
-  MenuItemConstructorOptions,
-  ipcMain,
-  shell,
-} from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import * as path from "path";
 import promiseIpc from "electron-promise-ipc";
 import {
   setMenu,
   installExtensions,
   getResourcesPath,
-  trayIconImages,
   getAppConfig,
   isDev,
   DNS_NATIVE_WEBSITES_FILE_PATH,
 } from "./utils";
 import { VpnManager } from "./vpnManager";
 import { LOG_FILE_PATH, logger } from "./log";
+import { AppTray } from "./tray";
 
 let mainWindow: null | BrowserWindow;
-let tray: Tray | undefined;
+let tray: AppTray | undefined;
 let isAppQuitting = false;
 
 let localizedStrings: { [key: string]: string } = {
@@ -88,12 +79,6 @@ async function createWindow() {
     if (isHideWhenWindowIsClosed) minimizeWindowToTray(event);
     else await quitApp();
   });
-  mainWindow.on("show", () => {
-    if (vpnManager?.traffic) vpnManager.traffic.setIsCapturePockets = true;
-  });
-  mainWindow.on("hide", () => {
-    if (vpnManager?.traffic) vpnManager.traffic.setIsCapturePockets = false;
-  });
 }
 
 app.on("ready", createWindow);
@@ -123,35 +108,6 @@ app.on("second-instance", () => {
 });
 
 app.setAsDefaultProtocolClient("ss");
-
-function createTray() {
-  if (tray) return;
-  tray = new Tray(trayIconImages.disconnected);
-  tray.on("click", () => {
-    if (!mainWindow) {
-      createWindow()
-        .then
-        //Ignore promise returned from createWindow.
-        ();
-      return;
-    }
-    if (mainWindow.isMinimized() || !mainWindow.isVisible()) {
-      mainWindow.restore();
-      mainWindow.show();
-      mainWindow.focus();
-    } else {
-      mainWindow.hide();
-    }
-  });
-  tray.setToolTip("Shadowsocks-global");
-  // Retrieve localized strings, falling back to the pre-populated English default.
-  const quitString = localizedStrings["quit"];
-  const menuTemplate = [
-    { type: "separator" } as MenuItemConstructorOptions,
-    { label: quitString, click: quitApp },
-  ];
-  tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
-}
 
 promiseIpc.on("start", async () => {
   vpnManager = new VpnManager(mainWindow, tray);
@@ -187,7 +143,7 @@ ipcMain.on("localizationResponse", (event, localizationResult) => {
   if (!!localizationResult) {
     localizedStrings = localizationResult;
   }
-  createTray();
+  if (mainWindow) tray = new AppTray(mainWindow, createWindow);
 });
 
 ipcMain.on("setRunAtSystemStartup", () => {
