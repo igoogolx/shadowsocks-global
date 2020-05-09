@@ -36,7 +36,10 @@ jobs:
           CI: true
 
       - name: 'Upload the building files as artifact'
+      - run: rm -rf dist/.icon-ico
+      - run: rm -rf dist/win-ia32-unpacked
+      - run: rm -rf dist/builder-effective-config.yaml
         uses: actions/upload-artifact@v1
         with:
           name: ShadowsocksGlobal
-          path: dist/*.exe
+          path: dist
