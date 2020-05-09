@@ -34,7 +34,9 @@ jobs:
       - run: yarn build
         env:
           CI: true
-      - run: del dist/.icon-ico dist/win-ia32-unpacked dist/builder-effective-config.yaml
+      - run: del dist/.icon-ico
+      - run: del dist/win-ia32-unpacked
+      - run: del dist/builder-effective-config.yaml
 
       - name: 'Upload the building files as artifact'
         uses: actions/upload-artifact@v1
