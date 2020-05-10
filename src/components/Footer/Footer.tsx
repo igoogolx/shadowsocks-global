@@ -29,7 +29,7 @@ const Footer = () => {
       if (message) setMessage(message);
       if (message === "Disconnected") dispatch(proxy.actions.stopVpn());
     });
-    ipcRenderer.on("updateMessage", (event, udpStatus) => {
+    ipcRenderer.on("udpStatus", (event, udpStatus) => {
       setUdpStatus(udpStatus);
     });
 
