@@ -84,7 +84,7 @@ export const validateServerCredentials = (address: string, port: number) =>
 const KB = 1024;
 const MB = 1024 * KB;
 const GB = 1024 * MB;
-export const convertTrafficData = (data: number) => {
+export const convertFlowData = (data: number) => {
   function financial(x: number, fractionDigits = 2) {
     return Number(Number.parseFloat(x.toString()).toFixed(fractionDigits));
   }

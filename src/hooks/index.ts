@@ -3,7 +3,7 @@ import { useOnMount } from "./useOnMount";
 import { useChartjs } from "./useChartjs";
 import { useLockBodyScroll } from "./useLockBodyScroll";
 import { useAsync } from "./useAsync";
-import { useTrafficStatistics } from "./useTrafficStatistics";
+import { useFlow } from "./useFlow";
 
 export {
   useOnMount,
@@ -11,5 +11,5 @@ export {
   useChartjs,
   useLockBodyScroll,
   useAsync,
-  useTrafficStatistics,
+  useFlow,
 };

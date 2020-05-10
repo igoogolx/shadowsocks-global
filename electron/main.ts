@@ -143,7 +143,10 @@ ipcMain.on("localizationResponse", (event, localizationResult) => {
   if (!!localizationResult) {
     localizedStrings = localizationResult;
   }
-  if (mainWindow) tray = new AppTray(mainWindow, createWindow);
+  if (mainWindow) {
+    tray = new AppTray(mainWindow, createWindow);
+    tray.setToolTip();
+  }
 });
 
 ipcMain.on("setRunAtSystemStartup", () => {

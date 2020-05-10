@@ -51,7 +51,7 @@ export class AppTray {
     }
   };
   setToolTip = (toolTip?: string) => {
-    const title = "ShadowsocksGlobal";
+    const title = `ShadowsocksGlobal ${app.getVersion()}`;
     const content = toolTip ? title + "\n" + toolTip + "\n" : title + "\n";
     this.tray?.setToolTip(content);
   };

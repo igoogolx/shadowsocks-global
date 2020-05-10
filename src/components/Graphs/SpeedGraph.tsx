@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { ChartConfiguration } from "chart.js";
 import { Graph } from "../Core";
-import { convertTrafficData } from "../../share";
+import { convertFlowData } from "../../share";
 
 type SpeedGraphProps = {
   statistics: { download: number; upload: number; time: number }[];
@@ -55,7 +55,7 @@ export const SpeedGraph = (props: SpeedGraphProps) => {
               },
               ticks: {
                 callback(value: number) {
-                  return convertTrafficData(value);
+                  return convertFlowData(value);
                 },
                 autoSkip: true,
                 maxTicksLimit: 6,

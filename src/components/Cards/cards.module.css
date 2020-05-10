@@ -125,7 +125,7 @@
 }
 
 .speed {
-  width: 392px;
+  width: 100%;
   height: 200px;
   pointer-events: auto;
 }
@@ -162,21 +162,6 @@
   & .server {
     background-color: #fef3ef;
     color: #ff8b58;
-  }
-}
-
-.portNetSpeed {
-  flex-direction: column;
-  width: 180px;
-  height: 200px;
-  font-size: var(--font-size-larger);
-  & .title {
-    font-weight: 600;
-  }
-  & .item {
-    margin: 5px 20px;
-    display: flex;
-    justify-content: space-between;
   }
 }
 

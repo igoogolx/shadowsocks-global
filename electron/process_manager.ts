@@ -245,14 +245,14 @@ export class ConnectionManager {
     if (this.ssLocal) {
       this.ssLocal.start(this.remoteServer);
       await this.mainWindow?.webContents.send(
-        "message",
+        "updateMessage",
         "Checking ss-local..."
       );
     }
 
     await isServerReachable(this.proxyAddress, this.proxyPort);
 
-    await this.mainWindow?.webContents.send("message", "Checking Udp...");
+    await this.mainWindow?.webContents.send("updateMessage", "Checking Udp...");
     if (this.isProxyUdp)
       this.isUdpEnabled = await checkUdpForwardingEnabled(
         this.proxyAddress,
@@ -263,7 +263,10 @@ export class ConnectionManager {
       this.isUdpEnabled ? "enabled" : "disabled"
     );
 
-    await this.mainWindow?.webContents.send("message", "Checking server...");
+    await this.mainWindow?.webContents.send(
+      "updateMessage",
+      "Checking server..."
+    );
     await validateServerCredentials(this.proxyAddress, this.proxyPort);
 
     // Don't validate credentials on boot: if the key was revoked, we want the system to stay
@@ -271,7 +274,10 @@ export class ConnectionManager {
     /*if (!this.isAutoConnect) {
     await validateServerCredentials(PROXY_ADDRESS, PROXY_PORT);
   }*/
-    await this.mainWindow?.webContents.send("message", "Staring tun2socks...");
+    await this.mainWindow?.webContents.send(
+      "updateMessage",
+      "Staring tun2socks..."
+    );
 
     this.tun2socks.start(this.isProxyUdp && this.isUdpEnabled);
 
@@ -283,7 +289,7 @@ export class ConnectionManager {
 
     if (this.smartDns) {
       await this.mainWindow?.webContents.send(
-        "message",
+        "updateMessage",
         "Starting SmartDns..."
       );
       await this.smartDns.start();
@@ -293,7 +299,10 @@ export class ConnectionManager {
       throw new Error(
         "Fail to start one or some of smartDns,ss-local,tun2socks"
       );
-    await this.mainWindow?.webContents.send("message", "Configuring routes...");
+    await this.mainWindow?.webContents.send(
+      "updateMessage",
+      "Configuring routes..."
+    );
 
     await this.routing.start();
   }

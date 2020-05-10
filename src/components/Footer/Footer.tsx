@@ -5,8 +5,8 @@ import { ipcRenderer } from "electron";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { proxy } from "../../reducers/proxyReducer";
-import { useTrafficStatistics } from "../../hooks";
-import { convertTrafficData } from "../../share";
+import { useFlow } from "../../hooks";
+import { convertFlowData } from "../../share";
 
 const Footer = () => {
   const [udpStatus, setUdpStatus] = useState<
@@ -18,27 +18,27 @@ const Footer = () => {
     (state) => state.proxy.isStarted
   );
 
-  const trafficStatistics = useTrafficStatistics();
+  const flow = useFlow();
 
   useEffect(() => {
     if (!isStarted) setUdpStatus(undefined);
   }, [isStarted]);
 
   useEffect(() => {
-    ipcRenderer.on("message", (event, message) => {
+    ipcRenderer.on("updateMessage", (event, message) => {
       if (message) setMessage(message);
       if (message === "Disconnected") dispatch(proxy.actions.stopVpn());
     });
-    ipcRenderer.on("udpStatus", (event, udpStatus) => {
+    ipcRenderer.on("updateMessage", (event, udpStatus) => {
       setUdpStatus(udpStatus);
     });
 
     return () => {
-      ipcRenderer.removeAllListeners("message");
+      ipcRenderer.removeAllListeners("updateMessage");
       ipcRenderer.removeAllListeners("udpStatus");
+      console.log("remove listeners");
     };
   }, [dispatch]);
-
   return (
     <div className={styles.container}>
       <div className={styles.udp}>
@@ -46,15 +46,13 @@ const Footer = () => {
         <Dot type={udpStatus} />
       </div>
       <div className={styles.traffic}>
-        usage: {convertTrafficData(trafficStatistics.usage)}
+        usage: {convertFlowData(flow.totalUsage)}
       </div>
       <div className={styles.traffic}>
-        download:{" "}
-        {convertTrafficData(trafficStatistics.receivedBytesPerSecond) + "/S"}
+        download: {convertFlowData(flow.downloadBytesPerSecond) + "/S"}
       </div>
       <div className={styles.traffic}>
-        upload:{" "}
-        {convertTrafficData(trafficStatistics.sentBytesPerSecond) + "/S"}
+        upload: {convertFlowData(flow.uploadBytesPerSecond) + "/S"}
       </div>
       <div className={styles.message}>{message}</div>
     </div>

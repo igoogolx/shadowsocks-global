@@ -1,17 +1,15 @@
 import React from "react";
 import styles from "./dashboard.module.css";
-import { TrafficCard } from "../Cards/TrafficCard";
+import { FlowCard } from "../Cards/FlowCard";
 import { SpeedGraphCard } from "../Cards/SpeedGraphCard";
 import { LatencyCard } from "../Cards/LatencyCard";
-import { PortNetSpeedCard } from "../Cards/PortNetSpeedCard";
 
 export const Dashboard = () => (
   <div className={styles.container}>
     <LatencyCard />
-    <TrafficCard />
+    <FlowCard />
     <div className={styles.flexContainer}>
       <SpeedGraphCard />
-      <PortNetSpeedCard />
     </div>
   </div>
 );
