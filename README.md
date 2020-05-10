@@ -15,8 +15,8 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 
 **Installation**           
 
-2. Download the release file and install it. 
-3. Enjoy.
+1. Download the release file and install it. 
+2. Enjoy.
 ## How to use customized rules
 
 1. Download rules from https://github.com/FQrabbit/SSTap-Rule or write your own rules. **Note**: the rule file size must be smaller than 100Kb to ensure performance.
