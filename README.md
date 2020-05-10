@@ -2,9 +2,6 @@
 
 A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jigsaw-Code/outline-client)(windows). **IPV6: not support**
 
-![Running screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/Running.png)
-
-![Nodes screenshot](https://github.com/igoogolx/shadowsocks-global/blob/master/screenshot/nodes.png)
 ## Features
 
 - Supports Shadowsocks and SOCKS5 protocol
@@ -18,7 +15,6 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 
 **Installation**           
 
-1. Install the [Npcap](https://nmap.org/npcap/)(recommended) or  [Winpcap](https://www.winpcap.org/). 
 2. Download the release file and install it. 
 3. Enjoy.
 ## How to use customized rules
