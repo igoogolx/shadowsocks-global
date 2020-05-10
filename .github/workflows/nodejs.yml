@@ -34,12 +34,3 @@ jobs:
       - run: yarn build
         env:
           CI: true
-      - run: del dist/.icon-ico
-      - run: del dist/win-ia32-unpacked
-      - run: del dist/builder-effective-config.yaml
-
-      - name: 'Upload the building files as artifact'
-        uses: actions/upload-artifact@v1
-        with:
-          name: ShadowsocksGlobal
-          path: dist
