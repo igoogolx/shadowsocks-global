@@ -42,7 +42,6 @@ const TUN2SOCKS_TAP_DEVICE_NAME = "shadowsocksGlobal-tap0";
 //Must be different with Outline
 const TUN2SOCKS_TAP_DEVICE_IP = "10.0.85.3";
 const TUN2SOCKS_VIRTUAL_ROUTER_IP = "10.0.85.1";
-const TUN2SOCKS_TAP_DEVICE_NETWORK = "10.0.85.0";
 const TUN2SOCKS_VIRTUAL_ROUTER_NETMASK = "255.255.255.0";
 
 // Raises an error if:
@@ -484,29 +483,19 @@ forward-zone:
 
 class Tun2socks extends ChildProcessHelper {
   constructor(private proxyAddress: string, private proxyPort: number) {
-    super(pathToEmbeddedBinary("badvpn", "badvpn-tun2socks"));
+    super(pathToEmbeddedBinary("go-tun2socks", "tun2socks"));
   }
 
   start(isUdpEnabled: boolean) {
-    // ./badvpn-tun2socks.exe \
-    //   --tundev "tap0901:outline-tap0:10.0.85.2:10.0.85.0:255.255.255.0" \
-    //   --netif-ipaddr 10.0.85.1 --netif-netmask 255.255.255.0 \
-    //   --socks-server-addr 127.0.0.1:1081 \
-    //   --socks5-udp --udp-relay-addr 127.0.0.1:1081 \
-    //   --transparent-dns
     const args: string[] = [];
-    args.push(
-      "--tundev",
-      `tap0901:${TUN2SOCKS_TAP_DEVICE_NAME}:${TUN2SOCKS_TAP_DEVICE_IP}:${TUN2SOCKS_TAP_DEVICE_NETWORK}:${TUN2SOCKS_VIRTUAL_ROUTER_NETMASK}`
-    );
-    args.push("--netif-ipaddr", TUN2SOCKS_VIRTUAL_ROUTER_IP);
-    args.push("--netif-netmask", TUN2SOCKS_VIRTUAL_ROUTER_NETMASK);
-    args.push("--socks-server-addr", `${this.proxyAddress}:${this.proxyPort}`);
-    args.push("--loglevel", "error");
-    args.push("--transparent-dns");
-    if (isUdpEnabled) {
-      args.push("--socks5-udp");
-      args.push("--udp-relay-addr", `${this.proxyAddress}:${this.proxyPort}`);
+    args.push("-tunName", TUN2SOCKS_TAP_DEVICE_NAME);
+    args.push("-tunAddr", TUN2SOCKS_TAP_DEVICE_IP);
+    args.push("-tunMask", TUN2SOCKS_VIRTUAL_ROUTER_NETMASK);
+    args.push("-tunGw", TUN2SOCKS_VIRTUAL_ROUTER_IP);
+    args.push("-proxyServer", `${this.proxyAddress}:${this.proxyPort}`);
+    args.push("-loglevel", "error");
+    if (!isUdpEnabled) {
+      args.push("-dnsFallback");
     }
 
     this.launch(args);
