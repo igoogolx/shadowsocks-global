@@ -8,7 +8,6 @@ import { Button, Dialog, Icon, ICON_NAME, INPUT_SIZE } from "../Core";
 import { isEmpty, isPort } from "../../utils/validator";
 import { FieldSelector } from "../Core/Selector/Selector";
 import { RegionCodeSelector } from "./RegioncodeSelector";
-import { lookupRegionCodes } from "../../utils/helper";
 
 type EditShadowsocksDialogProps = {
   close: () => void;
@@ -36,32 +35,19 @@ export const EditShadowsocksDialog = React.memo(
     const dispatch = useDispatch();
 
     const onSubmit = async (shadowsocks: Omit<Shadowsocks, "id">) => {
-      let searchedRegionCode;
-      if (shadowsocks.regionCode === "Auto")
-        try {
-          searchedRegionCode = await lookupRegionCodes([shadowsocks.host]).then(
-            (regionCodes) => regionCodes[0]
-          );
-        } catch (e) {}
       if (initialValue)
         dispatch(
           proxy.actions.update({
             type: "shadowsocks",
-            config: {
-              ...shadowsocks,
-              id: initialValue.id,
-              regionCode: searchedRegionCode || shadowsocks.regionCode,
-            },
+            id: initialValue.id,
+            config: shadowsocks,
           })
         );
       else
         dispatch(
           proxy.actions.add({
             type: "shadowsocks",
-            config: {
-              ...shadowsocks,
-              regionCode: searchedRegionCode || shadowsocks.regionCode,
-            },
+            config: shadowsocks,
           })
         );
       close();

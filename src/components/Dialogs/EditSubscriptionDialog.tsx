@@ -43,10 +43,10 @@ export const EditSubscriptionDialog = React.memo(
           dispatch(
             proxy.actions.update({
               type: "subscription",
+              id: initialValue.id,
               config: {
                 ...subscription,
                 name,
-                id: initialValue.id,
                 shadowsockses,
               },
             })

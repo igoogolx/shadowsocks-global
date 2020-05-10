@@ -97,26 +97,31 @@ export const proxy = createSlice({
     update: (
       state,
       action: PayloadAction<
-        | { type: "shadowsocks"; config: Shadowsocks }
-        | { type: "subscription"; config: Subscription }
-        | { type: "socks5"; config: Socks5 }
+        | { type: "shadowsocks"; id: string; config: Partial<Shadowsocks> }
+        | { type: "subscription"; id: string; config: Partial<Subscription> }
+        | { type: "socks5"; id: string; config: Partial<Socks5> }
       >
     ) => {
-      const { type, config } = action.payload;
+      const { type, id, config } = action.payload;
       switch (type) {
         case "shadowsocks":
           {
             const shadowsocksIndex = state.shadowsockses.findIndex(
-              (proxy) => proxy.id === config.id
+              (proxy) => proxy.id === id
             );
             if (shadowsocksIndex === -1) {
               state.subscriptions.some((subscription, subscriptionIndex) =>
                 subscription.shadowsockses.some(
                   (shadowsocks, subShadowsocksIndex) => {
-                    if (shadowsocks.id === config.id) {
+                    if (shadowsocks.id === id) {
                       state.subscriptions[subscriptionIndex].shadowsockses[
                         subShadowsocksIndex
-                      ] = config as Shadowsocks;
+                      ] = {
+                        ...state.subscriptions[subscriptionIndex].shadowsockses[
+                          subShadowsocksIndex
+                        ],
+                        ...config,
+                      };
                       return true;
                     }
                     return false;
@@ -124,13 +129,16 @@ export const proxy = createSlice({
                 )
               );
             } else
-              state.shadowsockses[shadowsocksIndex] = config as Shadowsocks;
+              state.shadowsockses[shadowsocksIndex] = {
+                ...state.shadowsockses[shadowsocksIndex],
+                ...config,
+              };
           }
           break;
         case "subscription":
           {
             const index = state.subscriptions.findIndex(
-              (subscription) => subscription.id === config.id
+              (subscription) => subscription.id === id
             );
             if (
               state.subscriptions[index].shadowsockses.some(
@@ -139,15 +147,16 @@ export const proxy = createSlice({
             )
               //Reset activated id
               state.activeId = "";
-            state.subscriptions[index] = config as Subscription;
+            state.subscriptions[index] = {
+              ...state.subscriptions[index],
+              ...config,
+            };
           }
           break;
         //Socks5
         default: {
-          const index = state.socks5s.findIndex(
-            (socks5) => socks5.id === config.id
-          );
-          state.socks5s[index] = config as Socks5;
+          const index = state.socks5s.findIndex((socks5) => socks5.id === id);
+          state.socks5s[index] = { ...state.socks5s[index], ...config };
         }
       }
     },

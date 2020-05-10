@@ -58,8 +58,8 @@ export const Subscriptions = React.memo(() => {
                         dispatch(
                           proxy.actions.update({
                             type: "subscription",
+                            id: subscription.id,
                             config: {
-                              ...subscription,
                               shadowsockses,
                             },
                           })

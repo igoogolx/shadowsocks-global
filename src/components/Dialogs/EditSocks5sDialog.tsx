@@ -6,7 +6,6 @@ import styles from "./dialogs.module.css";
 import { Button, Dialog, INPUT_SIZE } from "../Core";
 import { RegionCodeSelector } from "./RegioncodeSelector";
 import { isPort } from "../../utils/validator";
-import { lookupRegionCodes } from "../../utils/helper";
 
 type EditSocks5sDialogProps = {
   close: () => void;
@@ -28,32 +27,19 @@ export const EditSocks5sDialog = React.memo((props: EditSocks5sDialogProps) => {
     [value]
   );
   const onSubmit = async (socks5: Omit<Socks5, "id">) => {
-    let searchedRegionCode;
-    if (socks5.regionCode === "Auto")
-      try {
-        searchedRegionCode = await lookupRegionCodes([socks5.host]).then(
-          (regionCodes) => regionCodes[0]
-        );
-      } catch (e) {}
     if (initialValue)
       dispatch(
         proxy.actions.update({
           type: "socks5",
-          config: {
-            ...socks5,
-            id: initialValue.id,
-            regionCode: searchedRegionCode || socks5.regionCode,
-          },
+          id: initialValue.id,
+          config: socks5,
         })
       );
     else
       dispatch(
         proxy.actions.add({
           type: "socks5",
-          config: {
-            ...socks5,
-            regionCode: searchedRegionCode || socks5.regionCode,
-          },
+          config: socks5,
         })
       );
     close();
