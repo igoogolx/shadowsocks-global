@@ -71,7 +71,8 @@ const Header = () => {
               dispatch(
                 proxy.actions.update({
                   type: "subscription",
-                  config: { ...subscription, shadowsockses },
+                  id: subscription.id,
+                  config: { shadowsockses },
                 })
               );
             })
