@@ -36,7 +36,6 @@ const Footer = () => {
     return () => {
       ipcRenderer.removeAllListeners("updateMessage");
       ipcRenderer.removeAllListeners("udpStatus");
-      console.log("remove listeners");
     };
   }, [dispatch]);
   return (
