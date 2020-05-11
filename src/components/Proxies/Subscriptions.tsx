@@ -49,6 +49,7 @@ export const Subscriptions = React.memo(() => {
                   {
                     iconName: ICON_NAME.UPDATE,
                     content: "Update",
+                    disabled: disabled,
                     handleOnClick: async () => {
                       try {
                         setIsUpdating(true);
@@ -74,6 +75,7 @@ export const Subscriptions = React.memo(() => {
                   {
                     iconName: ICON_NAME.EDIT,
                     content: "Edit",
+                    disabled: disabled,
                     handleOnClick: () => {
                       setEditingId(subscription.id);
                       setIsEditing(true);
@@ -92,6 +94,7 @@ export const Subscriptions = React.memo(() => {
                   {
                     iconName: ICON_NAME.DELETE,
                     content: "Delete",
+                    disabled: disabled,
                     isDivider: true,
                     isDanger: true,
                     handleOnClick: () => {
@@ -104,7 +107,6 @@ export const Subscriptions = React.memo(() => {
                     },
                   },
                 ]}
-                disabled={disabled}
               >
                 <Icon
                   iconName={ICON_NAME.OMIT}
