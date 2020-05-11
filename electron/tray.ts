@@ -1,5 +1,8 @@
 import { Tray, BrowserWindow, nativeImage, app, NativeImage } from "electron";
 import path from "path";
+import { flow, FlowData } from "./flow";
+import { convertFlowData } from "../src/share";
+import { getAppConfig } from "./utils";
 
 export class AppTray {
   tray: Tray | undefined;
@@ -43,16 +46,31 @@ export class AppTray {
     }
     return image;
   };
-  setImage = (type: "connected" | "disconnected") => {
-    if (this.trayIconImages) {
-      if (type === "connected")
-        this.tray?.setImage(this.trayIconImages.connected);
-      else this.tray?.setImage(this.trayIconImages.disconnected);
-    }
-  };
-  setToolTip = (toolTip?: string) => {
+
+  setToolTip = (type: "connected" | "disconnected") => {
     const title = `ShadowsocksGlobal ${app.getVersion()}`;
-    const content = toolTip ? title + "\n" + toolTip + "\n" : title + "\n";
-    this.tray?.setToolTip(content);
+    if (type === "connected") {
+      if (this.trayIconImages)
+        this.tray?.setImage(this.trayIconImages.connected);
+      const state = getAppConfig();
+      const proxyRule = state.setting.rule.current;
+      const flowListener = (flow: FlowData) => {
+        console.log(flow);
+        this.tray?.setToolTip(
+          title +
+            "\n" +
+            `Rule: ${proxyRule}` +
+            "\n" +
+            `download: ${convertFlowData(
+              flow.downloadBytesPerSecond
+            )}/S  upload: ${convertFlowData(flow.uploadBytesPerSecond)}/S`
+        );
+      };
+      flow(flowListener);
+    } else {
+      if (this.trayIconImages)
+        this.tray?.setImage(this.trayIconImages.disconnected);
+      this.tray?.setToolTip(title);
+    }
   };
 }

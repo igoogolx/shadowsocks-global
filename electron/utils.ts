@@ -1,4 +1,4 @@
-import { BrowserWindow, Menu } from "electron";
+import { Menu } from "electron";
 import { app } from "electron";
 import path from "path";
 import fs from "fs";
@@ -9,25 +9,26 @@ import Store from "electron-store";
 import { AppState } from "../src/reducers/rootReducer";
 import { getActivatedServer } from "../src/components/Proxies/util";
 import detectPort from "detect-port";
+import { mainWindow } from "./common";
 
 const appConfig = new Store();
 export const getAppConfig = () => appConfig.get("state") as AppState;
 
-export const setMenu = (mainWindow: BrowserWindow) => {
+export const setMenu = () => {
   if (process.env.NODE_ENV === "development") {
-    mainWindow.webContents.on("context-menu", (e, props) => {
+    mainWindow.get()?.webContents.on("context-menu", (e, props) => {
       const { x, y } = props;
       Menu.buildFromTemplate([
         {
           label: "Inspect element",
           click: () => {
-            mainWindow.webContents.inspectElement(x, y);
+            mainWindow.get()?.webContents.inspectElement(x, y);
           },
         },
-      ]).popup({ window: mainWindow });
+      ]).popup({ window: mainWindow.get() });
     });
   } else {
-    mainWindow.removeMenu();
+    mainWindow.get()?.removeMenu();
   }
 };
 

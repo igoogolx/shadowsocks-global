@@ -1,24 +1,16 @@
 import { ConnectionManager } from "./process_manager";
 import { getConfig } from "./utils";
-import { BrowserWindow } from "electron";
 import { ConnectionStatus } from "./routing_service";
 import { AppTray } from "./tray";
 import { flow, FlowData } from "./flow";
-import { convertFlowData } from "../src/share";
+import { mainWindow } from "./common";
+import { sendFlowToRender, sendMessageToRender } from "./ipc";
 
 export class VpnManager {
   currentConnection: ConnectionManager | undefined;
 
-  constructor(
-    private mainWindow: BrowserWindow | null,
-    private tray: AppTray | undefined
-  ) {}
+  constructor(private tray: AppTray | undefined) {}
 
-  private setTayImage = (status: ConnectionStatus) => {
-    const isConnected = status === ConnectionStatus.CONNECTED;
-    const trayIconImageType = isConnected ? "connected" : "disconnected";
-    this.tray?.setImage(trayIconImageType);
-  };
   private sendConnectionStatus = (status: ConnectionStatus) => {
     let statusString;
     switch (status) {
@@ -36,24 +28,22 @@ export class VpnManager {
         return;
     }
     const event = `proxy-${statusString}`;
-    if (this.mainWindow) {
-      this.mainWindow.webContents.send(event);
+    if (mainWindow.get()) {
+      mainWindow.get()?.webContents.send(event);
     } else {
       console.warn(`received ${event} event but no mainWindow to notify`);
     }
-    this.setTayImage(status);
   };
 
   start = async () => {
     try {
-      const { route, dns, isProxyUdp, remoteServer, rule } = await getConfig();
+      const { route, dns, isProxyUdp, remoteServer } = await getConfig();
       this.currentConnection = new ConnectionManager(
         //@ts-ignore
         remoteServer,
         isProxyUdp,
         route,
-        dns,
-        this.mainWindow
+        dns
       );
       if (!this.currentConnection) return;
       //TODO: Fix bug: can't catch error
@@ -71,34 +61,18 @@ export class VpnManager {
         console.log(`reconnected`);
         this.sendConnectionStatus(ConnectionStatus.CONNECTED);
       };
-      await this.mainWindow?.webContents.send("updateMessage", "Connecting...");
+      await sendMessageToRender("Connecting...");
       await this.currentConnection.start();
-      await this.mainWindow?.webContents.send("updateMessage", "Connected!");
+      await sendMessageToRender("Connected!");
       this.sendConnectionStatus(ConnectionStatus.CONNECTED);
-
-      const defaultTooltip =
-        (remoteServer.name
-          ? `${remoteServer?.name}(${remoteServer.host}:${remoteServer.port})`
-          : `${remoteServer.host}:${remoteServer.port}`) +
-        "\n" +
-        `Rule: ${rule}` +
-        "\n";
-      this.tray?.setToolTip(defaultTooltip);
       const flowListener = (flow: FlowData) => {
-        if (this.mainWindow) {
-          this.mainWindow.webContents.send("updateFlow", {
-            ...flow,
-            time: Date.now(),
-          });
-        }
-        this.tray?.setToolTip(
-          defaultTooltip +
-            `download: ${convertFlowData(
-              flow.downloadBytesPerSecond
-            )}/S  upload: ${convertFlowData(flow.uploadBytesPerSecond)}/S`
-        );
+        sendFlowToRender({
+          ...flow,
+          time: Date.now(),
+        });
       };
       flow(flowListener);
+      this.tray?.setToolTip("connected");
     } catch (e) {
       await this.stop();
       throw new Error(e);
@@ -112,8 +86,8 @@ export class VpnManager {
 
       this.currentConnection = undefined;
       this.sendConnectionStatus(ConnectionStatus.DISCONNECTED);
-      await this.mainWindow?.webContents.send("updateMessage", "Disconnected");
-      this.tray?.setToolTip();
+      await sendMessageToRender("Disconnected");
+      this.tray?.setToolTip("disconnected");
     } catch (e) {
       console.log(e);
     }

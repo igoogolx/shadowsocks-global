@@ -23,11 +23,12 @@ import {
   DNS_NATIVE_WEBSITES_FILE_PATH,
 } from "./utils";
 import { SMART_DNS_ADDRESS } from "../src/constants";
-import { BrowserWindow, app } from "electron";
+import { app } from "electron";
 import { validateServerCredentials } from "../src/share";
 import { logger } from "./log";
 import * as path from "path";
 import * as fs from "fs";
+import { sendMessageToRender, sendUdpStatusToRender } from "./ipc";
 
 export type Route = {
   proxy: string[];
@@ -139,8 +140,7 @@ export class ConnectionManager {
           type: "customized";
           server: { alternate: string; preferred: string };
           whiteListServers: string[];
-        },
-    private mainWindow: BrowserWindow | null
+        }
   ) {
     const isSocks5 = remoteServer.type === "socks5";
     const isSmartDns = dns.type === "smart";
@@ -234,39 +234,23 @@ export class ConnectionManager {
 
   // Fulfills once all three helpers have started successfully.
   async start() {
-    await this.mainWindow?.webContents.send(
-      "message",
-      "Checking tap device..."
-    );
-
+    await sendMessageToRender("Checking tap device...");
     testTapDevice();
-
     // ss-local must be up in order to test UDP support and validate credentials.
     if (this.ssLocal) {
       this.ssLocal.start(this.remoteServer);
-      await this.mainWindow?.webContents.send(
-        "updateMessage",
-        "Checking ss-local..."
-      );
+      await sendMessageToRender("Checking ss-local...");
     }
-
     await isServerReachable(this.proxyAddress, this.proxyPort);
-
-    await this.mainWindow?.webContents.send("updateMessage", "Checking Udp...");
+    await sendMessageToRender("Checking Udp...");
     if (this.isProxyUdp)
       this.isUdpEnabled = await checkUdpForwardingEnabled(
         this.proxyAddress,
         this.proxyPort
       );
-    await this.mainWindow?.webContents.send(
-      "udpStatus",
-      this.isUdpEnabled ? "enabled" : "disabled"
-    );
 
-    await this.mainWindow?.webContents.send(
-      "updateMessage",
-      "Checking server..."
-    );
+    await sendUdpStatusToRender(this.isUdpEnabled ? "enabled" : "disabled");
+    await sendMessageToRender("Checking server...");
     await validateServerCredentials(this.proxyAddress, this.proxyPort);
 
     // Don't validate credentials on boot: if the key was revoked, we want the system to stay
@@ -274,11 +258,8 @@ export class ConnectionManager {
     /*if (!this.isAutoConnect) {
     await validateServerCredentials(PROXY_ADDRESS, PROXY_PORT);
   }*/
-    await this.mainWindow?.webContents.send(
-      "updateMessage",
-      "Staring tun2socks..."
-    );
 
+    await sendMessageToRender("Staring tun2socks...");
     this.tun2socks.start(this.isProxyUdp && this.isUdpEnabled);
 
     //TODO: Implement a listener that terminates the start process once this.disconnecting become true.
@@ -288,10 +269,7 @@ export class ConnectionManager {
       );
 
     if (this.smartDns) {
-      await this.mainWindow?.webContents.send(
-        "updateMessage",
-        "Starting SmartDns..."
-      );
+      await sendMessageToRender("Starting SmartDns...");
       await this.smartDns.start();
     }
 
@@ -299,11 +277,8 @@ export class ConnectionManager {
       throw new Error(
         "Fail to start one or some of smartDns,ss-local,tun2socks"
       );
-    await this.mainWindow?.webContents.send(
-      "updateMessage",
-      "Configuring routes..."
-    );
 
+    await sendMessageToRender("Configuring routes...");
     await this.routing.start();
   }
 
