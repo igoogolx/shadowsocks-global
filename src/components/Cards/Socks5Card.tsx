@@ -1,10 +1,11 @@
 import { proxy, Socks5 } from "../../reducers/proxyReducer";
 import { ServerCard } from "./ServerCard";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { ICON_NAME } from "../Core";
 import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
+import { lookupRegionCode } from "../../utils/helper";
 
 type Socks5CardProps = {
   socks5: Socks5;
@@ -15,14 +16,14 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
   const dispatch = useDispatch();
   const onClick = useCallback(() => dispatch(proxy.actions.setActiveId(id)), [
     dispatch,
-    id
+    id,
   ]);
   const [isEditing, setIsEditing] = useState(false);
   const activatedId = useSelector<AppState, string>(
-    state => state.proxy.activeId
+    (state) => state.proxy.activeId
   );
   const isStartedOrProcessing = useSelector<AppState, boolean>(
-    state => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
 
   const dropdownItems = useMemo(() => {
@@ -32,7 +33,7 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
         iconName: ICON_NAME.EDIT,
         content: "Edit",
         handleOnClick: () => setIsEditing(true),
-        disabled: isActivated
+        disabled: isActivated,
       },
       {
         iconName: ICON_NAME.DELETE,
@@ -41,13 +42,29 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
         handleOnClick: () => {
           dispatch(proxy.actions.delete({ type: "socks5", id }));
         },
-        disabled: isActivated
-      }
+        disabled: isActivated,
+      },
     ];
   }, [activatedId, dispatch, id, isStartedOrProcessing]);
 
   const closeDialog = useCallback(() => setIsEditing(false), []);
-
+  useEffect(() => {
+    if (regionCode === "Auto") {
+      lookupRegionCode(host)
+        .then((regionCode) => {
+          dispatch(
+            proxy.actions.update({
+              type: "socks5",
+              id,
+              config: { regionCode },
+            })
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+  }, [dispatch, host, id, regionCode]);
   return (
     <>
       {isEditing && (
@@ -55,6 +72,7 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
       )}
       <ServerCard
         regionCode={regionCode}
+        type={"socks5"}
         onClick={onClick}
         host={host}
         port={port}

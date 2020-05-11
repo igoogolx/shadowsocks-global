@@ -11,27 +11,18 @@ const UPDATE_SUBSCRIPTIONS_TIMEOUT_MS = 5000;
 // Uses the OS' built-in functions, i.e. /etc/hosts, et al.:
 // https://nodejs.org/dist/latest-v10.x/docs/api/dns.html#dns_dns
 
-export const lookupRegionCodes = async (hosts: string[]) => {
-  const ips = await Promise.all(
-    hosts.map(async (host) => {
-      try {
-        return await lookupIp(host);
-      } catch {
-        return null;
-      }
-    })
-  );
-  return await Promise.all(
-    ips.map(
-      (ip) =>
-        new Promise<string | undefined>((fulfill) => {
-          if (!ip) fulfill(undefined);
-          const result = geoip.lookup(ip);
-          if (result) fulfill(result.country);
-          else fulfill(undefined);
-        })
-    )
-  );
+export const lookupRegionCode = async (host: string) => {
+  try {
+    const ip = await lookupIp(host);
+    return await new Promise<string | undefined>((fulfill) => {
+      if (!ip) fulfill(undefined);
+      const result = geoip.lookup(ip);
+      if (result) fulfill(result.country);
+      else fulfill(undefined);
+    });
+  } catch {
+    return undefined;
+  }
 };
 
 export const updateSubscription = async (url: string) => {
@@ -40,12 +31,10 @@ export const updateSubscription = async (url: string) => {
   });
   const nodes = Buffer.from(nodesBase64.data, "base64").toString();
   const shadowsockses = decodeSsUrl(nodes);
-  const hosts = shadowsockses.map((shadowsocks) => shadowsocks.host);
-  const regionCodes = await lookupRegionCodes(hosts);
 
-  return shadowsockses.map((shadowsocks, index) => ({
+  return shadowsockses.map((shadowsocks) => ({
     ...shadowsocks,
-    regionCode: regionCodes[index],
+    regionCode: "Auto",
     id: uuid(),
   }));
 };

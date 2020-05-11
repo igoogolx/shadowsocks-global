@@ -7,7 +7,7 @@ export const useAsync = (
 ) => {
   const isSubscribed = useRef(true);
   const [pending, setPending] = useState(false);
-  const [value, setValue] = useState(null);
+  const [value, setValue] = useState<any>(null);
   const [error, setError] = useState(null);
 
   // The execute function wraps asyncFunction and

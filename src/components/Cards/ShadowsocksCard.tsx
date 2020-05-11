@@ -19,15 +19,15 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
 
   const onClick = useCallback(() => dispatch(proxy.actions.setActiveId(id)), [
     dispatch,
-    id
+    id,
   ]);
   const [isEditing, setIsEditing] = useState(false);
   const activatedId = useSelector<AppState, string>(
-    state => state.proxy.activeId
+    (state) => state.proxy.activeId
   );
   const [isShowQrCode, setIsShowQrCode] = useState(false);
   const isStartedOrProcessing = useSelector<AppState, boolean>(
-    state => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
 
   const dropdownItems = useMemo(() => {
@@ -40,7 +40,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         handleOnClick: () => {
           setIsEditing(true);
         },
-        disabled: isActivated
+        disabled: isActivated,
       },
       {
         iconName: ICON_NAME.COPY,
@@ -49,14 +49,14 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
           const url = encodeSsUrl(props.shadowsocks);
           await clipboard.writeText(url);
           notifier.success("Copy Url successfully");
-        }
+        },
       },
       {
         iconName: ICON_NAME.QRCODE,
         content: "Share QrCode",
         handleOnClick: async () => {
           setIsShowQrCode(true);
-        }
+        },
       },
 
       {
@@ -66,8 +66,8 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         handleOnClick: () => {
           dispatch(proxy.actions.delete({ type: "shadowsocks", id }));
         },
-        disabled: isActivated
-      }
+        disabled: isActivated,
+      },
     ];
   }, [activatedId, dispatch, id, isStartedOrProcessing, props.shadowsocks]);
   const closeEditDialog = useCallback(() => setIsEditing(false), []);
@@ -76,7 +76,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
   useEffect(() => {
     if (isShowQrCode) {
       const url = encodeSsUrl(props.shadowsocks);
-      QRCode.toCanvas(document.getElementById("qr-code"), url).catch(e => {
+      QRCode.toCanvas(document.getElementById("qr-code"), url).catch((e) => {
         console.log(e);
       });
     }
@@ -97,6 +97,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
       )}
       <ServerCard
         id={id}
+        type={"shadowsocks"}
         onClick={onClick}
         name={name}
         host={host}

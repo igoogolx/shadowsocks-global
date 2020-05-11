@@ -1,7 +1,7 @@
 import styles from "./cards.module.css";
 import { Button, Dropdown, Icon, ICON_NAME } from "../Core";
 import React, { useCallback, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { Dot } from "../Dot/Dot";
 import { Card } from "../Core/Card/Card";
@@ -9,10 +9,12 @@ import { MenuItemProps } from "../Core/Menu/Menu";
 import { checkServer } from "../../utils/connectivity";
 import { useAsync } from "../../hooks";
 import classNames from "classnames";
-import { pingEventEmitter } from "../../utils/helper";
+import { lookupRegionCode, pingEventEmitter } from "../../utils/helper";
+import { proxy } from "../../reducers/proxyReducer";
 
 type ServerCardProps = {
   id: string;
+  type: "shadowsocks" | "socks5";
   menuItems: MenuItemProps[];
   onClick: () => void;
   name?: string;
@@ -23,7 +25,7 @@ type ServerCardProps = {
 };
 
 export const ServerCard = React.memo((props: ServerCardProps) => {
-  const { name, host, regionCode, onClick, id, menuItems, port } = props;
+  const { name, host, regionCode, onClick, id, menuItems, port, type } = props;
   const activeId = useSelector<AppState, string>(
     (state) => state.proxy.activeId
   );
@@ -43,24 +45,60 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
     [host, port]
   );
 
-  const { execute, pending, value: delay, error } = useAsync(ping, false);
+  const {
+    execute: executePing,
+    pending: pinging,
+    value: delay,
+    error,
+  } = useAsync(ping, false);
   const handleOnClickDelay = useCallback(
     (e: any) => {
       e.stopPropagation();
-      execute().catch((e) => {
+      executePing().catch((e) => {
         console.log(e);
       });
     },
-    [execute]
+    [executePing]
   );
   const isActive = activeId === id;
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    pingEventEmitter.on("test", execute);
+    pingEventEmitter.on("test", executePing);
     return () => {
-      pingEventEmitter.removeListener("test", execute);
+      pingEventEmitter.removeListener("test", executePing);
     };
-  }, [execute]);
+  }, [executePing]);
+
+  const getRegionCode = useCallback(async () => await lookupRegionCode(host), [
+    host,
+  ]);
+
+  const {
+    execute: executeGetRegionCode,
+    value: newRegionCode,
+    pending: gettingRegionCode,
+  } = useAsync(getRegionCode, false);
+
+  useEffect(() => {
+    if (regionCode === "Auto") {
+      executeGetRegionCode().catch((e) => {
+        console.log(e);
+      });
+    }
+  }, [dispatch, executeGetRegionCode, host, regionCode]);
+
+  useEffect(() => {
+    if (newRegionCode)
+      dispatch(
+        proxy.actions.update({
+          type,
+          id,
+          config: { regionCode: newRegionCode },
+        })
+      );
+  }, [dispatch, id, newRegionCode, type]);
   return (
     <div className={styles.server}>
       <Dropdown items={menuItems} className={styles.dropdown}>
@@ -73,7 +111,12 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
       >
         <div className={styles.flagContainer}>
           {regionCode && (
-            <Icon iconName={regionCode} type={"flag"} className={styles.flag} />
+            <Icon
+              iconName={gettingRegionCode ? ICON_NAME.LOADING : regionCode}
+              isLoading={gettingRegionCode}
+              type={gettingRegionCode ? "iconFont" : "flag"}
+              className={gettingRegionCode ? styles.loading : styles.flag}
+            />
           )}
         </div>
         <div className={styles.body}>
@@ -82,7 +125,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
         {isActive && <Dot type={"enabled"} className={styles.dot} />}
       </Card>
 
-      {(delay || error || pending) && !disabled && (
+      {(delay || error || pinging) && !disabled && (
         <Button
           className={classNames(styles.delay, {
             [styles.timeout]: error,
@@ -90,10 +133,10 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
             [styles.slow]: delay && Number(delay) > 500,
           })}
           onClick={handleOnClickDelay}
-          isLoading={pending}
+          isLoading={pinging}
           disabled={disabled}
         >
-          {pending ? "" : error ? "Timeout" : delay + "ms"}
+          {pinging ? "" : error ? "Timeout" : delay + "ms"}
         </Button>
       )}
     </div>

@@ -24,11 +24,7 @@ import path from "path";
 import { BUILD_IN_RULE, setting } from "../../reducers/settingReducer";
 import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
 import { clipboard, ipcRenderer } from "electron";
-import {
-  lookupRegionCodes,
-  pingEventEmitter,
-  updateSubscription,
-} from "../../utils/helper";
+import { pingEventEmitter, updateSubscription } from "../../utils/helper";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
 import { decodeSsUrl } from "../../utils/url";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
@@ -152,11 +148,9 @@ const Header = () => {
             const url = clipboard.readText();
             let shadowsockses = decodeSsUrl(url);
             if (shadowsockses.length === 0) return;
-            const hosts = shadowsockses.map((shadowsocks) => shadowsocks.host);
-            const regionCodes = await lookupRegionCodes(hosts);
-            shadowsockses = shadowsockses.map((shadowsocks, index) => ({
+            shadowsockses = shadowsockses.map((shadowsocks) => ({
               ...shadowsocks,
-              regionCode: regionCodes[index],
+              regionCode: "Auto",
             }));
             (shadowsockses as Shadowsocks[]).forEach((shadowsocks) =>
               dispatch(

@@ -27,6 +27,7 @@
     margin: auto 10px;
     position: relative;
     overflow: hidden;
+    display: flex;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -41,7 +42,12 @@
       left: 50%;
       transform: translate(-50%, -50%);
     }
+    & .loading {
+      color: var(--disabled-color);
+      margin: auto;
+    }
   }
+
   & .body {
     display: flex;
     flex-direction: column;
