@@ -16,9 +16,9 @@ export const useFlow = () => {
   }, []);
 
   useEffect(() => {
-    ipcRenderer.on("updateFlow", updateFlowListener);
+    ipcRenderer.on("proxy-flow", updateFlowListener);
     return () => {
-      ipcRenderer.removeListener("updateFlow", updateFlowListener);
+      ipcRenderer.removeListener("proxy-flow", updateFlowListener);
     };
   }, [updateFlowListener]);
 

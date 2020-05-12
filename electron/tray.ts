@@ -55,7 +55,6 @@ export class AppTray {
       const state = getAppConfig();
       const proxyRule = state.setting.rule.current;
       const flowListener = (flow: FlowData) => {
-        console.log(flow);
         this.tray?.setToolTip(
           title +
             "\n" +

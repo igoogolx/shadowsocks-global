@@ -92,11 +92,9 @@ const Header = () => {
       autoConnect();
     }
     //TODO: use customized channel for "Disconnected" because there are others message.
-    ipcRenderer.on("message", (event, message) => {
-      if (message === "Disconnected") {
-        dispatch(proxy.actions.setIsProcessing(false));
-        dispatch(proxy.actions.stopVpn());
-      }
+    ipcRenderer.on("proxy-disconnected", () => {
+      dispatch(proxy.actions.setIsProcessing(false));
+      dispatch(proxy.actions.stopVpn());
     });
 
     ipcRenderer.send("setRunAtSystemStartup");
@@ -108,7 +106,7 @@ const Header = () => {
     dispatch(proxy.actions.setIsProcessing(false));
     dispatch(proxy.actions.stopVpn());
     return () => {
-      ipcRenderer.removeAllListeners("message");
+      ipcRenderer.removeAllListeners("proxy-disconnected");
     };
     //Only be fired once to init app.
   }, []); // eslint-disable-line

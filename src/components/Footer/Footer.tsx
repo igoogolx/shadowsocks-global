@@ -4,7 +4,6 @@ import { Dot } from "../Dot/Dot";
 import { ipcRenderer } from "electron";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import { proxy } from "../../reducers/proxyReducer";
 import { useFlow } from "../../hooks";
 import { convertFlowData } from "../../share";
 
@@ -25,17 +24,16 @@ const Footer = () => {
   }, [isStarted]);
 
   useEffect(() => {
-    ipcRenderer.on("updateMessage", (event, message) => {
+    ipcRenderer.on("proxy-message", (event, message) => {
       if (message) setMessage(message);
-      if (message === "Disconnected") dispatch(proxy.actions.stopVpn());
     });
-    ipcRenderer.on("udpStatus", (event, udpStatus) => {
+    ipcRenderer.on("proxy-udpStatus", (event, udpStatus) => {
       setUdpStatus(udpStatus);
     });
 
     return () => {
-      ipcRenderer.removeAllListeners("updateMessage");
-      ipcRenderer.removeAllListeners("udpStatus");
+      ipcRenderer.removeAllListeners("proxy-message");
+      ipcRenderer.removeAllListeners("proxy-udpStatus");
     };
   }, [dispatch]);
   return (

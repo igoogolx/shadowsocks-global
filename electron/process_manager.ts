@@ -234,23 +234,23 @@ export class ConnectionManager {
 
   // Fulfills once all three helpers have started successfully.
   async start() {
-    await sendMessageToRender("Checking tap device...");
+    sendMessageToRender("Checking tap device...");
     testTapDevice();
     // ss-local must be up in order to test UDP support and validate credentials.
     if (this.ssLocal) {
       this.ssLocal.start(this.remoteServer);
-      await sendMessageToRender("Checking ss-local...");
+      sendMessageToRender("Checking ss-local...");
     }
     await isServerReachable(this.proxyAddress, this.proxyPort);
-    await sendMessageToRender("Checking Udp...");
+    sendMessageToRender("Checking Udp...");
     if (this.isProxyUdp)
       this.isUdpEnabled = await checkUdpForwardingEnabled(
         this.proxyAddress,
         this.proxyPort
       );
 
-    await sendUdpStatusToRender(this.isUdpEnabled ? "enabled" : "disabled");
-    await sendMessageToRender("Checking server...");
+    sendUdpStatusToRender(this.isUdpEnabled ? "enabled" : "disabled");
+    sendMessageToRender("Checking server...");
     await validateServerCredentials(this.proxyAddress, this.proxyPort);
 
     // Don't validate credentials on boot: if the key was revoked, we want the system to stay
@@ -259,7 +259,7 @@ export class ConnectionManager {
     await validateServerCredentials(PROXY_ADDRESS, PROXY_PORT);
   }*/
 
-    await sendMessageToRender("Staring tun2socks...");
+    sendMessageToRender("Staring tun2socks...");
     this.tun2socks.start(this.isProxyUdp && this.isUdpEnabled);
 
     //TODO: Implement a listener that terminates the start process once this.disconnecting become true.
@@ -269,7 +269,7 @@ export class ConnectionManager {
       );
 
     if (this.smartDns) {
-      await sendMessageToRender("Starting SmartDns...");
+      sendMessageToRender("Starting SmartDns...");
       await this.smartDns.start();
     }
 
@@ -278,7 +278,7 @@ export class ConnectionManager {
         "Fail to start one or some of smartDns,ss-local,tun2socks"
       );
 
-    await sendMessageToRender("Configuring routes...");
+    sendMessageToRender("Configuring routes...");
     await this.routing.start();
   }
 
