@@ -91,6 +91,18 @@ function testTapDevice() {
   }
 }
 
+export type Dns =
+  | {
+      type: "smart";
+      server: { native: string; default: string };
+      whiteListServers: string[];
+    }
+  | {
+      type: "customized";
+      server: { alternate: string; preferred: string };
+      whiteListServers: string[];
+    };
+
 // Establishes a full-system VPN with the help of Outline's routing daemon and child processes
 // ss-local and tun2socks. Follows the Mediator pattern in that none of the three "helpers" know
 // anything about the others.
@@ -130,17 +142,7 @@ export class ConnectionManager {
     private remoteServer: RemoteServer,
     private isProxyUdp: boolean,
     private route: Route,
-    private dns:
-      | {
-          type: "smart";
-          server: { native: string; default: string };
-          whiteListServers: string[];
-        }
-      | {
-          type: "customized";
-          server: { alternate: string; preferred: string };
-          whiteListServers: string[];
-        }
+    private dns: Dns
   ) {
     const isSocks5 = remoteServer.type === "socks5";
     const isSmartDns = dns.type === "smart";
@@ -444,7 +446,7 @@ class SmartDns extends ChildProcessHelper {
     domains.forEach((domain) => {
       conf += `
 forward-zone:
-  name:"${domain}."
+  name:"${domain.trim()}."
   forward-addr: ${this.server.native}`;
     });
     conf =

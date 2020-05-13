@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
 import promiseIpc from "electron-promise-ipc";
-import { setMenu, installExtensions, getAppConfig, isDev } from "./utils";
+import { setMenu, installExtensions, getAppState, isDev } from "./utils";
 import { VpnManager } from "./vpnManager";
 import { logger } from "./log";
 import { AppTray } from "./tray";
@@ -72,7 +72,7 @@ async function createWindow() {
   };
   mainWindow.get()?.on("minimize", minimizeWindowToTray);
   mainWindow.get()?.on("close", async (event: Event) => {
-    const isHideWhenWindowIsClosed = getAppConfig().setting.general
+    const isHideWhenWindowIsClosed = getAppState().setting.general
       .isHideWhenWindowIsClosed;
     if (isHideWhenWindowIsClosed) minimizeWindowToTray(event);
     else await quitApp();

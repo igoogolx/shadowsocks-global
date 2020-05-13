@@ -4,7 +4,7 @@ import promiseIpc from "electron-promise-ipc";
 
 import {
   DNS_NATIVE_WEBSITES_FILE_PATH,
-  getAppConfig,
+  getAppState,
   getResourcesPath,
 } from "./utils";
 import { LOG_FILE_PATH, logger } from "./log";
@@ -34,7 +34,7 @@ promiseIpc.on("getResourcesPath", async () => await getResourcesPath());
 promiseIpc.on("getAppVersion", async () => await app.getVersion());
 
 ipcMain.on("setRunAtSystemStartup", () => {
-  const appConfig = getAppConfig();
+  const appConfig = getAppState();
   if (appConfig.setting.general.isRunAtSystemStartup)
     app.setLoginItemSettings({ openAtLogin: true });
   else app.setLoginItemSettings({ openAtLogin: false });

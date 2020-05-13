@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DNS_SMART_TYPE } from "../constants";
+import { BUILD_IN_RULE_GLOBAL } from "../share";
 
 const DEFAULT_LOCAL_PORT = 1081;
 
-export const BUILD_IN_RULE = "Global";
 const GOOGLE_DNS = "8.8.8.8";
 const DNS_POD = "119.29.29.29";
 
@@ -80,7 +80,7 @@ export const initialSettingState: SettingState = {
     },
   },
   rule: {
-    current: BUILD_IN_RULE,
+    current: BUILD_IN_RULE_GLOBAL,
     dirPath: "",
     additionalRoutes: [],
   },

@@ -1,5 +1,5 @@
-import { ConnectionManager } from "./process_manager";
-import { getConfig } from "./utils";
+import { ConnectionManager, Dns } from "./process_manager";
+import { Config, RemoteServer } from "./utils";
 import { ConnectionStatus } from "./routing_service";
 import { AppTray } from "./tray";
 import { flow, FlowData } from "./flow";
@@ -16,13 +16,14 @@ export class VpnManager {
 
   start = async () => {
     try {
-      const { route, dns, isProxyUdp, remoteServer } = await getConfig();
+      const config = new Config();
+      const proxyServer = await config.getProxyServer();
+      const route = await config.getRoutes();
       this.currentConnection = new ConnectionManager(
-        //@ts-ignore
-        remoteServer,
-        isProxyUdp,
+        proxyServer as RemoteServer,
+        config.getIsUdpEnabled(),
         route,
-        dns
+        config.getDns() as Dns
       );
       if (!this.currentConnection) return;
       //TODO: Fix bug: can't catch error

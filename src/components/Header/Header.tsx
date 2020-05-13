@@ -21,7 +21,7 @@ import { useSelector, useDispatch } from "react-redux";
 import fs from "fs";
 import promiseIpc from "electron-promise-ipc";
 import path from "path";
-import { BUILD_IN_RULE, setting } from "../../reducers/settingReducer";
+import { setting } from "../../reducers/settingReducer";
 import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
 import { clipboard, ipcRenderer } from "electron";
 import { pingEventEmitter, updateSubscription } from "../../utils/helper";
@@ -34,6 +34,10 @@ import Dashboard from "../Dashboard/Dashboard";
 import Setting from "../Setting/Setting";
 import About from "../About/About";
 import Store from "electron-store";
+import {
+  BUILD_IN_RULE_GLOBAL,
+  BUILD_IN_RULE_BYPASS_MAINLAND_CHINA,
+} from "../../share";
 
 const PROXY_TYPES = ["Shadowsocks", "Socks5", "Subscription"];
 const MANGE_TYPES = ["Statistics", "Setting", "About"];
@@ -217,19 +221,7 @@ const Header = () => {
     const loadRulePath = async () => {
       setIsLoadingRules(true);
       let rulePaths: string[] = [];
-      try {
-        // @ts-ignore
-        const resourcesPath = await promiseIpc.send("getResourcesPath");
-        const defaultRuleDirPath = path.join(resourcesPath, "defaultRules");
-        const defaultRules = await fs.promises.readdir(defaultRuleDirPath);
-        defaultRules.forEach((rule) => {
-          if (path.extname(rule) === ".rules")
-            rulePaths.push(path.join(defaultRuleDirPath, rule));
-        });
-      } catch (e) {
-        console.log(e);
-        notifier.error("Fail to load default rules");
-      }
+
       if (customizedRulesDirPath)
         try {
           const customizedRules = await fs.promises.readdir(
@@ -263,7 +255,8 @@ const Header = () => {
   }, [dispatch]);
   const rulesOptions = useMemo(
     () => [
-      { value: BUILD_IN_RULE },
+      { value: BUILD_IN_RULE_GLOBAL },
+      { value: BUILD_IN_RULE_BYPASS_MAINLAND_CHINA },
       ...rulePaths.map((rulePath) => ({
         value: path.basename(rulePath, ".rules"),
       })),

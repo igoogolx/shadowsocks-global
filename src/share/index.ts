@@ -94,3 +94,6 @@ export const convertFlowData = (data: number) => {
   if (data < GB) return `${financial(data / MB)} MB`;
   else return `${financial(data / GB)} GB`;
 };
+
+export const BUILD_IN_RULE_GLOBAL = "Global";
+export const BUILD_IN_RULE_BYPASS_MAINLAND_CHINA = "Bypass mainland China";

@@ -4,15 +4,20 @@ import path from "path";
 import fs from "fs";
 import { DNS_SMART_TYPE, SMART_DNS_ADDRESS } from "../src/constants";
 import { GLOBAL_PROXY_ROUTES, GLOBAL_RESERVED_ROUTES } from "./constant";
-import { lookupIp } from "../src/share";
+import {
+  BUILD_IN_RULE_BYPASS_MAINLAND_CHINA,
+  BUILD_IN_RULE_GLOBAL,
+  lookupIp,
+} from "../src/share";
 import Store from "electron-store";
 import { AppState } from "../src/reducers/rootReducer";
 import { getActivatedServer } from "../src/components/Proxies/util";
 import detectPort from "detect-port";
 import { mainWindow } from "./common";
+import { isIPv4 } from "net";
 
 const appConfig = new Store();
-export const getAppConfig = () => appConfig.get("state") as AppState;
+export const getAppState = () => appConfig.get("state") as AppState;
 
 export const setMenu = () => {
   if (process.env.NODE_ENV === "development") {
@@ -88,130 +93,144 @@ export const readRule = async (path: string) => {
   return { isProxy, subnets: rules.slice(1) };
 };
 
-export const getConfig = async () => {
-  const state = getAppConfig();
-  let activatedServer = getActivatedServer(state.proxy);
-  const serverIp = await lookupIp(activatedServer.host);
-  activatedServer = { ...activatedServer, host: serverIp };
-  const shadowsocksLocalPort = state.setting.general.shadowsocksLocalPort;
-  const isShadowsocks = activatedServer.type === "shadowsocks";
-  if (isShadowsocks) {
-    const _port = await detectPort(shadowsocksLocalPort);
-    if (_port !== shadowsocksLocalPort)
-      throw new Error(
-        `port: ${shadowsocksLocalPort} was occupied, try port: ${_port}`
-      );
-  }
-  let dnsServer: {},
-    dnsWhiteListServers: string[],
-    proxyRoutes: string[],
-    reservedRoutes = [serverIp + "/32"];
-  //Proxy rule
-  const currentRule = state.setting.rule.current;
-  if (state.setting.rule.current === "Global") {
-    proxyRoutes = GLOBAL_PROXY_ROUTES;
-    reservedRoutes = [...reservedRoutes, ...GLOBAL_RESERVED_ROUTES];
-  } else {
-    const defaultRuleDirPath = path.join(getResourcesPath(), "defaultRules");
-    const defaultRulePaths = await fs.promises.readdir(defaultRuleDirPath);
-    let rulePath;
-    let rule = defaultRulePaths.find(
-      (rulePath) => path.basename(rulePath, ".rules") === currentRule
-    );
+export class Config {
+  private state = getAppState();
 
-    if (rule) rulePath = path.join(defaultRuleDirPath, rule);
-    if (!rule && state.setting.rule.dirPath) {
-      const customizedRulePaths = await fs.promises.readdir(
-        state.setting.rule.dirPath
-      );
-      rule = customizedRulePaths.find(
-        (rulePath) => path.basename(rulePath, ".rules") === currentRule
-      );
-      if (rule) rulePath = path.join(state.setting.rule.dirPath, rule);
-    }
-    if (!rulePath) throw new Error("The rule is invalid");
-    //Check whether rule path is valid
-    await fs.promises.access(rulePath);
-    const customizedRule = await readRule(rulePath);
-    if (customizedRule.isProxy) {
-      proxyRoutes = customizedRule.subnets;
-    } else {
-      proxyRoutes = GLOBAL_PROXY_ROUTES;
-      reservedRoutes = [
-        ...reservedRoutes,
-        ...GLOBAL_RESERVED_ROUTES,
-        ...customizedRule.subnets,
-      ];
-    }
-  }
-  //Smart Dns
-  const dns = state.setting.dns;
-  if (dns.type === DNS_SMART_TYPE) {
-    const defaultServer = dns.smart.defaultWebsite.server;
-    const nativeServer = dns.smart.nativeWebsite.server;
-    dnsServer = {
-      type: "smart",
-      server: { native: nativeServer, default: defaultServer },
-    };
-    dnsWhiteListServers = [SMART_DNS_ADDRESS, defaultServer, nativeServer];
-    if (dns.smart.defaultWebsite.isProxy) {
-      proxyRoutes = [...proxyRoutes, defaultServer + "/32"];
-    } else {
-      reservedRoutes = [...reservedRoutes, defaultServer + "/32"];
-    }
-    if (dns.smart.nativeWebsite.isProxy) {
-      proxyRoutes = [...proxyRoutes, nativeServer + "/32"];
-    } else {
-      reservedRoutes = [...reservedRoutes, nativeServer + "/32"];
-    }
-    //Customized Dns
-  } else {
-    const preferredServer = dns.customized.preferredServer;
-    const alternateServer = dns.customized.alternateServer;
-    dnsServer = {
-      type: "customized",
-      server: { preferred: preferredServer, alternate: alternateServer },
-    };
-    dnsWhiteListServers = [preferredServer, alternateServer];
-    if (dns.customized.isProxy) {
-      proxyRoutes = [
-        ...proxyRoutes,
-        preferredServer + "/32",
-        alternateServer + "/32",
-      ];
-    } else {
-      reservedRoutes = [
-        ...reservedRoutes,
-        preferredServer + "/32",
-        alternateServer + "/32",
-      ];
-    }
-  }
+  getIsUdpEnabled = () => {
+    return this.state.setting.general.isProxyUdp;
+  };
 
-  const proxy: string[] = [],
-    reserved: string[] = [];
-  const additionalRoutes = state.setting.rule.additionalRoutes;
-  additionalRoutes.forEach((route) => {
-    if (route.isProxy) proxy.push(route.ip);
-    else reserved.push(route.ip);
-  });
+  getDns = () => {
+    let dnsServer;
+    let whiteListServers;
+    //Smart Dns
+    const dns = this.state.setting.dns;
+    if (dns.type === DNS_SMART_TYPE) {
+      const defaultServer = dns.smart.defaultWebsite.server;
+      const nativeServer = dns.smart.nativeWebsite.server;
+      dnsServer = {
+        type: "smart",
+        server: { native: nativeServer, default: defaultServer },
+      };
+      whiteListServers = [SMART_DNS_ADDRESS, defaultServer, nativeServer];
 
-  proxyRoutes = [...proxyRoutes, ...proxy.map((ip) => ip + "/32")];
-  reservedRoutes = [...reservedRoutes, ...reserved.map((ip) => ip + "/32")];
+      //Customized Dns
+    } else {
+      const preferredServer = dns.customized.preferredServer;
+      const alternateServer = dns.customized.alternateServer;
+      dnsServer = {
+        type: "customized",
+        server: { preferred: preferredServer, alternate: alternateServer },
+      };
+      whiteListServers = [preferredServer, alternateServer];
+    }
 
-  return {
-    rule: state.setting.rule.current,
-    route: { proxy: proxyRoutes, reserved: reservedRoutes },
-    dns: { ...dnsServer, whiteListServers: dnsWhiteListServers },
-    isProxyUdp: state.setting.general.isProxyUdp,
-    remoteServer: isShadowsocks
+    return { ...dnsServer, whiteListServers };
+  };
+
+  getProxyServer = async () => {
+    let activatedServer = getActivatedServer(this.state.proxy);
+    const serverIp = await lookupIp(activatedServer.host);
+    const isShadowsocks = activatedServer.type === "shadowsocks";
+    const ssLocalPort = this.state.setting.general.shadowsocksLocalPort;
+    activatedServer = { ...activatedServer, host: serverIp };
+    if (isShadowsocks) {
+      const _port = await detectPort(ssLocalPort);
+      if (_port !== ssLocalPort)
+        throw new Error(
+          `port: ${ssLocalPort} was occupied, try port: ${_port}`
+        );
+    }
+    return isShadowsocks
       ? {
           ...activatedServer,
-          local_port: state.setting.general.shadowsocksLocalPort,
+          local_port: this.state.setting.general.shadowsocksLocalPort,
         }
-      : activatedServer,
+      : activatedServer;
   };
-};
+
+  getRoutes = async () => {
+    let activatedServer = getActivatedServer(this.state.proxy);
+    const serverIp = await lookupIp(activatedServer.host);
+    let proxy = [...GLOBAL_PROXY_ROUTES];
+    let reserved = [serverIp + "/32", ...GLOBAL_RESERVED_ROUTES];
+    const currentRule = this.state.setting.rule.current;
+    switch (currentRule) {
+      case BUILD_IN_RULE_GLOBAL:
+        break;
+      case BUILD_IN_RULE_BYPASS_MAINLAND_CHINA:
+        {
+          const ChinaIpsString = await fs.promises.readFile(
+            path.join(getResourcesPath(), "acl", "chn.acl"),
+            "utf8"
+          );
+          const ChinaIps = ChinaIpsString.split("\n").filter((line) => {
+            const subnet = line.split("/");
+            if (subnet.length !== 2) return false;
+            return isIPv4(subnet[0]);
+          });
+          reserved = [...reserved, ...ChinaIps];
+        }
+        break;
+      default: {
+        let rulePath;
+        let rule;
+        const customizedRulesDirPath = this.state.setting.rule.dirPath;
+        if (customizedRulesDirPath) {
+          const customizedRulePaths = await fs.promises.readdir(
+            customizedRulesDirPath
+          );
+          rule = customizedRulePaths.find(
+            (rulePath) => path.basename(rulePath, ".rules") === currentRule
+          );
+          if (rule) rulePath = path.join(customizedRulesDirPath, rule);
+        }
+        if (!rulePath) throw new Error("The rule is invalid");
+        //Check whether rule path is valid
+        await fs.promises.access(rulePath);
+        const customizedRule = await readRule(rulePath);
+        if (customizedRule.isProxy) {
+          proxy = customizedRule.subnets;
+        } else {
+          reserved = [...reserved, ...customizedRule.subnets];
+        }
+      }
+    }
+
+    //Smart Dns
+    const dns = this.state.setting.dns;
+    if (dns.type === DNS_SMART_TYPE) {
+      const defaultServer = dns.smart.defaultWebsite.server;
+      const nativeServer = dns.smart.nativeWebsite.server;
+
+      if (dns.smart.defaultWebsite.isProxy) {
+        proxy = [...proxy, defaultServer + "/32"];
+      } else {
+        reserved = [...reserved, defaultServer + "/32"];
+      }
+      if (dns.smart.nativeWebsite.isProxy) {
+        proxy = [...proxy, nativeServer + "/32"];
+      } else {
+        reserved = [...reserved, nativeServer + "/32"];
+      }
+      //Customized Dns
+    } else {
+      const preferredServer = dns.customized.preferredServer;
+      const alternateServer = dns.customized.alternateServer;
+      if (dns.customized.isProxy) {
+        proxy = [...proxy, preferredServer + "/32", alternateServer + "/32"];
+      } else {
+        reserved = [
+          ...reserved,
+          preferredServer + "/32",
+          alternateServer + "/32",
+        ];
+      }
+    }
+
+    return { proxy, reserved };
+  };
+}
 
 export const DNS_NATIVE_WEBSITES_FILE_PATH = pathToConfig(
   "unbound",

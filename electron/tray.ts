@@ -2,7 +2,7 @@ import { Tray, BrowserWindow, nativeImage, app, NativeImage } from "electron";
 import path from "path";
 import { flow, FlowData } from "./flow";
 import { convertFlowData } from "../src/share";
-import { getAppConfig } from "./utils";
+import { getAppState } from "./utils";
 
 export class AppTray {
   tray: Tray | undefined;
@@ -52,7 +52,7 @@ export class AppTray {
     if (type === "connected") {
       if (this.trayIconImages)
         this.tray?.setImage(this.trayIconImages.connected);
-      const state = getAppConfig();
+      const state = getAppState();
       const proxyRule = state.setting.rule.current;
       const flowListener = (flow: FlowData) => {
         this.tray?.setToolTip(
