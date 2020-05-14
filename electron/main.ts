@@ -72,7 +72,7 @@ async function createWindow() {
     else await quitApp();
   });
 
-  tray = new AppTray(mainWindow.get() as BrowserWindow, createWindow);
+  tray = new AppTray(createWindow);
   tray.setToolTip("disconnected");
 }
 

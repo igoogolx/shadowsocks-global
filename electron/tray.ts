@@ -1,8 +1,9 @@
-import { Tray, BrowserWindow, nativeImage, app, NativeImage } from "electron";
+import { Tray, nativeImage, app, NativeImage } from "electron";
 import path from "path";
 import { flow, FlowData } from "./flow";
 import { convertFlowData } from "../src/share";
 import { getAppState } from "./utils";
+import { mainWindow } from "./common";
 
 export class AppTray {
   tray: Tray | undefined;
@@ -13,26 +14,26 @@ export class AppTray {
       }
     | undefined;
 
-  constructor(mainWindow: BrowserWindow, createWindow: () => Promise<void>) {
+  constructor(createWindow: () => Promise<void>) {
     this.trayIconImages = {
       connected: this.createTrayIconImage("connected.png"),
       disconnected: this.createTrayIconImage("disconnected.png"),
     };
     this.tray = new Tray(this.trayIconImages.disconnected);
     this.tray.on("click", () => {
-      if (!mainWindow) {
+      if (!mainWindow.get()) {
         createWindow()
           .then
           //Ignore promise returned from createWindow.
           ();
         return;
       }
-      if (mainWindow.isMinimized() || !mainWindow.isVisible()) {
-        mainWindow.restore();
-        mainWindow.show();
-        mainWindow.focus();
+      if (mainWindow.get()?.isMinimized() || !mainWindow.get()?.isVisible()) {
+        mainWindow.get()?.restore();
+        mainWindow.get()?.show();
+        mainWindow.get()?.focus();
       } else {
-        mainWindow.hide();
+        mainWindow.get()?.hide();
       }
     });
   }
