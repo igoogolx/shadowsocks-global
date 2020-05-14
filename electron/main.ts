@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow } from "electron";
 import * as path from "path";
 import promiseIpc from "electron-promise-ipc";
 import { setMenu, installExtensions, getAppState, isDev } from "./utils";
@@ -10,12 +10,6 @@ import "./ipc";
 
 let tray: AppTray | undefined;
 let isAppQuitting = false;
-
-let localizedStrings: { [key: string]: string } = {
-  "connected-server-state": "Connected",
-  "disconnected-server-state": "Disconnected",
-  quit: "Quit",
-};
 
 let vpnManager: VpnManager | undefined;
 
@@ -77,6 +71,9 @@ async function createWindow() {
     if (isHideWhenWindowIsClosed) minimizeWindowToTray(event);
     else await quitApp();
   });
+
+  tray = new AppTray(mainWindow.get() as BrowserWindow, createWindow);
+  tray.setToolTip("disconnected");
 }
 
 app.on("ready", createWindow);
@@ -117,15 +114,6 @@ promiseIpc.on("stop", async () => {
   }
 });
 
-ipcMain.on("localizationResponse", (event, localizationResult) => {
-  if (!!localizationResult) {
-    localizedStrings = localizationResult;
-  }
-  if (mainWindow.get()) {
-    tray = new AppTray(mainWindow.get() as BrowserWindow, createWindow);
-    tray.setToolTip("disconnected");
-  }
-});
 //Prevent main process from crashing.
 //TODO: add system log
 process.on("uncaughtException", function (err) {

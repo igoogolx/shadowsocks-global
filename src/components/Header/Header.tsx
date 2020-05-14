@@ -103,8 +103,6 @@ const Header = () => {
 
     ipcRenderer.send("setRunAtSystemStartup");
 
-    //TODO:i18next
-    ipcRenderer.send("localizationResponse", null);
     //If the app crashes unexpectedly, the "start" Button can be loading state after restarting app.
     //To avoid that, the state mush be reset.
     dispatch(proxy.actions.setIsProcessing(false));
