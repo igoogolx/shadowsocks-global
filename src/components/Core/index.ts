@@ -2,7 +2,6 @@ import { Button } from "./Button/Button";
 import { Dialog } from "./Dialog/Dialog";
 import { Dropdown } from "./Dropdown/Dropdown";
 import { Form, Field } from "./Form";
-import { Graph } from "./Graph/Graph";
 import { Icon } from "./Icon/Icon";
 import { Input, INPUT_SIZE } from "./Input/Input";
 import { Menu } from "./Menu/Menu";
@@ -24,7 +23,6 @@ export {
   Menu,
   Message,
   Input,
-  Graph,
   BUTTON_SIZE,
   Field,
   INPUT_SIZE,
@@ -34,5 +32,5 @@ export {
   Toggle,
   Tabs,
   notifier,
-  Tooltip
+  Tooltip,
 };

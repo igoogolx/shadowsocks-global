@@ -6,12 +6,12 @@ import { useFlow } from "../../hooks";
 
 export const SpeedGraphCard = () => {
   const flow = useFlow();
-  const [netSpeed, setNetSpeed] = useState<
+  const [netSpeeds, setNetSpeeds] = useState<
     { download: number; upload: number; time: number }[]
   >([]);
 
   useEffect(() => {
-    setNetSpeed((data) => {
+    setNetSpeeds((data) => {
       const speed = {
         download: flow.downloadBytesPerSecond,
         upload: flow.uploadBytesPerSecond,
@@ -24,7 +24,7 @@ export const SpeedGraphCard = () => {
 
   return (
     <Card className={styles.speed}>
-      <SpeedGraph statistics={netSpeed} />
+      <SpeedGraph data={netSpeeds} />
     </Card>
   );
 };
