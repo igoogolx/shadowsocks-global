@@ -1,8 +1,8 @@
 {
   "productName": "ShadowsocksGlobal",
   "files": [
+    "acl",
     "build",
-    "defaultRules",
     "third_party",
     "resources",
     "!build/static/**/*.map",
@@ -10,7 +10,7 @@
   ],
   "asarUnpack": [
     "third_party",
-    "defaultRules"
+    "acl"
   ],
   "directories": {
     "output": "dist"
