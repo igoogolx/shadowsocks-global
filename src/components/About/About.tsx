@@ -6,7 +6,7 @@ import { useOnMount } from "../../hooks";
 import promiseIpc from "electron-promise-ipc";
 
 const About = () => {
-  const [appVersion, setAppVersion] = useState();
+  const [appVersion, setAppVersion] = useState<any>();
 
   useOnMount(() => {
     try {
