@@ -1,4 +1,4 @@
-import { Tray, nativeImage, app, NativeImage } from "electron";
+import { Tray, nativeImage, app, NativeImage, Menu } from "electron";
 import path from "path";
 import { flow, FlowData } from "./flow";
 import { convertFlowData } from "../src/share";
@@ -14,7 +14,7 @@ export class AppTray {
       }
     | undefined;
 
-  constructor(createWindow: () => Promise<void>) {
+  constructor(createWindow: () => Promise<void>, quitApp: () => Promise<void>) {
     this.trayIconImages = {
       connected: this.createTrayIconImage("connected.png"),
       disconnected: this.createTrayIconImage("disconnected.png"),
@@ -36,6 +36,8 @@ export class AppTray {
         mainWindow.get()?.hide();
       }
     });
+    const menuTemplate = [{ label: "Quit", click: quitApp }];
+    this.tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
   }
 
   private createTrayIconImage = (imageName: string) => {
