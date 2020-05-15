@@ -8,6 +8,7 @@
   flex-direction: row-reverse;
   background-color: white;
   width: 100vw;
+  border-bottom: 1px solid var(--line-color);
   & .selector {
     margin: auto 20px;
   }
