@@ -6,11 +6,10 @@ import { AppState } from "../../reducers/rootReducer";
 import { Dot } from "../Dot/Dot";
 import { Card } from "../Core/Card/Card";
 import { MenuItemProps } from "../Core/Menu/Menu";
-import { checkServer } from "../../utils/connectivity";
-import { useAsync } from "../../hooks";
+import { useAsync, usePing } from "../../hooks";
 import classNames from "classnames";
-import { lookupRegionCode, pingEventEmitter } from "../../utils/helper";
-import { proxy } from "../../reducers/proxyReducer";
+import { lookupRegionCode } from "../../utils/helper";
+import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
 
 type ServerCardProps = {
   id: string;
@@ -22,10 +21,20 @@ type ServerCardProps = {
   port: number;
   regionCode?: string;
   disabled?: boolean;
-};
+} & Pick<Shadowsocks, "pingTime">;
 
 export const ServerCard = React.memo((props: ServerCardProps) => {
-  const { name, host, regionCode, onClick, id, menuItems, port, type } = props;
+  const {
+    name,
+    host,
+    regionCode,
+    onClick,
+    id,
+    menuItems,
+    port,
+    type,
+    pingTime,
+  } = props;
   const activeId = useSelector<AppState, string>(
     (state) => state.proxy.activeId
   );
@@ -33,43 +42,25 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
     (state) => state.proxy.isStarted || state.proxy.isProcessing
   );
 
-  const ping = useCallback(
-    async () =>
-      await checkServer({
-        address: host,
-        port,
-        attempts: 10,
-        timeout: 2000,
-      }),
+  const dispatch = useDispatch();
 
-    [host, port]
-  );
+  const { ping } = usePing([{ type, id, host, port }]);
 
-  const {
-    execute: executePing,
-    pending: pinging,
-    value: delay,
-    error,
-  } = useAsync(ping, false);
-  const handleOnClickDelay = useCallback(
+  const handleOnClickPing = useCallback(
     (e: any) => {
       e.stopPropagation();
-      executePing().catch((e) => {
+      ping().catch((e) => {
         console.log(e);
       });
     },
-    [executePing]
+    [ping]
   );
-  const isActive = activeId === id;
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    pingEventEmitter.on("test", executePing);
-    return () => {
-      pingEventEmitter.removeListener("test", executePing);
-    };
-  }, [executePing]);
+    if (pingTime)
+      dispatch(proxy.actions.update({ type, id, config: { pingTime } }));
+  }, [dispatch, id, pingTime, type]);
+  const isActive = activeId === id;
 
   const getRegionCode = useCallback(async () => await lookupRegionCode(host), [
     host,
@@ -125,18 +116,22 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
         {isActive && <Dot type={"enabled"} className={styles.dot} />}
       </Card>
 
-      {(delay || error || pinging) && !disabled && (
+      {pingTime && (
         <Button
           className={classNames(styles.delay, {
-            [styles.timeout]: error,
-            [styles.fast]: delay && Number(delay) <= 500,
-            [styles.slow]: delay && Number(delay) > 500,
+            [styles.timeout]: pingTime === "timeout",
+            [styles.fast]: pingTime && Number(pingTime) <= 500,
+            [styles.slow]: pingTime && Number(pingTime) > 500,
           })}
-          onClick={handleOnClickDelay}
-          isLoading={pinging}
+          onClick={handleOnClickPing}
+          isLoading={pingTime === "pinging"}
           disabled={disabled}
         >
-          {pinging ? "" : error ? "Timeout" : delay + "ms"}
+          {pingTime === "pinging"
+            ? ""
+            : pingTime === "timeout"
+            ? "Timeout"
+            : pingTime + "ms"}
         </Button>
       )}
     </div>

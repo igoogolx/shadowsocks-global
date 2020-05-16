@@ -5,6 +5,7 @@ import { proxy, Socks5 } from "../../reducers/proxyReducer";
 import styles from "./proxies.module.css";
 import { Socks5Card } from "../Cards/Socks5Card";
 import { Dropdown, Icon, ICON_NAME } from "../Core";
+import { PingServer, usePing } from "../../hooks";
 
 export const Socks5s = React.memo(() => {
   const socks5s = useSelector<AppState, Socks5[]>(
@@ -14,8 +15,38 @@ export const Socks5s = React.memo(() => {
     (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
   const dispatch = useDispatch();
+  const pingServers = useMemo(
+    () =>
+      socks5s.map((socks5) => ({
+        type: "shadowsocks",
+        id: socks5.id,
+        host: socks5.host,
+        port: socks5.port,
+      })),
+    [socks5s]
+  );
+
+  const { isPinging, ping } = usePing(pingServers as PingServer[]);
   const dropdownItems = useMemo(
     () => [
+      {
+        iconName: ICON_NAME.INSTRUMENT,
+        content: "Ping Test",
+        handleOnClick: ping,
+        disabled: isPinging || disabled,
+      },
+      {
+        iconName: ICON_NAME.SORT,
+        content: "Sort By Ping Time",
+        disabled: isPinging || disabled,
+        handleOnClick: () => {
+          dispatch(
+            proxy.actions.sortByPingTime({
+              type: "socks5s",
+            })
+          );
+        },
+      },
       {
         iconName: ICON_NAME.DELETE,
         content: "Delete",
@@ -30,7 +61,7 @@ export const Socks5s = React.memo(() => {
         },
       },
     ],
-    [dispatch]
+    [disabled, dispatch, isPinging, ping]
   );
   return (
     <>

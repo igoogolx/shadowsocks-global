@@ -14,7 +14,7 @@ type ShadowsocksCardProps = {
 };
 
 export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
-  const { id, name, host, regionCode, port } = props.shadowsocks;
+  const { id, name, host, regionCode, port, pingTime } = props.shadowsocks;
   const dispatch = useDispatch();
 
   const onClick = useCallback(() => dispatch(proxy.actions.setActiveId(id)), [
@@ -104,6 +104,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         port={port}
         regionCode={regionCode}
         menuItems={dropdownItems}
+        pingTime={pingTime}
       />
     </>
   );

@@ -5,6 +5,7 @@ import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
 import styles from "./proxies.module.css";
 import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
 import { Dropdown, Icon, ICON_NAME } from "../Core";
+import { PingServer, usePing } from "../../hooks";
 
 export const Shadowsockses = React.memo(() => {
   const shadowsockses = useSelector<AppState, Shadowsocks[]>(
@@ -14,8 +15,38 @@ export const Shadowsockses = React.memo(() => {
   const disabled = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing || state.proxy.isStarted
   );
+  const pingServers = useMemo(
+    () =>
+      shadowsockses.map((shadowsocks) => ({
+        type: "shadowsocks",
+        id: shadowsocks.id,
+        host: shadowsocks.host,
+        port: shadowsocks.port,
+      })),
+    [shadowsockses]
+  );
+
+  const { isPinging, ping } = usePing(pingServers as PingServer[]);
   const dropdownItems = useMemo(
     () => [
+      {
+        iconName: ICON_NAME.INSTRUMENT,
+        content: "Ping Test",
+        handleOnClick: ping,
+        disabled: isPinging || disabled,
+      },
+      {
+        iconName: ICON_NAME.SORT,
+        content: "Sort By Ping Time",
+        disabled: isPinging || disabled,
+        handleOnClick: () => {
+          dispatch(
+            proxy.actions.sortByPingTime({
+              type: "shadowsockses",
+            })
+          );
+        },
+      },
       {
         iconName: ICON_NAME.DELETE,
         content: "Delete",
@@ -30,7 +61,7 @@ export const Shadowsockses = React.memo(() => {
         },
       },
     ],
-    [dispatch]
+    [disabled, dispatch, isPinging, ping]
   );
   return (
     <>

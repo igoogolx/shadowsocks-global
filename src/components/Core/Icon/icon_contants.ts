@@ -15,6 +15,8 @@ export const ICON_SIZE = {
 };
 
 export const ICON_NAME = {
+  SORT: "orderedlist",
+  INSTRUMENT: "resourceoverview",
   UPDATE: "update",
   PLUS: "plus",
   CROSS: "cross",

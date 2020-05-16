@@ -15,7 +15,7 @@ export type Shadowsocks = {
 
   regionCode?: string;
 
-  delay?: number;
+  pingTime?: number | "pinging" | "timeout";
 };
 
 export type Subscription = {
@@ -32,7 +32,7 @@ export type Socks5 = {
   port: number;
   name?: string;
 
-  delay?: number;
+  pingTime?: number | "pinging" | "timeout";
 };
 
 export type ProxyState = {
@@ -93,6 +93,41 @@ export const proxy = createSlice({
       ) => ({
         payload: { ...proxy, config: { id: uuid(), ...proxy.config } },
       }),
+    },
+    sortByPingTime: (
+      state,
+      action: PayloadAction<
+        | { type: "shadowsockses" | "socks5s"; id?: undefined }
+        | { type: "subscription"; id: string }
+      >
+    ) => {
+      const { type } = action.payload;
+      const compareFunction = (
+        a: Pick<Shadowsocks, "pingTime">,
+        b: Pick<Shadowsocks, "pingTime">
+      ) => {
+        if (typeof a.pingTime !== "number") return 1;
+        if (typeof b.pingTime !== "number") return -1;
+        if (a.pingTime > b.pingTime) return 1;
+        if (a.pingTime < b.pingTime) return -1;
+        return 0;
+      };
+      switch (type) {
+        case "shadowsockses":
+          state.shadowsockses.sort(compareFunction);
+          break;
+        case "socks5s":
+          state.socks5s.sort(compareFunction);
+          break;
+        case "subscription":
+          const id = action.payload.id;
+          const index = state.subscriptions.findIndex((subscription) => {
+            if (id) return subscription.id === id;
+            return false;
+          });
+          if (index !== -1)
+            state.subscriptions[index].shadowsockses.sort(compareFunction);
+      }
     },
     update: (
       state,

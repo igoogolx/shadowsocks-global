@@ -24,7 +24,7 @@ import path from "path";
 import { setting } from "../../reducers/settingReducer";
 import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
 import { clipboard, ipcRenderer } from "electron";
-import { pingEventEmitter, updateSubscription } from "../../utils/helper";
+import { updateSubscription } from "../../utils/helper";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
 import { decodeSsUrl } from "../../utils/url";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
@@ -261,9 +261,7 @@ const Header = () => {
     ],
     [rulePaths]
   );
-  const pingTest = useCallback(() => {
-    pingEventEmitter.emit("test");
-  }, []);
+
   return (
     <>
       {currentDialogType === PROXY_TYPES[0] && (
@@ -325,11 +323,7 @@ const Header = () => {
           disabled={isLoadingRules || isStarted || isProcessing}
           isVirtualizedList={rulesOptions.length > 4}
         />
-        {!isStarted && !isProcessing && (
-          <Button onClick={pingTest} isPrimary={true} className={styles.button}>
-            Ping Test
-          </Button>
-        )}
+
         <div className={styles.iconButtons}>
           <Dropdown items={addProxyDropdownItems}>
             <Button className={styles.item}>

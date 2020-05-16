@@ -1,5 +1,4 @@
 import { lookupIp } from "../share";
-import EventEmitter from "events";
 //@ts-ignore
 import geoip from "geoip-country";
 import axios from "axios";
@@ -7,9 +6,6 @@ import { decodeSsUrl } from "./url";
 import { v4 as uuid } from "uuid";
 
 const UPDATE_SUBSCRIPTIONS_TIMEOUT_MS = 5000;
-
-// Uses the OS' built-in functions, i.e. /etc/hosts, et al.:
-// https://nodejs.org/dist/latest-v10.x/docs/api/dns.html#dns_dns
 
 export const lookupRegionCode = async (host: string) => {
   try {
@@ -38,6 +34,3 @@ export const updateSubscription = async (url: string) => {
     id: uuid(),
   }));
 };
-
-class Ping extends EventEmitter {}
-export const pingEventEmitter = new Ping();
