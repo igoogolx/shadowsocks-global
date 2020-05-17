@@ -213,6 +213,7 @@ export class ConnectionManager {
     this.tun2socks.onExit = () => {
       logger.info("stopped tun2socks in preparation for suspend");
     };
+    this.tun2socks.stop();
   }
 
   private resumeListener() {
