@@ -64,7 +64,7 @@ export const sendMessageToRender = (msg: string) => {
 export const sendUdpStatusToRender = (status: string) => {
   sendToRender("proxy-udpStatus", status);
 };
-export const sendFlowToRender = async (data: FlowData & { time: number }) => {
+export const sendFlowToRender = (data: FlowData & { time: number }) => {
   sendToRender("proxy-flow", data);
 };
 export const sendConnectionStatus = (status: ConnectionStatus) => {

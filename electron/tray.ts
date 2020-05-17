@@ -1,18 +1,32 @@
 import { Tray, nativeImage, app, NativeImage, Menu } from "electron";
 import path from "path";
-import { flow, FlowData } from "./flow";
+import { getFlow } from "./flow";
 import { convertFlowData } from "../src/share";
 import { getAppState } from "./utils";
 import { mainWindow } from "./common";
 
 export class AppTray {
-  tray: Tray | undefined;
-  trayIconImages:
+  private tray: Tray | undefined;
+  private readonly trayIconImages:
     | {
         connected: NativeImage;
         disconnected: NativeImage;
       }
     | undefined;
+  private flowListener = async (title: string, proxyRule: string) => {
+    const flow = await getFlow();
+    if (!flow) return;
+    this.tray?.setToolTip(
+      title +
+        "\n" +
+        `Rule: ${proxyRule}` +
+        "\n" +
+        `download: ${convertFlowData(
+          flow.downloadBytesPerSecond
+        )}/S  upload: ${convertFlowData(flow.uploadBytesPerSecond)}/S`
+    );
+  };
+  private flowTimer: NodeJS.Timer | undefined = undefined;
 
   constructor(createWindow: () => Promise<void>, quitApp: () => Promise<void>) {
     this.trayIconImages = {
@@ -57,22 +71,15 @@ export class AppTray {
         this.tray?.setImage(this.trayIconImages.connected);
       const state = getAppState();
       const proxyRule = state.setting.rule.current;
-      const flowListener = (flow: FlowData) => {
-        this.tray?.setToolTip(
-          title +
-            "\n" +
-            `Rule: ${proxyRule}` +
-            "\n" +
-            `download: ${convertFlowData(
-              flow.downloadBytesPerSecond
-            )}/S  upload: ${convertFlowData(flow.uploadBytesPerSecond)}/S`
-        );
-      };
-      flow(flowListener);
+      this.flowTimer = setInterval(
+        () => this.flowListener(title, proxyRule),
+        1000
+      );
     } else {
       if (this.trayIconImages)
         this.tray?.setImage(this.trayIconImages.disconnected);
       this.tray?.setToolTip(title);
+      if (this.flowTimer) clearInterval(this.flowTimer);
     }
   };
 }

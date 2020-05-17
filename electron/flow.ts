@@ -7,20 +7,27 @@ export type FlowData = {
   totalUsage: number;
 };
 
-export const flow = (listener: (data: FlowData) => void) => {
-  const client = net.createConnection({ host: "127.0.0.1", port: 1090 });
-  client.on("data", (data) => {
-    const rawData = JSON.parse(data.toString());
-    listener({
-      downloadBytesPerSecond: rawData.DownloadBytesPerSecond,
-      uploadBytesPerSecond: rawData.UploadBytesPerSecond,
-      totalUsage: rawData.TotalUsage,
+export const getFlow = async () => {
+  try {
+    return await new Promise<FlowData | null>((fulfill, reject) => {
+      const client = net.createConnection(
+        { host: "127.0.0.1", port: 1090 },
+        () => {}
+      );
+      client.on("data", (data) => {
+        const rawData = JSON.parse(data.toString());
+        fulfill({
+          downloadBytesPerSecond: rawData.DownloadBytesPerSecond,
+          uploadBytesPerSecond: rawData.UploadBytesPerSecond,
+          totalUsage: rawData.TotalUsage,
+        });
+      });
+      client.on("error", (err) => {
+        reject(err);
+      });
     });
-  });
-  client.on("end", () => {
-    logger.info("disconnected from flow server");
-  });
-  client.on("error", (err) => {
-    logger.error(err);
-  });
+  } catch (e) {
+    logger.error(`Fail to get flow:${e}`);
+    return null;
+  }
 };

@@ -2,7 +2,7 @@ import { ConnectionManager, Dns } from "./process_manager";
 import { Config, RemoteServer } from "./utils";
 import { ConnectionStatus } from "./routing_service";
 import { AppTray } from "./tray";
-import { flow, FlowData } from "./flow";
+import { getFlow } from "./flow";
 import {
   sendConnectionStatus,
   sendFlowToRender,
@@ -10,9 +10,19 @@ import {
 } from "./ipc";
 
 export class VpnManager {
-  currentConnection: ConnectionManager | undefined;
+  private currentConnection: ConnectionManager | undefined;
+  private flowTimer: NodeJS.Timer | undefined;
 
   constructor(private tray: AppTray | undefined) {}
+
+  private flowListener = async () => {
+    const flow = await getFlow();
+    if (!flow) return;
+    sendFlowToRender({
+      ...flow,
+      time: Date.now(),
+    });
+  };
 
   start = async () => {
     try {
@@ -45,13 +55,7 @@ export class VpnManager {
       await this.currentConnection.start();
       sendMessageToRender("Connected!");
       sendConnectionStatus(ConnectionStatus.CONNECTED);
-      const flowListener = (flow: FlowData) => {
-        sendFlowToRender({
-          ...flow,
-          time: Date.now(),
-        });
-      };
-      flow(flowListener);
+      this.flowTimer = setInterval(this.flowListener, 1000);
       this.tray?.setToolTip("connected");
     } catch (e) {
       await this.stop();
@@ -63,13 +67,14 @@ export class VpnManager {
       if (!this.currentConnection) return;
       this.currentConnection.stop();
       await this.currentConnection.onceStopped;
-
-      this.currentConnection = undefined;
       sendConnectionStatus(ConnectionStatus.DISCONNECTED);
       sendMessageToRender("Disconnected");
-      this.tray?.setToolTip("disconnected");
     } catch (e) {
       console.log(e);
+    } finally {
+      this.tray?.setToolTip("disconnected");
+      if (this.flowTimer) clearInterval(this.flowTimer);
+      this.currentConnection = undefined;
     }
   };
 }
