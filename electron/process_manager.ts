@@ -23,11 +23,9 @@ import {
   DNS_NATIVE_WEBSITES_FILE_PATH,
 } from "./utils";
 import { SMART_DNS_ADDRESS } from "../src/constants";
-import { app } from "electron";
 import { validateServerCredentials } from "../src/share";
 import { logger } from "./log";
 import * as path from "path";
-import * as fs from "fs";
 import { sendMessageToRender, sendUdpStatusToRender } from "./ipc";
 
 export type Route = {
@@ -120,7 +118,6 @@ export class ConnectionManager {
   private readonly routing: RoutingDaemon;
   private readonly ssLocal: SsLocal | null;
   private readonly tun2socks: Tun2socks;
-  private readonly smartDns: SmartDns | null;
 
   // Extracted out to an instance variable because in certain situations, notably a change in UDP
   // support, we need to stop and restart tun2socks *without notifying the client* and this allows
@@ -157,10 +154,14 @@ export class ConnectionManager {
       ? Number(remoteServer.port)
       : remoteServer.local_port || PROXY_PORT;
 
-    this.tun2socks = new Tun2socks(this.proxyAddress, this.proxyPort);
-    this.smartDns = isSmartDns
-      ? new SmartDns(dns.server as { native: string; default: string })
-      : null;
+    this.tun2socks = isSmartDns
+      ? new Tun2socks(
+          this.proxyAddress,
+          this.proxyPort,
+          dns.server as { native: string; default: string }
+        )
+      : new Tun2socks(this.proxyAddress, this.proxyPort);
+
     this.ssLocal = isSocks5 ? null : new SsLocal(this.proxyPort);
 
     // This trio of Promises, each tied to a helper process' exit, is key to the instance's
@@ -184,14 +185,6 @@ export class ConnectionManager {
         })
       );
     }
-    if (this.smartDns)
-      exits.push(
-        // This Promise cant't be fulfilled when the smartDns is enabled,
-        // so it must not be added to exits in the case.
-        new Promise<void>((fulfill) => {
-          if (this.smartDns) this.smartDns.onExit = fulfill;
-        })
-      );
 
     Promise.race(exits).then(() => {
       logger.info("a helper has exited, disconnecting");
@@ -271,11 +264,6 @@ export class ConnectionManager {
         "Fail to start one or some of smartDns,ss-local,tun2socks"
       );
 
-    if (this.smartDns) {
-      sendMessageToRender("Starting SmartDns...");
-      await this.smartDns.start();
-    }
-
     if (this.isDisconnecting)
       throw new Error(
         "Fail to start one or some of smartDns,ss-local,tun2socks"
@@ -319,7 +307,6 @@ export class ConnectionManager {
     }
 
     if (this.ssLocal) this.ssLocal.stop();
-    if (this.smartDns) this.smartDns.stop();
     this.tun2socks.stop();
   }
 
@@ -432,44 +419,12 @@ class ChildProcessHelper {
   }
 }
 
-class SmartDns extends ChildProcessHelper {
-  private confPath = path.join(
-    app.getPath("userData"),
-    "accelerated-domains.china.conf"
-  );
-  constructor(private server: { default: string; native: string }) {
-    super(pathToEmbeddedBinary("unbound", "unbound"));
-  }
-  async makeConf() {
-    const txt = await fs.promises.readFile(DNS_NATIVE_WEBSITES_FILE_PATH);
-    const domains = txt.toString().trim().split("\n");
-    let conf = "";
-    domains.forEach((domain) => {
-      conf += `
-forward-zone:
-  name:"${domain.trim()}."
-  forward-addr: ${this.server.native}`;
-    });
-    conf =
-      `
-server:
-	  # verbosity level 0-4 of logging
-	  verbosity: 0
-forward-zone:
-  name:"."
-  forward-addr: ${this.server.default}
-  ` + conf;
-    await fs.promises.writeFile(this.confPath, conf.trim());
-  }
-  async start() {
-    await this.makeConf();
-    const args = ["-c", this.confPath];
-    this.launch(args);
-  }
-}
-
 class Tun2socks extends ChildProcessHelper {
-  constructor(private proxyAddress: string, private proxyPort: number) {
+  constructor(
+    private proxyAddress: string,
+    private proxyPort: number,
+    private dnsServer?: { default: string; native: string }
+  ) {
     super(pathToEmbeddedBinary("go-tun2socks", "tun2socks"));
   }
 
@@ -483,6 +438,12 @@ class Tun2socks extends ChildProcessHelper {
     args.push("-loglevel", "error");
     if (!isUdpEnabled) {
       args.push("-dnsFallback");
+    }
+    if (this.dnsServer) {
+      args.push("-primaryDNSAddr", `${this.dnsServer.default}:53`);
+      args.push("-alternativeDNSAddr", `${this.dnsServer.native}:53`);
+      args.push("-primaryDNSDomainFile", DNS_NATIVE_WEBSITES_FILE_PATH);
+      args.push("-smartDns");
     }
 
     this.launch(args);

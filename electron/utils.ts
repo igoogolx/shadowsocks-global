@@ -232,7 +232,8 @@ export class Config {
   };
 }
 
-export const DNS_NATIVE_WEBSITES_FILE_PATH = pathToConfig(
-  "unbound",
-  "accelerated-domains.china.raw.txt"
+export const DNS_NATIVE_WEBSITES_FILE_PATH = path.join(
+  getResourcesPath(),
+  "acl",
+  "gfwlist.acl"
 );
