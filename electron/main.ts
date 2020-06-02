@@ -106,6 +106,11 @@ promiseIpc.on("start", async () => {
   vpnManager = new VpnManager(tray);
   await vpnManager.start();
 });
+promiseIpc.on("changeServer", async () => {
+  if (vpnManager) {
+    await vpnManager.changeServer();
+  }
+});
 
 promiseIpc.on("stop", async () => {
   if (vpnManager) {

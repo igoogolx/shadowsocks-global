@@ -34,26 +34,18 @@ interface RoutingServiceRequest {
   parameters: { [parameter: string]: string[] };
 }
 
-type Traffic = {
-  receivedBytesPerSecond: number;
-  sentBytesPerSecond: number;
-  sentBytesTotal: number;
-  receivedBytesTotal: number;
-  time: number;
-};
-
 interface RoutingServiceResponse {
   action: RoutingServiceAction; // Matches RoutingServiceRequest.action
   statusCode: RoutingServiceStatusCode;
   errorMessage?: string;
   connectionStatus: ConnectionStatus;
-  traffic?: Traffic;
 }
 
 enum RoutingServiceAction {
   CONFIGURE_ROUTING = "configureRouting",
   RESET_ROUTING = "resetRouting",
   STATUS_CHANGED = "statusChanged",
+  ADD_RESERVED_ROUTE = "addReservedRoutes",
 }
 
 enum RoutingServiceStatusCode {
@@ -188,6 +180,9 @@ export class RoutingDaemon {
           this.socket.end();
         }
         break;
+      case RoutingServiceAction.ADD_RESERVED_ROUTE:
+        logger.info("Add the reserved route successfully");
+        break;
       default:
         console.error(
           `unexpected message from background service: ${data.toString()}`
@@ -213,6 +208,44 @@ export class RoutingDaemon {
       );
     }
     return response;
+  }
+
+  async addReservedRoute(route: string) {
+    return new Promise<void>((fulfill, reject) => {
+      if (!this.socket) {
+        return reject("The Vpn has not been started!");
+      }
+      this.socket.write(
+        JSON.stringify({
+          action: RoutingServiceAction.ADD_RESERVED_ROUTE,
+          parameters: {
+            reservedRoutes: [route],
+          },
+        })
+      );
+
+      this.socket.once("data", (data) => {
+        const message = RoutingDaemon.parseRoutingServiceResponse(data);
+        if (
+          !message ||
+          message.action !== RoutingServiceAction.ADD_RESERVED_ROUTE ||
+          message.statusCode !== RoutingServiceStatusCode.SUCCESS
+        ) {
+          // NOTE: This will rarely occur because the connectivity tests
+          //       performed when the user clicks "CONNECT" should detect when
+          //       the system is offline and that, currently, is pretty much
+          //       the only time the routing service will fail.
+          reject(
+            new Error(
+              !!message
+                ? message.errorMessage
+                : "empty routing service response"
+            )
+          );
+        }
+        fulfill();
+      });
+    });
   }
 
   // Use #onceDisconnected to be notified when the connection terminates.

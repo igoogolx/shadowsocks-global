@@ -2,7 +2,7 @@ import { Menu } from "electron";
 import { app } from "electron";
 import path from "path";
 import fs from "fs";
-import { DNS_SMART_TYPE, SMART_DNS_ADDRESS } from "../src/constants";
+import { SMART_DNS_ADDRESS } from "../src/constants";
 import { GLOBAL_PROXY_ROUTES, GLOBAL_RESERVED_ROUTES } from "./constant";
 import {
   BUILD_IN_RULE_BYPASS_MAINLAND_CHINA,
@@ -76,15 +76,11 @@ export function pathToEmbeddedBinary(toolName: string, filename: string) {
     filename + ".exe"
   );
 }
-export function pathToConfig(toolName: string, filename: string) {
-  return path.join(getResourcesPath(), "third_party", toolName, filename);
-}
 
 export const readRule = async (path: string) => {
   const rulesString = await fs.promises.readFile(path, "utf8");
   const stats = await fs.promises.stat(path);
   const fileSizeInKb = stats["size"] / 1000;
-  console.log(fileSizeInKb);
   if (fileSizeInKb > 100)
     throw new Error("The rule file's size must be smaller than 100KB");
   const rules = rulesString.trim().split("\n");
@@ -96,36 +92,23 @@ export const readRule = async (path: string) => {
 export class Config {
   private state = getAppState();
 
-  getIsUdpEnabled = () => {
-    return this.state.setting.general.isProxyUdp;
+  getIsDnsOverUdp = () => {
+    return this.state.setting.general.DnsOverUdp;
   };
 
   getDns = () => {
-    let dnsServer;
     let whiteListServers;
     //Smart Dns
     const dns = this.state.setting.dns;
-    if (dns.type === DNS_SMART_TYPE) {
-      const defaultServer = dns.smart.defaultWebsite.server;
-      const nativeServer = dns.smart.nativeWebsite.server;
-      dnsServer = {
-        type: "smart",
-        server: { native: nativeServer, default: defaultServer },
-      };
-      whiteListServers = [SMART_DNS_ADDRESS, defaultServer, nativeServer];
-
-      //Customized Dns
-    } else {
-      const preferredServer = dns.customized.preferredServer;
-      const alternateServer = dns.customized.alternateServer;
-      dnsServer = {
-        type: "customized",
-        server: { preferred: preferredServer, alternate: alternateServer },
-      };
-      whiteListServers = [preferredServer, alternateServer];
-    }
-
-    return { ...dnsServer, whiteListServers };
+    whiteListServers = [
+      SMART_DNS_ADDRESS,
+      dns.default.server,
+      dns.gfwList.server,
+    ];
+    return {
+      server: { default: dns.default.server, gfwList: dns.gfwList.server },
+      whiteListServers,
+    };
   };
 
   getProxyServer = async () => {
@@ -199,40 +182,21 @@ export class Config {
 
     //Smart Dns
     const dns = this.state.setting.dns;
-    if (dns.type === DNS_SMART_TYPE) {
-      const defaultServer = dns.smart.defaultWebsite.server;
-      const nativeServer = dns.smart.nativeWebsite.server;
-
-      if (dns.smart.defaultWebsite.isProxy) {
-        proxy = [...proxy, defaultServer + "/32"];
-      } else {
-        reserved = [...reserved, defaultServer + "/32"];
-      }
-      if (dns.smart.nativeWebsite.isProxy) {
-        proxy = [...proxy, nativeServer + "/32"];
-      } else {
-        reserved = [...reserved, nativeServer + "/32"];
-      }
-      //Customized Dns
+    if (dns.default.isProxy) {
+      proxy = [...proxy, dns.default.server + "/32"];
     } else {
-      const preferredServer = dns.customized.preferredServer;
-      const alternateServer = dns.customized.alternateServer;
-      if (dns.customized.isProxy) {
-        proxy = [...proxy, preferredServer + "/32", alternateServer + "/32"];
-      } else {
-        reserved = [
-          ...reserved,
-          preferredServer + "/32",
-          alternateServer + "/32",
-        ];
-      }
+      reserved = [...reserved, dns.default.server + "/32"];
     }
-
+    if (dns.gfwList.isProxy) {
+      proxy = [...proxy, dns.gfwList.server + "/32"];
+    } else {
+      reserved = [...reserved, dns.gfwList.server + "/32"];
+    }
     return { proxy, reserved };
   };
 }
 
-export const DNS_NATIVE_WEBSITES_FILE_PATH = path.join(
+export const GFW_LIST_FILE_PATH = path.join(
   getResourcesPath(),
   "acl",
   "gfwlist.acl"

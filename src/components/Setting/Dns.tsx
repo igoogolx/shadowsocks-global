@@ -5,13 +5,9 @@ import { Button, Field, Form, INPUT_SIZE } from "../Core";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { DnsSettingState, setting } from "../../reducers/settingReducer";
-import { FieldSelector } from "../Core/Selector/Selector";
-import { isIPv4 } from "net";
-import { DNS_CUSTOMIZED_TYPE, DNS_SMART_TYPE } from "../../constants";
 import { notifier } from "../Core/Notification";
 import { ipcRenderer } from "electron";
 
-const typeOptions = [{ value: DNS_SMART_TYPE }, { value: DNS_CUSTOMIZED_TYPE }];
 export const Dns = React.memo(() => {
   const dnsState = useSelector<AppState, DnsSettingState>(
     (state) => state.setting.dns
@@ -19,20 +15,15 @@ export const Dns = React.memo(() => {
   const initValue = useMemo(() => {
     const dns = dnsState;
     return {
-      type: dns.type,
-      defaultWebsiteDns: dns.smart.defaultWebsite.server,
-      isProxyDefaultWebsiteDns: dns.smart.defaultWebsite.isProxy,
-      nativeWebsiteDns: dns.smart.nativeWebsite.server,
-      isProxyNativeWebsiteDns: dns.smart.nativeWebsite.isProxy,
-      preferredCustomizedServer: dns.customized.preferredServer,
-      alternateCustomizedServer: dns.customized.alternateServer,
-      isProxyCustomizedDns: dns.customized.isProxy,
+      defaultDns: dns.default.server,
+      isProxyDefaultDns: dns.default.isProxy,
+      gfwListDns: dns.gfwList.server,
+      isProxyGfwListDns: dns.gfwList.isProxy,
     };
   }, [dnsState]);
   const [dnsSetting, setDnsSetting] = useState(initValue);
-  const isSmartDns = dnsSetting.type === DNS_SMART_TYPE;
   const disabled = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
   const [isChanged, setIsChanged] = useState(false);
   const dispatch = useDispatch();
@@ -52,28 +43,12 @@ export const Dns = React.memo(() => {
   );
   const onSubmit = useCallback(
     (data) => {
-      if (data.type === "smart")
-        dispatch(
-          setting.actions.setSmartDns({
-            defaultWebsite: {
-              isProxy: data.isProxyDefaultWebsiteDns,
-              server: data.defaultWebsiteDns,
-            },
-            nativeWebsite: {
-              isProxy: data.isProxyNativeWebsiteDns,
-              server: data.nativeWebsiteDns,
-            },
-          })
-        );
-      else
-        dispatch(
-          setting.actions.setCustomizedDns({
-            isProxy: data.isProxyCustomizedDns,
-            preferredServer: data.preferredCustomizedServer,
-            alternateServer: data.alternateCustomizedServer,
-          })
-        );
-
+      dispatch(
+        setting.actions.setCustomizedDns({
+          default: { server: data.defaultDns, isProxy: data.isProxyDefaultDns },
+          gfwList: { server: data.gfwList, isProxy: data.isProxyGfwList },
+        })
+      );
       setIsChanged(false);
       notifier.success("Update setting successfully");
     },
@@ -81,77 +56,40 @@ export const Dns = React.memo(() => {
   );
 
   const openNativeWebsitesFile = useCallback(() => {
-    ipcRenderer.send("openDnsNativeWebsitesFile");
+    ipcRenderer.send("openGfwListFile");
   }, []);
 
   return (
     <Form onSubmit={onSubmit} onChange={onChange} value={dnsSetting}>
       <div className={styles.item}>
-        <div className={styles.title}>Type:</div>
-        <FieldSelector
-          name={"type"}
-          options={typeOptions}
+        <div className={styles.title}>Default dns:</div>
+        <Field
+          name={"defaultDns"}
           disabled={disabled}
+          className={styles.input}
+          size={INPUT_SIZE.M}
         />
+        <FieldToggle name={"isProxyDefaultDns"} disabled={disabled}>
+          Proxy this dns
+        </FieldToggle>
       </div>
-      {isSmartDns && (
-        <>
-          <div className={styles.item}>
-            <div className={styles.title}>Default dns:</div>
-            <Field
-              name={"defaultWebsiteDns"}
-              disabled={disabled}
-              className={styles.input}
-              size={INPUT_SIZE.M}
-            />
-            <FieldToggle name={"isProxyDefaultWebsiteDns"} disabled={disabled}>
-              Proxy this dns
-            </FieldToggle>
-          </div>
-          <div className={styles.item}>
-            <div className={styles.title}>Dns for native website:</div>
-            <Field
-              name={"nativeWebsiteDns"}
-              disabled={disabled}
-              className={styles.input}
-              size={INPUT_SIZE.M}
-            />
-            <FieldToggle name={"isProxyNativeWebsiteDns"} disabled={disabled}>
-              Proxy this dns
-            </FieldToggle>
-          </div>
-          <div className={styles.item}>
-            <Button isPrimary={true} onClick={openNativeWebsitesFile}>
-              Open native websites file
-            </Button>
-          </div>
-        </>
-      )}
-      {isSmartDns || (
-        <>
-          <div className={styles.title}>Servers:</div>
-          <Field
-            name={"preferredCustomizedServer"}
-            disabled={disabled}
-            label={"Preferred server"}
-            placeholder={"XXXX.XXXX.XXXX.XXXX"}
-            className={styles.input}
-            validate={isIPv4}
-          />
-          <Field
-            name={"alternateCustomizedServer"}
-            disabled={disabled}
-            label={"Alternate server"}
-            placeholder={"XXXX.XXXX.XXXX.XXXX"}
-            className={styles.input}
-            validate={isIPv4}
-          />
-          <FieldToggle name={"isProxyCustomizedDns"} disabled={disabled}>
-            Proxy this dns
-          </FieldToggle>
-        </>
-      )}
-
+      <div className={styles.item}>
+        <div className={styles.title}>Dns for gfw list:</div>
+        <Field
+          name={"gfwListDns"}
+          disabled={disabled}
+          className={styles.input}
+          size={INPUT_SIZE.M}
+        />
+        <FieldToggle name={"isProxyGfwListDns"} disabled={disabled}>
+          Proxy this dns
+        </FieldToggle>
+      </div>
+      <div className={styles.item}>
+        <Button isPrimary={true} onClick={openNativeWebsitesFile}>
+          Open gfw list file
+        </Button>
+      </div>
       <div className={styles.footer}>
         <Button
           isPrimary={true}

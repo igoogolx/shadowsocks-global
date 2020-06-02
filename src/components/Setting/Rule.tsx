@@ -21,7 +21,7 @@ export const Rule = React.memo(() => {
   }, [ruleState]);
   const [value, setValue] = useState(initValue);
   const disabled = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
   const [isChanged, setIsChanged] = useState(false);
   const [isEditAdditionalRoutes, setIsEditAdditionalRoutes] = useState(false);

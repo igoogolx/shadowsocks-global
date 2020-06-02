@@ -8,7 +8,7 @@ import { AppState } from "../../reducers/rootReducer";
 
 export const Home = React.memo(() => {
   const isConnectingOrConnected = useSelector<AppState, boolean>(
-    (state) => state.proxy.isStarted || state.proxy.isProcessing
+    (state) => state.proxy.isConnected || state.proxy.isProcessing
   );
   return (
     <>

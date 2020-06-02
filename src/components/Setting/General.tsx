@@ -14,7 +14,7 @@ export const General = React.memo(() => {
     (state) => state.setting.general
   );
   const disabled = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
   const [value, setValue] = useState(general);
   const [isChanged, setIsChanged] = useState(false);
@@ -58,11 +58,11 @@ export const General = React.memo(() => {
         />
       </div>
       <FieldToggle
-        name={"isProxyUdp"}
+        name={"DnsOverUdp"}
         disabled={disabled}
         className={styles.item}
       >
-        Proxy udp
+        Dns over Udp
       </FieldToggle>
       <FieldToggle
         name={"isUpdateSubscriptionsOnOpen"}

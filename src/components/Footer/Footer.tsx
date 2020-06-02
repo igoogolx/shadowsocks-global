@@ -13,15 +13,15 @@ const Footer = () => {
   >();
   const dispatch = useDispatch();
   const [message, setMessage] = useState("");
-  const isStarted = useSelector<AppState, boolean>(
-    (state) => state.proxy.isStarted
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
   );
 
   const flow = useFlow();
 
   useEffect(() => {
-    if (!isStarted) setUdpStatus(undefined);
-  }, [isStarted]);
+    if (!isConnected) setUdpStatus(undefined);
+  }, [isConnected]);
 
   useEffect(() => {
     ipcRenderer.on("proxy-message", (event, message) => {

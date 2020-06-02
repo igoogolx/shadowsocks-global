@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DNS_SMART_TYPE } from "../constants";
 import { BUILD_IN_RULE_GLOBAL } from "../share";
 
 const DEFAULT_LOCAL_PORT = 1081;
@@ -7,24 +6,14 @@ const DEFAULT_LOCAL_PORT = 1081;
 const GOOGLE_DNS = "8.8.8.8";
 const DNS_POD = "119.29.29.29";
 
-type CustomizedDns = {
-  isProxy: boolean;
-  preferredServer: string;
-  alternateServer: string;
-};
-
-type SmartDnsField = {
+type DnsField = {
   isProxy: boolean;
   server: string;
 };
 
 export type DnsSettingState = {
-  type: "smart" | "customized";
-  smart: {
-    defaultWebsite: SmartDnsField;
-    nativeWebsite: SmartDnsField;
-  };
-  customized: CustomizedDns;
+  default: DnsField;
+  gfwList: DnsField;
 };
 
 export type Route = { ip: string; isProxy: boolean };
@@ -37,7 +26,7 @@ export type RuleState = {
 
 export type GeneralState = {
   shadowsocksLocalPort: number;
-  isProxyUdp: boolean;
+  DnsOverUdp: boolean;
   isUpdateSubscriptionsOnOpen: boolean;
   isRunAtSystemStartup: boolean;
   isHideWhenWindowIsClosed: boolean;
@@ -56,7 +45,7 @@ export type SettingState = {
 export const initialSettingState: SettingState = {
   general: {
     shadowsocksLocalPort: DEFAULT_LOCAL_PORT,
-    isProxyUdp: true,
+    DnsOverUdp: false,
     isUpdateSubscriptionsOnOpen: false,
     isRunAtSystemStartup: false,
     isHideWhenWindowIsClosed: true,
@@ -65,19 +54,11 @@ export const initialSettingState: SettingState = {
     autoConnectDelay: 5,
   },
   dns: {
-    type: DNS_SMART_TYPE,
-    smart: {
-      defaultWebsite: {
-        isProxy: true,
-        server: GOOGLE_DNS,
-      },
-      nativeWebsite: { isProxy: false, server: DNS_POD },
+    default: {
+      isProxy: false,
+      server: DNS_POD,
     },
-    customized: {
-      isProxy: true,
-      preferredServer: "",
-      alternateServer: "",
-    },
+    gfwList: { isProxy: true, server: GOOGLE_DNS },
   },
   rule: {
     current: BUILD_IN_RULE_GLOBAL,
@@ -93,20 +74,8 @@ export const setting = createSlice({
     setGeneral: (state, action: PayloadAction<GeneralState>) => {
       state.general = action.payload;
     },
-
-    setSmartDns: (
-      state,
-      action: PayloadAction<{
-        defaultWebsite: SmartDnsField;
-        nativeWebsite: SmartDnsField;
-      }>
-    ) => {
-      state.dns.type = "smart";
-      state.dns.smart = action.payload;
-    },
-    setCustomizedDns: (state, action: PayloadAction<CustomizedDns>) => {
-      state.dns.type = "customized";
-      state.dns.customized = action.payload;
+    setCustomizedDns: (state, action: PayloadAction<DnsSettingState>) => {
+      state.dns = action.payload;
     },
     setCurrentRule: (state, action: PayloadAction<string>) => {
       state.rule.current = action.payload;

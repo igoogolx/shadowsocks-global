@@ -2,11 +2,7 @@ import { mainWindow } from "./common";
 import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import promiseIpc from "electron-promise-ipc";
 
-import {
-  DNS_NATIVE_WEBSITES_FILE_PATH,
-  getAppState,
-  getResourcesPath,
-} from "./utils";
+import { GFW_LIST_FILE_PATH, getAppState, getResourcesPath } from "./utils";
 import { LOG_FILE_PATH, logger } from "./log";
 import { FlowData } from "./flow";
 import { ConnectionStatus } from "./routing_service";
@@ -44,8 +40,8 @@ ipcMain.on("openLogFile", () => {
   shell.openItem(LOG_FILE_PATH);
 });
 
-ipcMain.on("openDnsNativeWebsitesFile", () => {
-  shell.openItem(DNS_NATIVE_WEBSITES_FILE_PATH);
+ipcMain.on("openGfwListFile", () => {
+  shell.openItem(GFW_LIST_FILE_PATH);
 });
 
 ipcMain.on("hideWindow", () => {

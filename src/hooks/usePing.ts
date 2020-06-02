@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { proxy } from "../reducers/proxyReducer";
 import { checkServer } from "../utils/connectivity";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { AppState } from "../reducers/rootReducer";
 
 export type PingServer = {
   type: "shadowsocks" | "socks5";
@@ -13,16 +14,23 @@ export type PingServer = {
 export const usePing = (servers: PingServer[]) => {
   const dispatch = useDispatch();
   const [isPinging, setIsPing] = useState(false);
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
+  );
+  const isConnectedRef = useRef(false);
   const isUnmounting = useRef(false);
   useEffect(() => {
     return () => {
       isUnmounting.current = true;
     };
   }, []);
+  useEffect(() => {
+    isConnectedRef.current = isConnected;
+  }, [isConnected]);
   const ping = useCallback(async () => {
     setIsPing(true);
     for (let i = 0; i < servers.length; i++) {
-      if (isUnmounting.current) return;
+      if (isUnmounting.current || isConnectedRef.current) return;
       const { host, port, id, type } = servers[i];
       try {
         dispatch(

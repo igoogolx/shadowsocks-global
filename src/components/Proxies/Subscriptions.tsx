@@ -20,7 +20,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const disabled = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
   const closeEditDialog = useCallback(() => setIsEditing(false), []);
   const dispatch = useDispatch();

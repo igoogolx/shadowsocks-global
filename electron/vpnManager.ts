@@ -1,5 +1,5 @@
 import { ConnectionManager, Dns } from "./process_manager";
-import { Config, RemoteServer } from "./utils";
+import { Config, getAppState, RemoteServer } from "./utils";
 import { ConnectionStatus } from "./routing_service";
 import { AppTray } from "./tray";
 import { getFlow } from "./flow";
@@ -8,6 +8,8 @@ import {
   sendFlowToRender,
   sendMessageToRender,
 } from "./ipc";
+import { getActivatedServer } from "../src/components/Proxies/util";
+import { lookupIp } from "../src/share";
 
 export class VpnManager {
   private currentConnection: ConnectionManager | undefined;
@@ -31,7 +33,7 @@ export class VpnManager {
       const route = await config.getRoutes();
       this.currentConnection = new ConnectionManager(
         proxyServer as RemoteServer,
-        config.getIsUdpEnabled(),
+        config.getIsDnsOverUdp(),
         route,
         config.getDns() as Dns
       );
@@ -61,6 +63,14 @@ export class VpnManager {
       await this.stop();
       throw new Error(e);
     }
+  };
+  changeServer = async () => {
+    sendMessageToRender("Connecting...");
+    let activatedServer = getActivatedServer(getAppState().proxy);
+    const host = await lookupIp(activatedServer.host);
+    const proxyServer = { ...activatedServer, host };
+    await this.currentConnection?.changeServer(proxyServer as RemoteServer);
+    sendMessageToRender("Connected!");
   };
   stop = async () => {
     try {

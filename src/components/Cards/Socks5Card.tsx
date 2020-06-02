@@ -22,12 +22,12 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
   const activatedId = useSelector<AppState, string>(
     (state) => state.proxy.activeId
   );
-  const isStartedOrProcessing = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing || state.proxy.isStarted
+  const isConnectedOrProcessing = useSelector<AppState, boolean>(
+    (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
 
   const dropdownItems = useMemo(() => {
-    const isActivated = activatedId === id && isStartedOrProcessing;
+    const isActivated = activatedId === id && isConnectedOrProcessing;
     return [
       {
         iconName: ICON_NAME.EDIT,
@@ -45,7 +45,7 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
         disabled: isActivated,
       },
     ];
-  }, [activatedId, dispatch, id, isStartedOrProcessing]);
+  }, [activatedId, dispatch, id, isConnectedOrProcessing]);
 
   const closeDialog = useCallback(() => setIsEditing(false), []);
   useEffect(() => {

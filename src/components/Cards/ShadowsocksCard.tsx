@@ -7,6 +7,7 @@ import { encodeSsUrl } from "../../utils/url";
 import { clipboard } from "electron";
 import { AppState } from "../../reducers/rootReducer";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
+import promiseIpc from "electron-promise-ipc";
 import QRCode from "qrcode";
 
 type ShadowsocksCardProps = {
@@ -16,22 +17,39 @@ type ShadowsocksCardProps = {
 export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
   const { id, name, host, regionCode, port, pingTime } = props.shadowsocks;
   const dispatch = useDispatch();
-
-  const onClick = useCallback(() => dispatch(proxy.actions.setActiveId(id)), [
-    dispatch,
-    id,
-  ]);
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
+  );
+  const onClick = useCallback(() => {
+    dispatch(proxy.actions.setActiveId(id));
+    if (isConnected) {
+      dispatch(proxy.actions.setIsConnected(false));
+      dispatch(proxy.actions.setIsProcessing(true));
+      promiseIpc
+        //@ts-ignore
+        .send("changeServer")
+        .catch((e) => {
+          if (e.message && typeof e.message === "string")
+            notifier.error(e.message);
+          else notifier.error("Unknown error");
+        })
+        .finally(() => {
+          dispatch(proxy.actions.setIsConnected(true));
+          dispatch(proxy.actions.setIsProcessing(false));
+        });
+    }
+  }, [dispatch, id, isConnected]);
   const [isEditing, setIsEditing] = useState(false);
   const activatedId = useSelector<AppState, string>(
     (state) => state.proxy.activeId
   );
   const [isShowQrCode, setIsShowQrCode] = useState(false);
-  const isStartedOrProcessing = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing || state.proxy.isStarted
+  const isConnectedOrProcessing = useSelector<AppState, boolean>(
+    (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
 
   const dropdownItems = useMemo(() => {
-    const isActivated = activatedId === id && isStartedOrProcessing;
+    const isActivated = activatedId === id && isConnectedOrProcessing;
 
     return [
       {
@@ -69,7 +87,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         disabled: isActivated,
       },
     ];
-  }, [activatedId, dispatch, id, isStartedOrProcessing, props.shadowsocks]);
+  }, [activatedId, dispatch, id, isConnectedOrProcessing, props.shadowsocks]);
   const closeEditDialog = useCallback(() => setIsEditing(false), []);
   const closeQrCodeDialog = useCallback(() => setIsShowQrCode(false), []);
 

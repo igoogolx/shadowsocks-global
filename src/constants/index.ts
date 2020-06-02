@@ -21,5 +21,3 @@ export const ENCRYPTION_METHODS = [
 ];
 
 export const SMART_DNS_ADDRESS = "127.0.0.1";
-export const DNS_SMART_TYPE = "smart";
-export const DNS_CUSTOMIZED_TYPE = "customized";

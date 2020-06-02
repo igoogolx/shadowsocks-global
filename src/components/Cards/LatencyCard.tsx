@@ -22,8 +22,8 @@ export const LatencyCard = () => {
 };
 
 export const ToSeverCard = () => {
-  const isStarted = useSelector<AppState, boolean>(
-    (state) => state.proxy.isStarted
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
   );
   const check = useCallback(async () => {
     const proxy = store.getState().proxy;
@@ -36,13 +36,13 @@ export const ToSeverCard = () => {
     });
   }, []);
   const { execute, pending, value, error } = useAsync(check, false);
-  const disabled = !isStarted || pending;
+  const disabled = !isConnected || pending;
   useEffect(() => {
-    if (isStarted)
+    if (isConnected)
       execute()
         //Ignore promise returned from onClick
         .then();
-  }, [isStarted, execute]);
+  }, [isConnected, execute]);
   const tooltipRef = useRef(null);
   return (
     <div className={styles.card}>
@@ -61,7 +61,7 @@ export const ToSeverCard = () => {
         iconName={ICON_NAME.PAPER_PLANE}
         title={"To Server"}
         data={
-          isStarted
+          isConnected
             ? pending
               ? "Checking"
               : !value || error
@@ -78,17 +78,17 @@ export const ToSeverCard = () => {
 };
 
 export const ToDnsCard = () => {
-  const isStarted = useSelector<AppState, boolean>(
-    (state) => state.proxy.isStarted
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
   );
   const { execute, pending, value, error } = useAsync(checkDns, false);
-  const disabled = !isStarted || pending;
+  const disabled = !isConnected || pending;
   useEffect(() => {
-    if (isStarted)
+    if (isConnected)
       execute()
         //Ignore promise returned from onClick
         .then();
-  }, [isStarted, execute]);
+  }, [isConnected, execute]);
   const tooltipRef = useRef(null);
   return (
     <div className={styles.card}>
@@ -107,7 +107,7 @@ export const ToDnsCard = () => {
         iconName={ICON_NAME.DNS}
         title={"To Dns"}
         data={
-          isStarted
+          isConnected
             ? pending
               ? "Checking"
               : !value || error
@@ -127,8 +127,8 @@ export const ToInternetCard = () => {
   const shadowsocksLocalPort = useSelector<AppState, number>(
     (state) => state.setting.general.shadowsocksLocalPort
   );
-  const isStarted = useSelector<AppState, boolean>(
-    (state) => state.proxy.isStarted
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
   );
   const check = useCallback(async () => {
     const proxy = store.getState().proxy;
@@ -142,13 +142,13 @@ export const ToInternetCard = () => {
       );
   }, [shadowsocksLocalPort]);
   const { execute, pending, value, error } = useAsync(check, false);
-  const disabled = !isStarted || pending;
+  const disabled = !isConnected || pending;
   useEffect(() => {
-    if (isStarted)
+    if (isConnected)
       execute()
         //Ignore promise returned from onClick
         .then();
-  }, [isStarted, execute]);
+  }, [isConnected, execute]);
   const tooltipRef = useRef(null);
   return (
     <div className={styles.card}>
@@ -167,7 +167,7 @@ export const ToInternetCard = () => {
         iconName={ICON_NAME.INTERNET}
         title={"To Internet"}
         data={
-          isStarted
+          isConnected
             ? pending
               ? "Checking"
               : !value || error

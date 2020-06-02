@@ -98,15 +98,15 @@ const Header = () => {
     //TODO: use customized channel for "Disconnected" because there are others message.
     ipcRenderer.on("proxy-disconnected", () => {
       dispatch(proxy.actions.setIsProcessing(false));
-      dispatch(proxy.actions.stopVpn());
+      dispatch(proxy.actions.setIsConnected(false));
     });
 
     ipcRenderer.send("setRunAtSystemStartup");
 
-    //If the app crashes unexpectedly, the "start" Button can be loading state after restarting app.
+    //If the app crashes unexpectedly, the "Connect" Button can be loading state after restarting app.
     //To avoid that, the state mush be reset.
     dispatch(proxy.actions.setIsProcessing(false));
-    dispatch(proxy.actions.stopVpn());
+    dispatch(proxy.actions.setIsConnected(false));
     return () => {
       ipcRenderer.removeAllListeners("proxy-disconnected");
     };
@@ -115,8 +115,8 @@ const Header = () => {
   const customizedRulesDirPath = useSelector<AppState, string>(
     (state) => state.setting.rule.dirPath
   );
-  const isStarted = useSelector<AppState, boolean>(
-    (state) => state.proxy.isStarted
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
   );
   const isProcessing = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing
@@ -205,7 +205,7 @@ const Header = () => {
       dispatch(proxy.actions.setIsProcessing(true));
       //@ts-ignore
       await promiseIpc.send("start");
-      dispatch(proxy.actions.startVpn());
+      dispatch(proxy.actions.setIsConnected(true));
       if (isHideAfterConnection) ipcRenderer.send("hideWindow");
     } catch (e) {
       if (e.message && typeof e.message === "string") notifier.error(e.message);
@@ -214,12 +214,10 @@ const Header = () => {
       dispatch(proxy.actions.setIsProcessing(false));
     }
   }, [activeId, autoConnectTimer, dispatch, isHideAfterConnection]);
-
   useEffect(() => {
     const loadRulePath = async () => {
       setIsLoadingRules(true);
       let rulePaths: string[] = [];
-
       if (customizedRulesDirPath)
         try {
           const customizedRules = await fs.promises.readdir(
@@ -244,7 +242,7 @@ const Header = () => {
     try {
       // @ts-ignore
       await promiseIpc.send("stop");
-      dispatch(proxy.actions.stopVpn());
+      dispatch(proxy.actions.setIsConnected(false));
     } catch (e) {
       console.log(e);
     } finally {
@@ -292,7 +290,7 @@ const Header = () => {
         <LoadingDialog content={"Updating subscriptions..."} />
       )}
       <div className={styles.container}>
-        {isStarted ? (
+        {isConnected ? (
           <Button
             isDanger={true}
             className={styles.button}
@@ -300,7 +298,7 @@ const Header = () => {
             isLoading={isProcessing}
             disabled={isProcessing}
           >
-            {isProcessing ? "Stopping" : "Stop"}
+            {isProcessing ? "Disconnecting" : "Disconnect"}
           </Button>
         ) : (
           <Button
@@ -310,7 +308,7 @@ const Header = () => {
             isLoading={isProcessing}
             disabled={isProcessing}
           >
-            {isProcessing ? "Starting" : "Start"}
+            {isProcessing ? "Connecting" : "Connect"}
           </Button>
         )}
 
@@ -320,7 +318,7 @@ const Header = () => {
           value={currentRule}
           onChange={changeCurrentRule}
           className={styles.selector}
-          disabled={isLoadingRules || isStarted || isProcessing}
+          disabled={isLoadingRules || isConnected || isProcessing}
           isVirtualizedList={rulesOptions.length > 4}
         />
 

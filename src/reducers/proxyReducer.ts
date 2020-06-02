@@ -36,8 +36,8 @@ export type Socks5 = {
 };
 
 export type ProxyState = {
-  isStarted: boolean;
-  //Starting or Stopping
+  isConnected: boolean;
+  //Connecting or  Disconnecting
   isProcessing: boolean;
   activeId: string;
   shadowsockses: Shadowsocks[];
@@ -46,7 +46,7 @@ export type ProxyState = {
 };
 
 export const initialProxyState: ProxyState = {
-  isStarted: false,
+  isConnected: false,
   isProcessing: false,
   activeId: "",
   shadowsockses: [],
@@ -58,11 +58,8 @@ export const proxy = createSlice({
   name: "proxy",
   initialState: initialProxyState,
   reducers: {
-    startVpn: (state) => {
-      state.isStarted = true;
-    },
-    stopVpn: (state) => {
-      state.isStarted = false;
+    setIsConnected: (state, action: PayloadAction<boolean>) => {
+      state.isConnected = action.payload;
     },
     setIsProcessing: (state, action: PayloadAction<boolean>) => {
       state.isProcessing = action.payload;

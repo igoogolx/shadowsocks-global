@@ -15,18 +15,17 @@
 import { execSync } from "child_process";
 import { ConnectionStatus, RoutingDaemon } from "./routing_service";
 import { powerMonitor } from "electron";
-import { checkUdpForwardingEnabled, isServerReachable } from "./connectivity";
 import { ChildProcess, spawn } from "child_process";
 import {
   pathToEmbeddedBinary,
   RemoteServer,
-  DNS_NATIVE_WEBSITES_FILE_PATH,
+  GFW_LIST_FILE_PATH,
 } from "./utils";
 import { SMART_DNS_ADDRESS } from "../src/constants";
-import { validateServerCredentials } from "../src/share";
 import { logger } from "./log";
 import * as path from "path";
 import { sendMessageToRender, sendUdpStatusToRender } from "./ipc";
+import { checkUdpForwardingEnabled } from "./connectivity";
 
 export type Route = {
   proxy: string[];
@@ -89,17 +88,11 @@ function testTapDevice() {
   }
 }
 
-export type Dns =
-  | {
-      type: "smart";
-      server: { native: string; default: string };
-      whiteListServers: string[];
-    }
-  | {
-      type: "customized";
-      server: { alternate: string; preferred: string };
-      whiteListServers: string[];
-    };
+export type Dns = {
+  server: { default: string; gfwList: string };
+
+  whiteListServers: string[];
+};
 
 // Establishes a full-system VPN with the help of Outline's routing daemon and child processes
 // ss-local and tun2socks. Follows the Mediator pattern in that none of the three "helpers" know
@@ -113,7 +106,7 @@ export class ConnectionManager {
   readonly proxyAddress: string;
   readonly proxyPort: number;
 
-  private isUdpEnabled = false;
+  private exits: Promise<void>[] = [];
 
   private readonly routing: RoutingDaemon;
   private readonly ssLocal: SsLocal | null;
@@ -123,6 +116,7 @@ export class ConnectionManager {
   // support, we need to stop and restart tun2socks *without notifying the client* and this allows
   // us swap the listener in and out.
   private tun2socksExitListener?: () => void | undefined;
+  private ssLocalExitListener?: () => void | undefined;
 
   // See #resumeListener.
   private terminated = false;
@@ -137,15 +131,14 @@ export class ConnectionManager {
 
   constructor(
     private remoteServer: RemoteServer,
-    private isProxyUdp: boolean,
+    private isDnsOverUdp: boolean,
     private route: Route,
     private dns: Dns
   ) {
     const isSocks5 = remoteServer.type === "socks5";
-    const isSmartDns = dns.type === "smart";
 
     this.routing = new RoutingDaemon(route, {
-      servers: isSmartDns ? [SMART_DNS_ADDRESS] : Object.values(dns.server),
+      servers: [SMART_DNS_ADDRESS],
       whiteListServers: dns.whiteListServers,
     });
 
@@ -154,21 +147,21 @@ export class ConnectionManager {
       ? Number(remoteServer.port)
       : remoteServer.local_port || PROXY_PORT;
 
-    this.tun2socks = isSmartDns
-      ? new Tun2socks(
-          this.proxyAddress,
-          this.proxyPort,
-          dns.server as { native: string; default: string }
-        )
-      : new Tun2socks(this.proxyAddress, this.proxyPort);
+    this.tun2socks = new Tun2socks(
+      this.proxyAddress,
+      this.proxyPort,
+      dns.server
+    );
 
-    this.ssLocal = isSocks5 ? null : new SsLocal(this.proxyPort);
+    this.ssLocal = isSocks5
+      ? null
+      : new SsLocal(this.proxyAddress, this.proxyPort);
 
     // This trio of Promises, each tied to a helper process' exit, is key to the instance's
     // lifecycle:
     //  - once any helper fails or exits, stop them all
     //  - once *all* helpers have stopped, we're done
-    const exits = [
+    this.exits = [
       this.routing.onceDisconnected,
       new Promise<void>((fulfill) => {
         this.tun2socksExitListener = fulfill;
@@ -177,21 +170,22 @@ export class ConnectionManager {
     ];
 
     if (this.ssLocal) {
-      exits.push(
+      this.exits.push(
         // This Promise cant't be fulfilled when in Socks5 proxy mode,
         // so it must not be added to exits in the case.
         new Promise<void>((fulfill) => {
-          if (this.ssLocal) this.ssLocal.onExit = fulfill;
+          this.ssLocalExitListener = fulfill;
+          if (this.ssLocal) this.ssLocal.onExit = this.ssLocalExitListener;
         })
       );
     }
 
-    Promise.race(exits).then(() => {
+    Promise.race(this.exits).then(() => {
       logger.info("a helper has exited, disconnecting");
       this.isDisconnecting = true;
       this.stop();
     });
-    this.onAllHelpersStopped = Promise.all(exits).then(() => {
+    this.onAllHelpersStopped = Promise.all(this.exits).then(() => {
       logger.info("all helpers have exited");
       this.terminated = true;
     });
@@ -221,11 +215,25 @@ export class ConnectionManager {
     logger.info("restarting tun2socks after resume");
 
     this.tun2socks.onExit = this.tun2socksExitListener;
-    this.tun2socks.start(this.isProxyUdp && this.isUdpEnabled);
+    this.tun2socks.start(this.isDnsOverUdp);
 
     // Check if UDP support has changed; if so, silently restart.
     //TODO:retestUdp
     // this.retestUdp();
+  }
+
+  async changeServer(newServer: RemoteServer) {
+    await this.routing.addReservedRoute(newServer.host + "/32");
+    await new Promise((fulfill) => {
+      if (this.ssLocal) {
+        this.ssLocal.onExit = () => {
+          fulfill();
+        };
+        this.ssLocal.stop();
+      }
+    });
+    if (this.ssLocal) this.ssLocal.onExit = this.ssLocalExitListener;
+    this.ssLocal?.start(newServer);
   }
 
   // Fulfills once all three helpers have started successfully.
@@ -235,28 +243,10 @@ export class ConnectionManager {
     // ss-local must be up in order to test UDP support and validate credentials.
     if (this.ssLocal) {
       this.ssLocal.start(this.remoteServer);
-      sendMessageToRender("Checking ss-local...");
     }
-    await isServerReachable(this.proxyAddress, this.proxyPort);
-    sendMessageToRender("Checking Udp...");
-    if (this.isProxyUdp)
-      this.isUdpEnabled = await checkUdpForwardingEnabled(
-        this.proxyAddress,
-        this.proxyPort
-      );
-
-    sendUdpStatusToRender(this.isUdpEnabled ? "enabled" : "disabled");
-    sendMessageToRender("Checking server...");
-    await validateServerCredentials(this.proxyAddress, this.proxyPort);
-
-    // Don't validate credentials on boot: if the key was revoked, we want the system to stay
-    // "connected" so that traffic doesn't leak.
-    /*if (!this.isAutoConnect) {
-    await validateServerCredentials(PROXY_ADDRESS, PROXY_PORT);
-  }*/
 
     sendMessageToRender("Staring tun2socks...");
-    this.tun2socks.start(this.isProxyUdp && this.isUdpEnabled);
+    this.tun2socks.start(this.isDnsOverUdp);
 
     //TODO: Implement a listener that terminates the start process once this.disconnecting become true.
     if (this.isDisconnecting)
@@ -423,12 +413,12 @@ class Tun2socks extends ChildProcessHelper {
   constructor(
     private proxyAddress: string,
     private proxyPort: number,
-    private dnsServer?: { default: string; native: string }
+    private dnsServer: { default: string; gfwList: string }
   ) {
     super(pathToEmbeddedBinary("go-tun2socks", "tun2socks"));
   }
 
-  start(isUdpEnabled: boolean) {
+  start(isDnsOverUdp: boolean) {
     const args: string[] = [];
     args.push("-tunName", TUN2SOCKS_TAP_DEVICE_NAME);
     args.push("-tunAddr", TUN2SOCKS_TAP_DEVICE_IP);
@@ -436,13 +426,11 @@ class Tun2socks extends ChildProcessHelper {
     args.push("-tunGw", TUN2SOCKS_VIRTUAL_ROUTER_IP);
     args.push("-proxyServer", `${this.proxyAddress}:${this.proxyPort}`);
     args.push("-loglevel", "error");
-    if (!isUdpEnabled) {
-      args.push("-dnsFallback");
-    }
+    if (!isDnsOverUdp) args.push("-dnsFallback");
     if (this.dnsServer) {
-      args.push("-primaryDNSAddr", `${this.dnsServer.default}:53`);
-      args.push("-alternativeDNSAddr", `${this.dnsServer.native}:53`);
-      args.push("-primaryDNSDomainFile", DNS_NATIVE_WEBSITES_FILE_PATH);
+      args.push("-primaryDNSAddr", `${this.dnsServer.gfwList}:53`);
+      args.push("-alternativeDNSAddr", `${this.dnsServer.default}:53`);
+      args.push("-primaryDNSDomainFile", GFW_LIST_FILE_PATH);
       args.push("-smartDns");
     }
 
@@ -451,7 +439,10 @@ class Tun2socks extends ChildProcessHelper {
 }
 
 export class SsLocal extends ChildProcessHelper {
-  constructor(private readonly proxyPort: number) {
+  constructor(
+    private readonly proxyAddress: string,
+    private readonly proxyPort: number
+  ) {
     super(pathToEmbeddedBinary("shadowsocks-libev", "ss-local"));
   }
 
@@ -467,7 +458,13 @@ export class SsLocal extends ChildProcessHelper {
     //Enable SIP003 plugin.
     args.push("--plugin", config.plugin || "");
     args.push("--plugin-opts", config.plugin_opts || "");
-
     this.launch(args);
+
+    sendUdpStatusToRender(""); //Reset Udp status
+    checkUdpForwardingEnabled(this.proxyAddress, this.proxyPort).then(
+      (isUdpEnabled) => {
+        sendUdpStatusToRender(isUdpEnabled ? "enabled" : "disabled");
+      }
+    );
   }
 }

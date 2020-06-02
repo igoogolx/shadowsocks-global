@@ -12,7 +12,7 @@ export const Socks5s = React.memo(() => {
     (state) => state.proxy.socks5s
   );
   const disabled = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
   const dispatch = useDispatch();
   const pingServers = useMemo(

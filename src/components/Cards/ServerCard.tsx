@@ -39,7 +39,11 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
     (state) => state.proxy.activeId
   );
   const disabled = useSelector<AppState, boolean>(
-    (state) => state.proxy.isStarted || state.proxy.isProcessing
+    (state) => state.proxy.isProcessing
+  );
+
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
   );
 
   const dispatch = useDispatch();
@@ -125,7 +129,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
           })}
           onClick={handleOnClickPing}
           isLoading={pingTime === "pinging"}
-          disabled={disabled}
+          disabled={isConnected || disabled}
         >
           {pingTime === "pinging"
             ? ""

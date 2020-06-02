@@ -13,7 +13,7 @@ export const Shadowsockses = React.memo(() => {
   );
   const dispatch = useDispatch();
   const disabled = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing || state.proxy.isStarted
+    (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
   const pingServers = useMemo(
     () =>
