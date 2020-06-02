@@ -7,7 +7,7 @@ import { encodeSsUrl } from "../../utils/url";
 import { clipboard } from "electron";
 import { AppState } from "../../reducers/rootReducer";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
-import promiseIpc from "electron-promise-ipc";
+import { ipcRenderer as ipc } from "electron-better-ipc";
 import QRCode from "qrcode";
 
 type ShadowsocksCardProps = {
@@ -25,9 +25,8 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
     if (isConnected) {
       dispatch(proxy.actions.setIsConnected(false));
       dispatch(proxy.actions.setIsProcessing(true));
-      promiseIpc
-        //@ts-ignore
-        .send("changeServer")
+      ipc
+        .callMain("changeServer")
         .catch((e) => {
           if (e.message && typeof e.message === "string")
             notifier.error(e.message);

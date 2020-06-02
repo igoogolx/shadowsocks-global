@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import * as path from "path";
-import promiseIpc from "electron-promise-ipc";
+import { ipcMain as ipc } from "electron-better-ipc";
 import { setMenu, installExtensions, getAppState, isDev } from "./utils";
 import { VpnManager } from "./vpnManager";
 import { logger } from "./log";
@@ -102,17 +102,17 @@ app.on("second-instance", () => {
 
 app.setAsDefaultProtocolClient("ss");
 
-promiseIpc.on("start", async () => {
+ipc.answerRenderer("start", async () => {
   vpnManager = new VpnManager(tray);
   await vpnManager.start();
 });
-promiseIpc.on("changeServer", async () => {
+ipc.answerRenderer("changeServer", async () => {
   if (vpnManager) {
     await vpnManager.changeServer();
   }
 });
 
-promiseIpc.on("stop", async () => {
+ipc.answerRenderer("stop", async () => {
   if (vpnManager) {
     await vpnManager.stop();
     vpnManager = undefined;

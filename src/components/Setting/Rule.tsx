@@ -4,7 +4,7 @@ import styles from "./setting.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { RuleState, setting } from "../../reducers/settingReducer";
-import promiseIpc from "electron-promise-ipc";
+import { ipcRenderer as ipc } from "electron-better-ipc";
 import { notifier } from "../Core/Notification";
 import { EditAdditionalRoutesDialog } from "../Dialogs/EditAdditionalRoutesDialog";
 
@@ -79,10 +79,8 @@ export const Rule = React.memo(() => {
             adornment={
               <Button
                 onClick={async () => {
-                  const rulesDir = await promiseIpc.send(
+                  const rulesDir = await ipc.callMain(
                     "getCustomizedRulesDirPath",
-
-                    // @ts-ignore
                     ruleState.dirPath
                   );
                   if (rulesDir) {

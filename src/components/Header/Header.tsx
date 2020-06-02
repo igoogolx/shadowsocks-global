@@ -19,7 +19,7 @@ import { notifier } from "../Core/Notification";
 import { AppState } from "../../reducers/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
 import fs from "fs";
-import promiseIpc from "electron-promise-ipc";
+import { ipcRenderer as ipc } from "electron-better-ipc";
 import path from "path";
 import { setting } from "../../reducers/settingReducer";
 import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
@@ -203,8 +203,7 @@ const Header = () => {
         return;
       }
       dispatch(proxy.actions.setIsProcessing(true));
-      //@ts-ignore
-      await promiseIpc.send("start");
+      await ipc.callMain("start");
       dispatch(proxy.actions.setIsConnected(true));
       if (isHideAfterConnection) ipcRenderer.send("hideWindow");
     } catch (e) {
@@ -240,8 +239,7 @@ const Header = () => {
   const stop = useCallback(async () => {
     dispatch(proxy.actions.setIsProcessing(true));
     try {
-      // @ts-ignore
-      await promiseIpc.send("stop");
+      await ipc.callMain("stop");
       dispatch(proxy.actions.setIsConnected(false));
     } catch (e) {
       console.log(e);

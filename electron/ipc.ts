@@ -1,33 +1,35 @@
 import { mainWindow } from "./common";
 import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
-import promiseIpc from "electron-promise-ipc";
-
+import { ipcMain as ipc } from "electron-better-ipc";
 import { GFW_LIST_FILE_PATH, getAppState, getResourcesPath } from "./utils";
 import { LOG_FILE_PATH, logger } from "./log";
 import { FlowData } from "./flow";
 import { ConnectionStatus } from "./routing_service";
 
-promiseIpc.on("getCustomizedRulesDirPath", async (defaultPath: unknown) => {
-  try {
-    if (mainWindow.get()) {
-      const result = await dialog.showOpenDialog(
-        mainWindow.get() as BrowserWindow,
-        {
-          defaultPath: defaultPath as string,
-          properties: ["openDirectory"],
-        }
-      );
-      if (result.canceled) return null;
-      else return result.filePaths[0];
+ipc.answerRenderer(
+  "getCustomizedRulesDirPath",
+  async (defaultPath: unknown) => {
+    try {
+      if (mainWindow.get()) {
+        const result = await dialog.showOpenDialog(
+          mainWindow.get() as BrowserWindow,
+          {
+            defaultPath: defaultPath as string,
+            properties: ["openDirectory"],
+          }
+        );
+        if (result.canceled) return null;
+        else return result.filePaths[0];
+      }
+    } catch (e) {
+      return null;
     }
-  } catch (e) {
-    return null;
   }
-});
+);
 
-promiseIpc.on("getResourcesPath", async () => await getResourcesPath());
+ipc.answerRenderer("getResourcesPath", async () => await getResourcesPath());
 
-promiseIpc.on("getAppVersion", async () => await app.getVersion());
+ipc.answerRenderer("getAppVersion", async () => await app.getVersion());
 
 ipcMain.on("setRunAtSystemStartup", () => {
   const appConfig = getAppState();
