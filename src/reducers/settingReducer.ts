@@ -27,11 +27,11 @@ export type RuleState = {
 export type GeneralState = {
   shadowsocksLocalPort: number;
   DnsOverUdp: boolean;
-  isUpdateSubscriptionsOnOpen: boolean;
-  isRunAtSystemStartup: boolean;
-  isHideWhenWindowIsClosed: boolean;
-  isHideAfterConnection: boolean;
-  isAutoConnect: boolean;
+  updateSubscriptionsOnOpen: boolean;
+  runAtSystemStartup: boolean;
+  hideWhenWindowIsClosed: boolean;
+  hideAfterConnection: boolean;
+  autoConnect: boolean;
   autoConnectDelay: number; //Seconds
 };
 
@@ -46,11 +46,11 @@ export const initialSettingState: SettingState = {
   general: {
     shadowsocksLocalPort: DEFAULT_LOCAL_PORT,
     DnsOverUdp: false,
-    isUpdateSubscriptionsOnOpen: false,
-    isRunAtSystemStartup: false,
-    isHideWhenWindowIsClosed: true,
-    isHideAfterConnection: false,
-    isAutoConnect: false,
+    updateSubscriptionsOnOpen: false,
+    runAtSystemStartup: false,
+    hideWhenWindowIsClosed: true,
+    hideAfterConnection: false,
+    autoConnect: false,
     autoConnectDelay: 5,
   },
   dns: {

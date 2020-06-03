@@ -46,12 +46,12 @@ const Header = () => {
     (state) => state.proxy.subscriptions
   );
   const isUpdateSubscriptionsOnOpen = useSelector<AppState, boolean>(
-    (state) => state.setting.general.isUpdateSubscriptionsOnOpen
+    (state) => state.setting.general.updateSubscriptionsOnOpen
   );
   const [isUpdatingSubscriptions, setIsUpdatingSubscriptions] = useState(false);
   const [autoConnectTimer, setConnectTimer] = useState<NodeJS.Timeout>();
   const isAutoConnect = useSelector<AppState, boolean>(
-    (state) => state.setting.general.isAutoConnect
+    (state) => state.setting.general.autoConnect
   );
   const autoConnectDelay = useSelector<AppState, number>(
     (state) => state.setting.general.autoConnectDelay
@@ -128,7 +128,7 @@ const Header = () => {
     (state) => state.setting.rule.current
   );
   const isHideAfterConnection = useSelector<AppState, boolean>(
-    (state) => state.setting.general.isHideAfterConnection
+    (state) => state.setting.general.hideAfterConnection
   );
   const [rulePaths, setRulePaths] = useState<string[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);

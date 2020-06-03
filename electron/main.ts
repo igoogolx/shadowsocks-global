@@ -67,7 +67,7 @@ async function createWindow() {
   mainWindow.get()?.on("minimize", minimizeWindowToTray);
   mainWindow.get()?.on("close", async (event: Event) => {
     const isHideWhenWindowIsClosed = getAppState().setting.general
-      .isHideWhenWindowIsClosed;
+      .hideWhenWindowIsClosed;
     if (isHideWhenWindowIsClosed) minimizeWindowToTray(event);
     else await quitApp();
   });

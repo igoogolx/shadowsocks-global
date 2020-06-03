@@ -31,11 +31,11 @@ export const General = React.memo(() => {
     (data) => {
       dispatch(setting.actions.setGeneral(data));
       setIsChanged(false);
-      if (general.isRunAtSystemStartup !== data.isRunAtSystemStartup)
+      if (general.runAtSystemStartup !== data.isRunAtSystemStartup)
         ipcRenderer.send("setRunAtSystemStartup");
       notifier.success("Update setting successfully");
     },
-    [dispatch, general.isRunAtSystemStartup]
+    [dispatch, general.runAtSystemStartup]
   );
   const reset = useCallback(() => {
     setValue(general);

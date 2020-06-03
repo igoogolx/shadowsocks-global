@@ -33,7 +33,7 @@ ipc.answerRenderer("getAppVersion", async () => await app.getVersion());
 
 ipcMain.on("setRunAtSystemStartup", () => {
   const appConfig = getAppState();
-  if (appConfig.setting.general.isRunAtSystemStartup)
+  if (appConfig.setting.general.runAtSystemStartup)
     app.setLoginItemSettings({ openAtLogin: true });
   else app.setLoginItemSettings({ openAtLogin: false });
 });
