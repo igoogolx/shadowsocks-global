@@ -1,5 +1,5 @@
 import styles from "./cards.module.css";
-import { Button, Dropdown, Icon, ICON_NAME } from "../Core";
+import { Button, Checkbox, Dropdown, Icon, ICON_NAME } from "../Core";
 import React, { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
@@ -41,7 +41,12 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
   const disabled = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing
   );
-
+  const isSelecting = useSelector<AppState, boolean>(
+    (state) => state.proxy.isSelecting
+  );
+  const isSelected = useSelector<AppState, boolean>(
+    (state) => state.proxy.selectedIds.indexOf(id) !== -1
+  );
   const isConnected = useSelector<AppState, boolean>(
     (state) => state.proxy.isConnected
   );
@@ -94,14 +99,29 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
         })
       );
   }, [dispatch, id, newRegionCode, type]);
+  const handleOnSelect = useCallback(
+    (isSelected: boolean) => {
+      if (isSelected) dispatch(proxy.actions.select(id));
+      else dispatch(proxy.actions.unSelect(id));
+    },
+    [dispatch, id]
+  );
   return (
     <div className={styles.server}>
-      <Dropdown items={menuItems} className={styles.dropdown}>
-        <Icon iconName={ICON_NAME.OMIT} />
-      </Dropdown>
+      {isSelecting && type !== "socks5" ? (
+        <Checkbox
+          checked={Boolean(isSelected)}
+          onChange={handleOnSelect}
+          className={styles.checkbox}
+        />
+      ) : (
+        <Dropdown items={menuItems} className={styles.dropdown}>
+          <Icon iconName={ICON_NAME.OMIT} />
+        </Dropdown>
+      )}
       <Card
         onClick={onClick}
-        className={styles.card}
+        className={classNames(styles.card, { [styles.selected]: isSelected })}
         disabled={disabled || isActive}
       >
         <div className={styles.flagContainer}>

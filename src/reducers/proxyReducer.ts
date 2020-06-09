@@ -43,6 +43,8 @@ export type ProxyState = {
   shadowsockses: Shadowsocks[];
   subscriptions: Subscription[];
   socks5s: Socks5[];
+  selectedIds: string[];
+  isSelecting: boolean;
 };
 
 export const initialProxyState: ProxyState = {
@@ -52,12 +54,37 @@ export const initialProxyState: ProxyState = {
   shadowsockses: [],
   subscriptions: [],
   socks5s: [],
+  selectedIds: [],
+  isSelecting: false,
 };
 
 export const proxy = createSlice({
   name: "proxy",
   initialState: initialProxyState,
   reducers: {
+    select: (state, action: PayloadAction<string>) => {
+      state.selectedIds.push(action.payload);
+    },
+    selectAll: (state) => {
+      const ids = state.shadowsockses.map((shadowsocks) => shadowsocks.id);
+      state.subscriptions.forEach((subscription) => {
+        subscription.shadowsockses.forEach((shadowsocks) => {
+          ids.push(shadowsocks.id);
+        });
+      });
+      state.selectedIds = ids;
+    },
+    unSelect: (state, action: PayloadAction<string>) => {
+      const index = state.selectedIds.indexOf(action.payload);
+      if (index === -1) return;
+      state.selectedIds.splice(index, 1);
+    },
+    resetSelectedIds: (state) => {
+      state.selectedIds = [];
+    },
+    setIsSelecting: (state, action: PayloadAction<boolean>) => {
+      state.isSelecting = action.payload;
+    },
     setIsConnected: (state, action: PayloadAction<boolean>) => {
       state.isConnected = action.payload;
     },
@@ -195,6 +222,32 @@ export const proxy = createSlice({
     delete: (
       state,
       action: PayloadAction<{
+        type: "shadowsocks" | "socks5";
+        ids: string[];
+      }>
+    ) => {
+      const { type, ids } = action.payload;
+      if (type === "shadowsocks") {
+        ids.forEach((id) => {
+          deleteOneShadowsocks(state, id);
+        });
+      } else ids.forEach((id: string) => deleteOneSocks5(state, id));
+    },
+    deleteAll: (
+      state,
+      action: PayloadAction<{
+        type: "shadowsocks" | "socks5";
+      }>
+    ) => {
+      const { type } = action.payload;
+      if (type === "shadowsocks") {
+        state.shadowsockses = [];
+      } else state.socks5s = [];
+      if (state.activeId !== "") state.activeId = "";
+    },
+    deleteOne: (
+      state,
+      action: PayloadAction<{
         type: "shadowsocks" | "subscription" | "socks5";
         id: string;
       }>
@@ -202,35 +255,7 @@ export const proxy = createSlice({
       const { type, id } = action.payload;
       switch (type) {
         case "shadowsocks":
-          //Delete all
-          if (id === "") {
-            const isActivated = state.shadowsockses.some(
-              (shadowsocks) => (shadowsocks.id = state.activeId)
-            );
-            if (isActivated) state.activeId = "";
-            state.shadowsockses = [];
-          } else {
-            //Reset activated id
-            if (state.activeId === id) state.activeId = "";
-            const shadowsocksIndex = state.shadowsockses.findIndex(
-              (shadowsocks) => shadowsocks.id === id
-            );
-            if (shadowsocksIndex === -1) {
-              state.subscriptions.some((subscription, subscriptionIndex) =>
-                subscription.shadowsockses.some(
-                  (shadowsocks, subShadowsocksIndex) => {
-                    if (shadowsocks.id === id) {
-                      state.subscriptions[
-                        subscriptionIndex
-                      ].shadowsockses.splice(subShadowsocksIndex, 1);
-                      return true;
-                    }
-                    return false;
-                  }
-                )
-              );
-            } else state.shadowsockses.splice(shadowsocksIndex, 1);
-          }
+          deleteOneShadowsocks(state, id);
           break;
         case "subscription":
           {
@@ -249,20 +274,36 @@ export const proxy = createSlice({
           break;
         //Socks5
         default: {
-          //Delete all
-          if (id === "") {
-            const isActivated = state.socks5s.some(
-              (socks5) => socks5.id === state.activeId
-            );
-            if (isActivated) state.activeId = "";
-            state.socks5s = [];
-          }
-
-          //Reset activated id
-          if (state.activeId === id) state.activeId = "";
-          state.socks5s = state.socks5s.filter((socks5) => socks5.id !== id);
+          deleteOneSocks5(state, id);
         }
       }
     },
   },
 });
+
+const deleteOneShadowsocks = (state: ProxyState, id: string) => {
+  //Reset activated id
+  if (state.activeId === id) state.activeId = "";
+  const shadowsocksIndex = state.shadowsockses.findIndex(
+    (shadowsocks) => shadowsocks.id === id
+  );
+  if (shadowsocksIndex === -1) {
+    state.subscriptions.some((subscription, subscriptionIndex) =>
+      subscription.shadowsockses.some((shadowsocks, subShadowsocksIndex) => {
+        if (shadowsocks.id === id) {
+          state.subscriptions[subscriptionIndex].shadowsockses.splice(
+            subShadowsocksIndex,
+            1
+          );
+          return true;
+        }
+        return false;
+      })
+    );
+  } else state.shadowsockses.splice(shadowsocksIndex, 1);
+};
+const deleteOneSocks5 = (state: ProxyState, id: string) => {
+  //Reset activated id
+  if (state.activeId === id) state.activeId = "";
+  state.socks5s = state.socks5s.filter((socks5) => socks5.id !== id);
+};

@@ -15,7 +15,8 @@ type ShadowsocksCardProps = {
 };
 
 export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
-  const { id, name, host, regionCode, port, pingTime } = props.shadowsocks;
+  const { shadowsocks } = props;
+  const { id, name, host, regionCode, port, pingTime } = shadowsocks;
   const dispatch = useDispatch();
   const isConnected = useSelector<AppState, boolean>(
     (state) => state.proxy.isConnected
@@ -81,7 +82,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         isDanger: true,
         content: "Delete",
         handleOnClick: () => {
-          dispatch(proxy.actions.delete({ type: "shadowsocks", id }));
+          dispatch(proxy.actions.deleteOne({ type: "shadowsocks", id }));
         },
         disabled: isActivated,
       },

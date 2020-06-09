@@ -11,6 +11,11 @@
     height: 80px;
     width: 180px;
   }
+  & .selected {
+    border: 1px solid var(--success-color);
+    height: 78px;
+    width: 178px;
+  }
   & .dropdown {
     color: var(--icon-color);
     cursor: pointer;
@@ -21,6 +26,13 @@
     &:hover {
       color: var(--icon-hover-color);
     }
+  }
+  & .checkbox {
+    cursor: pointer;
+    position: absolute;
+    right: 8px;
+    padding: 0;
+    top: 8px;
   }
 
   & .flagContainer {

@@ -108,7 +108,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
         isDanger: true,
         handleOnClick: () => {
           dispatch(
-            proxy.actions.delete({
+            proxy.actions.deleteOne({
               type: "subscription",
               id: subscription.id,
             })
@@ -145,10 +145,12 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
   );
 };
 
-export const Subscriptions = React.memo(() => {
-  const subscriptions = useSelector<AppState, Subscription[]>(
-    (state) => state.proxy.subscriptions
-  );
+type SubscriptionsProps = {
+  subscriptions: Subscription[];
+};
+
+export const Subscriptions = React.memo((props: SubscriptionsProps) => {
+  const { subscriptions } = props;
   return (
     <>
       {subscriptions.map((subscription) => (

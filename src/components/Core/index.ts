@@ -12,6 +12,7 @@ import { BUTTON_SIZE } from "./Button/button_contants";
 import { Selector } from "./Selector/Selector";
 import { Toggle } from "./Toggle/Toggle";
 import { Tabs } from "./Tabs/Tabs";
+import { Checkbox } from "./Checkbox/Checkbox";
 import { Tooltip } from "./Tooltip/Tooltip";
 
 export {
@@ -33,4 +34,5 @@ export {
   Tabs,
   notifier,
   Tooltip,
+  Checkbox,
 };

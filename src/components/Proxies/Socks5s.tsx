@@ -7,10 +7,12 @@ import { Socks5Card } from "../Cards/Socks5Card";
 import { Dropdown, Icon, ICON_NAME } from "../Core";
 import { PingServer, usePing } from "../../hooks";
 
-export const Socks5s = React.memo(() => {
-  const socks5s = useSelector<AppState, Socks5[]>(
-    (state) => state.proxy.socks5s
-  );
+type Socks5sProps = {
+  socks5s: Socks5[];
+};
+
+export const Socks5s = React.memo((props: Socks5sProps) => {
+  const { socks5s } = props;
   const disabled = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
@@ -53,9 +55,8 @@ export const Socks5s = React.memo(() => {
         isDanger: true,
         handleOnClick: () => {
           dispatch(
-            proxy.actions.delete({
+            proxy.actions.deleteAll({
               type: "socks5",
-              id: "",
             })
           );
         },

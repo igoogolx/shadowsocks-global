@@ -40,7 +40,7 @@ export const Socks5Card = React.memo((props: Socks5CardProps) => {
         isDanger: true,
         content: "Delete",
         handleOnClick: () => {
-          dispatch(proxy.actions.delete({ type: "socks5", id }));
+          dispatch(proxy.actions.deleteOne({ type: "socks5", id }));
         },
         disabled: isActivated,
       },

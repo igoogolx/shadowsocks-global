@@ -7,10 +7,12 @@ import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
 import { Dropdown, Icon, ICON_NAME } from "../Core";
 import { PingServer, usePing } from "../../hooks";
 
-export const Shadowsockses = React.memo(() => {
-  const shadowsockses = useSelector<AppState, Shadowsocks[]>(
-    (state) => state.proxy.shadowsockses
-  );
+type ShadowsocksesProps = {
+  shadowsockses: Shadowsocks[];
+};
+
+export const Shadowsockses = React.memo((props: ShadowsocksesProps) => {
+  const { shadowsockses } = props;
   const dispatch = useDispatch();
   const disabled = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing || state.proxy.isConnected
@@ -53,9 +55,8 @@ export const Shadowsockses = React.memo(() => {
         isDanger: true,
         handleOnClick: () => {
           dispatch(
-            proxy.actions.delete({
+            proxy.actions.deleteAll({
               type: "shadowsocks",
-              id: "",
             })
           );
         },

@@ -42,4 +42,7 @@ export const ICON_NAME = {
   QRCODE: "qrcode",
   CLOSE: "close",
   INFO_VARIANT: "information-variant",
+  BORDER: "border",
+  CHECK_SQUARE_FILL: "check-square-fill",
+  CHECK_SQUARE: "check-square",
 };

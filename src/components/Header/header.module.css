@@ -16,6 +16,12 @@
     margin: auto 20px auto 0;
     width: 150px;
   }
+  & .selectButton {
+    width: auto;
+    &:hover {
+      color: var(--success-color);
+    }
+  }
   & .iconButtons {
     position: absolute;
     left: 10px;

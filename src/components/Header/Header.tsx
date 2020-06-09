@@ -26,7 +26,7 @@ import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
 import { clipboard, ipcRenderer } from "electron";
 import { updateSubscription } from "../../utils/helper";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
-import { decodeSsUrl } from "../../utils/url";
+import { decodeSsUrl, encodeSsUrl } from "../../utils/url";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
 import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
 import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
@@ -38,6 +38,7 @@ import {
   BUILD_IN_RULE_GLOBAL,
   BUILD_IN_RULE_BYPASS_MAINLAND_CHINA,
 } from "../../share";
+import classNames from "classnames";
 
 const PROXY_TYPES = ["Shadowsocks", "Socks5", "Subscription"];
 const MANGE_TYPES = ["Statistics", "Setting", "About"];
@@ -258,6 +259,43 @@ const Header = () => {
     [rulePaths]
   );
 
+  const selectedIds = useSelector<AppState, string[]>(
+    (state) => state.proxy.selectedIds
+  );
+  const shadowsockses = useSelector<AppState, Shadowsocks[]>(
+    (state) => state.proxy.shadowsockses
+  );
+
+  const copySelectedShadowsocksesUrl = useCallback(() => {
+    let url = "";
+    let allShadowsockses = shadowsockses;
+    subscriptions.forEach((subscription) => {
+      allShadowsockses = [...allShadowsockses, ...subscription.shadowsockses];
+    });
+    allShadowsockses.forEach((shadowsocks) => {
+      if (selectedIds.indexOf(shadowsocks.id) !== -1) {
+        url += encodeSsUrl(shadowsocks) + "\n";
+      }
+    });
+    clipboard.writeText(url);
+    notifier.success("Copy Url successfully");
+  }, [selectedIds, shadowsockses, subscriptions]);
+  const deleteSelectedShadowsockses = useCallback(() => {
+    if (selectedIds.indexOf(activeId) !== -1) {
+      return notifier.error("The activated server can't be delete");
+    }
+    dispatch(proxy.actions.delete({ type: "shadowsocks", ids: selectedIds }));
+  }, [activeId, dispatch, selectedIds]);
+  const selectAllShadowsockses = useCallback(() => {
+    dispatch(proxy.actions.selectAll());
+  }, [dispatch]);
+  const doneSelect = useCallback(() => {
+    dispatch(proxy.actions.resetSelectedIds());
+    dispatch(proxy.actions.setIsSelecting(false));
+  }, [dispatch]);
+  const isSelecting = useSelector<AppState, boolean>(
+    (state) => state.proxy.isSelecting
+  );
   return (
     <>
       {currentDialogType === PROXY_TYPES[0] && (
@@ -288,50 +326,95 @@ const Header = () => {
         <LoadingDialog content={"Updating subscriptions..."} />
       )}
       <div className={styles.container}>
-        {isConnected ? (
-          <Button
-            isDanger={true}
-            className={styles.button}
-            onClick={stop}
-            isLoading={isProcessing}
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Disconnecting" : "Disconnect"}
-          </Button>
+        {isSelecting ? (
+          <>
+            <Button
+              onClick={doneSelect}
+              isPrimary={true}
+              className={classNames(styles.button, styles.selectButton)}
+            >
+              Done
+            </Button>
+            <Button
+              onClick={selectAllShadowsockses}
+              className={classNames(styles.button, styles.selectButton)}
+            >
+              <Icon iconName={ICON_NAME.CHECK_SQUARE} />
+              Select All
+            </Button>
+            <Button
+              onClick={deleteSelectedShadowsockses}
+              className={classNames(styles.button, styles.selectButton)}
+            >
+              <Icon iconName={ICON_NAME.DELETE} />
+              Delete
+            </Button>
+            <Button
+              onClick={copySelectedShadowsocksesUrl}
+              className={classNames(styles.button, styles.selectButton)}
+            >
+              <Icon iconName={ICON_NAME.COPY} />
+              Copy Url
+            </Button>
+          </>
         ) : (
-          <Button
-            isPrimary={true}
-            className={styles.button}
-            onClick={start}
-            isLoading={isProcessing}
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Connecting" : "Connect"}
-          </Button>
+          <>
+            {isConnected ? (
+              <Button
+                isDanger={true}
+                className={styles.button}
+                onClick={stop}
+                isLoading={isProcessing}
+                disabled={isProcessing}
+              >
+                {isProcessing ? "Disconnecting" : "Disconnect"}
+              </Button>
+            ) : (
+              <Button
+                isPrimary={true}
+                className={styles.button}
+                onClick={start}
+                isLoading={isProcessing}
+                disabled={isProcessing}
+              >
+                {isProcessing ? "Connecting" : "Connect"}
+              </Button>
+            )}
+
+            <Selector
+              options={rulesOptions}
+              label={"Rule"}
+              value={currentRule}
+              onChange={changeCurrentRule}
+              className={styles.selector}
+              disabled={isLoadingRules || isConnected || isProcessing}
+              isVirtualizedList={rulesOptions.length > 4}
+            />
+            <div className={styles.iconButtons}>
+              <Dropdown items={addProxyDropdownItems}>
+                <Button className={styles.item}>
+                  <Icon iconName={ICON_NAME.PLUS} size={ICON_SIZE.SIZE24} />
+                </Button>
+              </Dropdown>
+              <Dropdown items={manageDropdownItems}>
+                <Button className={styles.item}>
+                  <Icon iconName={ICON_NAME.SETTING} size={ICON_SIZE.SIZE24} />
+                </Button>
+              </Dropdown>
+              <Button
+                className={styles.item}
+                onClick={() => {
+                  dispatch(proxy.actions.setIsSelecting(true));
+                }}
+              >
+                <Icon
+                  iconName={ICON_NAME.CHECK_SQUARE}
+                  size={ICON_SIZE.SIZE24}
+                />
+              </Button>
+            </div>
+          </>
         )}
-
-        <Selector
-          options={rulesOptions}
-          label={"Rule"}
-          value={currentRule}
-          onChange={changeCurrentRule}
-          className={styles.selector}
-          disabled={isLoadingRules || isConnected || isProcessing}
-          isVirtualizedList={rulesOptions.length > 4}
-        />
-
-        <div className={styles.iconButtons}>
-          <Dropdown items={addProxyDropdownItems}>
-            <Button className={styles.item}>
-              <Icon iconName={ICON_NAME.PLUS} size={ICON_SIZE.SIZE24} />
-            </Button>
-          </Dropdown>
-          <Dropdown items={manageDropdownItems}>
-            <Button className={styles.item}>
-              <Icon iconName={ICON_NAME.SETTING} size={ICON_SIZE.SIZE24} />
-            </Button>
-          </Dropdown>
-        </div>
       </div>
     </>
   );
