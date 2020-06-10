@@ -1,6 +1,6 @@
 import { Tray, nativeImage, app, NativeImage, Menu } from "electron";
 import path from "path";
-import { convertFlowData } from "../src/share";
+import { convertFlowData } from "./share";
 import { getAppState } from "./utils";
 import { mainWindow } from "./common";
 import { flow } from "./flow";

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { convertFlowData } from "../../share";
+import { convertFlowData } from "../../electron/share";
 import { useChartjs } from "../../hooks";
 
 const configuration = {

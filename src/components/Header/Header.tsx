@@ -37,7 +37,7 @@ import Store from "electron-store";
 import {
   BUILD_IN_RULE_GLOBAL,
   BUILD_IN_RULE_BYPASS_MAINLAND_CHINA,
-} from "../../share";
+} from "../../electron/share";
 import classNames from "classnames";
 
 const PROXY_TYPES = ["Shadowsocks", "Socks5", "Subscription"];

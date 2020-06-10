@@ -1,4 +1,4 @@
-import { lookupIp } from "../share";
+import { lookupIp } from "../electron/share";
 //@ts-ignore
 import geoip from "geoip-country";
 import axios from "axios";

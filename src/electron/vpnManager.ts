@@ -7,8 +7,7 @@ import {
   sendFlowToRender,
   sendMessageToRender,
 } from "./ipc";
-import { getActivatedServer } from "../src/components/Proxies/util";
-import { lookupIp } from "../src/share";
+import { getActivatedServer, lookupIp } from "./share";
 import { flow } from "./flow";
 
 export class VpnManager {

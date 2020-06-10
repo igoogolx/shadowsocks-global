@@ -5,7 +5,7 @@ import { ipcRenderer } from "electron";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { useFlow } from "../../hooks";
-import { convertFlowData } from "../../share";
+import { convertFlowData } from "../../electron/share";
 
 const Footer = () => {
   const [udpStatus, setUdpStatus] = useState<

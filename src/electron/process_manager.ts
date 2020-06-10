@@ -21,13 +21,13 @@ import {
   RemoteServer,
   GFW_LIST_FILE_PATH,
 } from "./utils";
-import { SMART_DNS_ADDRESS } from "../src/constants";
 import { logger } from "./log";
 import * as path from "path";
 import { sendMessageToRender, sendUdpStatusToRender } from "./ipc";
 import { checkUdpForwardingEnabled } from "./connectivity";
 import detectPort from "detect-port";
 import { flow } from "./flow";
+import { SMART_DNS_ADDRESS } from "./share";
 
 export type Route = {
   proxy: string[];

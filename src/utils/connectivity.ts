@@ -13,7 +13,7 @@
 // limitations under the License.
 import * as net from "net";
 import * as dns from "dns";
-import { timeoutPromise } from "../share";
+import { timeoutPromise } from "../electron/share";
 
 const DNS_TEST_SERVER = "8.8.8.8";
 const DNS_TEST_DOMAIN = "google.com";

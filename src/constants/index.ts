@@ -19,5 +19,3 @@ export const ENCRYPTION_METHODS = [
   "chacha20",
   "chacha20-ietf",
 ];
-
-export const SMART_DNS_ADDRESS = "127.0.0.1";

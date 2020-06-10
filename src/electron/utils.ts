@@ -2,16 +2,16 @@ import { Menu } from "electron";
 import { app } from "electron";
 import path from "path";
 import fs from "fs";
-import { SMART_DNS_ADDRESS } from "../src/constants";
 import { GLOBAL_PROXY_ROUTES, GLOBAL_RESERVED_ROUTES } from "./constant";
 import {
   BUILD_IN_RULE_BYPASS_MAINLAND_CHINA,
   BUILD_IN_RULE_GLOBAL,
+  getActivatedServer,
   lookupIp,
-} from "../src/share";
+  SMART_DNS_ADDRESS,
+} from "./share";
 import Store from "electron-store";
-import { AppState } from "../src/reducers/rootReducer";
-import { getActivatedServer } from "../src/components/Proxies/util";
+import { AppState } from "../reducers/rootReducer";
 import detectPort from "detect-port";
 import { mainWindow } from "./common";
 import { isIPv4 } from "net";

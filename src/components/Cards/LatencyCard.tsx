@@ -4,10 +4,12 @@ import { Icon, ICON_NAME, ICON_SIZE, Tooltip } from "../Core";
 import React, { useCallback, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import { getActivatedServer } from "../Proxies/util";
 import { checkServer, checkDns } from "../../utils/connectivity";
 import { useAsync } from "../../hooks";
-import { validateServerCredentials } from "../../share";
+import {
+  getActivatedServer,
+  validateServerCredentials,
+} from "../../electron/share";
 import { store } from "../../store/store";
 
 //TODO: Remove repeated code

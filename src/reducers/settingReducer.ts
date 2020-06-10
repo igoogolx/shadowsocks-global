@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BUILD_IN_RULE_GLOBAL } from "../share";
+import { BUILD_IN_RULE_GLOBAL } from "../electron/share";
 
 const DEFAULT_LOCAL_PORT = 1081;
 
