@@ -2,7 +2,6 @@ import { ConnectionManager, Dns } from "./process_manager";
 import { Config, getAppState, RemoteServer } from "./utils";
 import { ConnectionStatus } from "./routing_service";
 import { AppTray } from "./tray";
-import { getFlow } from "./flow";
 import {
   sendConnectionStatus,
   sendFlowToRender,
@@ -10,6 +9,7 @@ import {
 } from "./ipc";
 import { getActivatedServer } from "../src/components/Proxies/util";
 import { lookupIp } from "../src/share";
+import { flow } from "./flow";
 
 export class VpnManager {
   private currentConnection: ConnectionManager | undefined;
@@ -18,10 +18,10 @@ export class VpnManager {
   constructor(private tray: AppTray | undefined) {}
 
   private flowListener = async () => {
-    const flow = await getFlow();
-    if (!flow) return;
+    const flowData = await flow.getData();
+    if (!flowData) return;
     sendFlowToRender({
-      ...flow,
+      ...flowData,
       time: Date.now(),
     });
   };

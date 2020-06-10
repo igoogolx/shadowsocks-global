@@ -26,6 +26,8 @@ import { logger } from "./log";
 import * as path from "path";
 import { sendMessageToRender, sendUdpStatusToRender } from "./ipc";
 import { checkUdpForwardingEnabled } from "./connectivity";
+import detectPort from "detect-port";
+import { flow } from "./flow";
 
 export type Route = {
   proxy: string[];
@@ -203,7 +205,7 @@ export class ConnectionManager {
     this.tun2socks.stop();
   }
 
-  private resumeListener() {
+  private async resumeListener() {
     if (this.terminated) {
       // NOTE: Cannot remove resume listeners - Electron bug?
       logger.error(
@@ -215,7 +217,7 @@ export class ConnectionManager {
     logger.info("restarting tun2socks after resume");
 
     this.tun2socks.onExit = this.tun2socksExitListener;
-    this.tun2socks.start(this.isDnsOverUdp);
+    await this.tun2socks.start(this.isDnsOverUdp);
 
     // Check if UDP support has changed; if so, silently restart.
     //TODO:retestUdp
@@ -246,7 +248,7 @@ export class ConnectionManager {
     }
 
     sendMessageToRender("Staring tun2socks...");
-    this.tun2socks.start(this.isDnsOverUdp);
+    await this.tun2socks.start(this.isDnsOverUdp);
 
     //TODO: Implement a listener that terminates the start process once this.disconnecting become true.
     if (this.isDisconnecting)
@@ -418,7 +420,7 @@ class Tun2socks extends ChildProcessHelper {
     super(pathToEmbeddedBinary("go-tun2socks", "tun2socks"));
   }
 
-  start(isDnsOverUdp: boolean) {
+  async start(isDnsOverUdp: boolean) {
     const args: string[] = [];
     args.push("-tunName", TUN2SOCKS_TAP_DEVICE_NAME);
     args.push("-tunAddr", TUN2SOCKS_TAP_DEVICE_IP);
@@ -434,6 +436,9 @@ class Tun2socks extends ChildProcessHelper {
       args.push("-smartDns");
     }
 
+    const port = await detectPort(flow.listeningPort);
+    if (port !== flow.listeningPort) flow.newListeningPort = port;
+    args.push("-flowListenAddr", `127.0.0.1:${flow.listeningPort}`);
     this.launch(args);
   }
 }

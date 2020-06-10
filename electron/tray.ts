@@ -1,9 +1,9 @@
 import { Tray, nativeImage, app, NativeImage, Menu } from "electron";
 import path from "path";
-import { getFlow } from "./flow";
 import { convertFlowData } from "../src/share";
 import { getAppState } from "./utils";
 import { mainWindow } from "./common";
+import { flow } from "./flow";
 
 export class AppTray {
   private tray: Tray | undefined;
@@ -14,16 +14,16 @@ export class AppTray {
       }
     | undefined;
   private flowListener = async (title: string, proxyRule: string) => {
-    const flow = await getFlow();
-    if (!flow) return;
+    const flowData = await flow.getData();
+    if (!flowData) return;
     this.tray?.setToolTip(
       title +
         "\n" +
         `Rule: ${proxyRule}` +
         "\n" +
         `download: ${convertFlowData(
-          flow.downloadBytesPerSecond
-        )}/S  upload: ${convertFlowData(flow.uploadBytesPerSecond)}/S`
+          flowData.downloadBytesPerSecond
+        )}/S  upload: ${convertFlowData(flowData.uploadBytesPerSecond)}/S`
     );
   };
   private flowTimer: NodeJS.Timer | undefined = undefined;
