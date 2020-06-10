@@ -124,3 +124,6 @@ ipc.answerRenderer("stop", async () => {
 process.on("uncaughtException", function (err) {
   logger.error(err);
 });
+
+//https://github.com/electron/electron/issues/23664#issuecomment-631674094
+app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");

@@ -38,12 +38,16 @@ ipcMain.on("setRunAtSystemStartup", () => {
   else app.setLoginItemSettings({ openAtLogin: false });
 });
 
-ipcMain.on("openLogFile", () => {
-  shell.openItem(LOG_FILE_PATH);
+ipcMain.on("openLogFile", async () => {
+  try {
+    await shell.openPath(LOG_FILE_PATH);
+  } catch (e) {}
 });
 
-ipcMain.on("openGfwListFile", () => {
-  shell.openItem(GFW_LIST_FILE_PATH);
+ipcMain.on("openGfwListFile", async () => {
+  try {
+    await shell.openPath(GFW_LIST_FILE_PATH);
+  } catch (e) {}
 });
 
 ipcMain.on("hideWindow", () => {
