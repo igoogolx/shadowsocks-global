@@ -46,7 +46,7 @@ export const Dns = React.memo(() => {
       dispatch(
         setting.actions.setCustomizedDns({
           default: { server: data.defaultDns, isProxy: data.isProxyDefaultDns },
-          gfwList: { server: data.gfwList, isProxy: data.isProxyGfwList },
+          gfwList: { server: data.gfwListDns, isProxy: data.isProxyGfwListDns },
         })
       );
       setIsChanged(false);
