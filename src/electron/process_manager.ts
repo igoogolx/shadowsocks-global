@@ -92,7 +92,7 @@ export class ConnectionManager {
 
   private exits: Promise<void>[] = [];
 
-  private readonly ssLocal: SsLocal | null;
+  private readonly ssLocal: SsLocal;
   private readonly tun2socks: Tun2socks;
   private readonly smartDnsBlock: SmartDnsBlock;
 
@@ -121,12 +121,8 @@ export class ConnectionManager {
     private dns: Dns,
     private rule: string
   ) {
-    const isSocks5 = remoteServer.type === "socks5";
-
-    this.proxyAddress = isSocks5 ? remoteServer.host : PROXY_ADDRESS;
-    this.proxyPort = isSocks5
-      ? Number(remoteServer.port)
-      : remoteServer.local_port || PROXY_PORT;
+    this.proxyAddress = PROXY_ADDRESS;
+    this.proxyPort = remoteServer.local_port || PROXY_PORT;
 
     this.tun2socks = new Tun2socks(
       this.proxyAddress,
@@ -136,9 +132,7 @@ export class ConnectionManager {
       this.rule
     );
 
-    this.ssLocal = isSocks5
-      ? null
-      : new SsLocal(this.proxyAddress, this.proxyPort);
+    this.ssLocal = new SsLocal(this.proxyAddress, this.proxyPort);
     this.smartDnsBlock = new SmartDnsBlock(this.dns.whiteListServers);
 
     // This trio of Promises, each tied to a helper process' exit, is key to the instance's
@@ -153,19 +147,11 @@ export class ConnectionManager {
       new Promise<void>((fulfill) => {
         this.smartDnsBlock.onExit = fulfill;
       }),
+      new Promise<void>((fulfill) => {
+        this.ssLocalExitListener = fulfill;
+        if (this.ssLocal) this.ssLocal.onExit = this.ssLocalExitListener;
+      }),
     ];
-
-    if (this.ssLocal) {
-      this.exits.push(
-        // This Promise cant't be fulfilled when in Socks5 proxy mode,
-        // so it must not be added to exits in the case.
-        new Promise<void>((fulfill) => {
-          this.ssLocalExitListener = fulfill;
-          if (this.ssLocal) this.ssLocal.onExit = this.ssLocalExitListener;
-        })
-      );
-    }
-
     Promise.race(this.exits).then(() => {
       logger.info("a helper has exited, disconnecting");
       this.isDisconnecting = true;
@@ -209,10 +195,7 @@ export class ConnectionManager {
   async start() {
     sendMessageToRender("Checking tap device...");
     // testTapDevice();
-    // ss-local must be up in order to test UDP support and validate credentials.
-    if (this.ssLocal) {
-      this.ssLocal.start(this.remoteServer);
-    }
+    this.ssLocal.start(this.remoteServer);
 
     sendMessageToRender("Staring tun2socks...");
     await this.tun2socks.start(this.isDnsOverUdp);
@@ -244,7 +227,7 @@ export class ConnectionManager {
       logger.error(`could not stop routing: ${e.message}`);
     }
 
-    if (this.ssLocal) this.ssLocal.stop();
+    this.ssLocal.stop();
     this.tun2socks.stop();
     this.smartDnsBlock.stop();
   }

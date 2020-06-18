@@ -28,7 +28,6 @@ import { updateSubscription } from "../../utils/helper";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
 import { decodeSsUrl, encodeSsUrl } from "../../utils/url";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
-import { EditSocks5sDialog } from "../Dialogs/EditSocks5sDialog";
 import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
 import Dashboard from "../Dashboard/Dashboard";
 import Setting from "../Setting/Setting";
@@ -36,7 +35,7 @@ import About from "../About/About";
 import Store from "electron-store";
 import classNames from "classnames";
 
-const PROXY_TYPES = ["Shadowsocks", "Socks5", "Subscription"];
+const PROXY_TYPES = ["Shadowsocks", "Subscription"];
 const MANGE_TYPES = ["Statistics", "Setting", "About"];
 const Header = () => {
   const subscriptions = useSelector<AppState, Subscription[]>(
@@ -310,9 +309,6 @@ const Header = () => {
         <EditShadowsocksDialog close={closeDialog} />
       )}
       {currentDialogType === PROXY_TYPES[1] && (
-        <EditSocks5sDialog close={closeDialog} />
-      )}
-      {currentDialogType === PROXY_TYPES[2] && (
         <EditSubscriptionDialog close={closeDialog} />
       )}
       {currentDialogType === MANGE_TYPES[0] && (

@@ -4,7 +4,6 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 
 ## Features
 
-- Supports Shadowsocks and SOCKS5 protocol
 - Built-in Shadowsocks plugin: simple-obfs
 - Supports Udp
 - Supports Smart Dns, Dns over Tcp
@@ -17,14 +16,6 @@ A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jig
 
 1. Download the release file and install it. 
 2. Enjoy.
-## How to use customized rules
-
-1. Download rules from https://github.com/FQrabbit/SSTap-Rule or write your own rules. **Note**: the rule file size must be smaller than 100Kb to ensure performance.
-2. Go to **setting->rule->Customized rules dir path**, add your rules dir.
-
-
-## Roadmap
-**Before** version **1.0.0** : fix bug, remove unsafe type assertions , clean code, improve performance and UI. **No more new features**.<br />**After** version **1.0.0**:  more new features......
 
 ## Development
 

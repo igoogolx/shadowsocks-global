@@ -25,16 +25,6 @@ export type Subscription = {
   shadowsockses: Shadowsocks[];
 };
 
-export type Socks5 = {
-  id: string;
-  regionCode?: string;
-  host: string;
-  port: number;
-  name?: string;
-
-  pingTime?: number | "pinging" | "timeout";
-};
-
 export type ProxyState = {
   isConnected: boolean;
   //Connecting or  Disconnecting
@@ -42,7 +32,6 @@ export type ProxyState = {
   activeId: string;
   shadowsockses: Shadowsocks[];
   subscriptions: Subscription[];
-  socks5s: Socks5[];
   selectedIds: string[];
   isSelecting: boolean;
 };
@@ -53,7 +42,6 @@ export const initialProxyState: ProxyState = {
   activeId: "",
   shadowsockses: [],
   subscriptions: [],
-  socks5s: [],
   selectedIds: [],
   isSelecting: false,
 };
@@ -104,16 +92,12 @@ export const proxy = createSlice({
           case "subscription":
             state.subscriptions.push(config);
             break;
-          //Socks5
-          default:
-            state.socks5s.push(config);
         }
       },
       prepare: (
         proxy:
           | { type: "shadowsocks"; config: Omit<Shadowsocks, "id"> }
           | { type: "subscription"; config: Omit<Subscription, "id"> }
-          | { type: "socks5"; config: Omit<Socks5, "id"> }
       ) => ({
         payload: { ...proxy, config: { id: uuid(), ...proxy.config } },
       }),
@@ -121,7 +105,7 @@ export const proxy = createSlice({
     sortByPingTime: (
       state,
       action: PayloadAction<
-        | { type: "shadowsockses" | "socks5s"; id?: undefined }
+        | { type: "shadowsockses"; id?: undefined }
         | { type: "subscription"; id: string }
       >
     ) => {
@@ -140,9 +124,6 @@ export const proxy = createSlice({
         case "shadowsockses":
           state.shadowsockses.sort(compareFunction);
           break;
-        case "socks5s":
-          state.socks5s.sort(compareFunction);
-          break;
         case "subscription":
           const id = action.payload.id;
           const index = state.subscriptions.findIndex((subscription) => {
@@ -158,7 +139,6 @@ export const proxy = createSlice({
       action: PayloadAction<
         | { type: "shadowsocks"; id: string; config: Partial<Shadowsocks> }
         | { type: "subscription"; id: string; config: Partial<Subscription> }
-        | { type: "socks5"; id: string; config: Partial<Socks5> }
       >
     ) => {
       const { type, id, config } = action.payload;
@@ -212,17 +192,12 @@ export const proxy = createSlice({
             };
           }
           break;
-        //Socks5
-        default: {
-          const index = state.socks5s.findIndex((socks5) => socks5.id === id);
-          state.socks5s[index] = { ...state.socks5s[index], ...config };
-        }
       }
     },
     delete: (
       state,
       action: PayloadAction<{
-        type: "shadowsocks" | "socks5";
+        type: "shadowsocks";
         ids: string[];
       }>
     ) => {
@@ -231,24 +206,23 @@ export const proxy = createSlice({
         ids.forEach((id) => {
           deleteOneShadowsocks(state, id);
         });
-      } else ids.forEach((id: string) => deleteOneSocks5(state, id));
+      }
     },
     deleteAll: (
       state,
       action: PayloadAction<{
-        type: "shadowsocks" | "socks5";
+        type: "shadowsocks";
       }>
     ) => {
       const { type } = action.payload;
       if (type === "shadowsocks") {
         state.shadowsockses = [];
-      } else state.socks5s = [];
-      if (state.activeId !== "") state.activeId = "";
+      }
     },
     deleteOne: (
       state,
       action: PayloadAction<{
-        type: "shadowsocks" | "subscription" | "socks5";
+        type: "shadowsocks" | "subscription";
         id: string;
       }>
     ) => {
@@ -272,10 +246,6 @@ export const proxy = createSlice({
             state.subscriptions.splice(index, 1);
           }
           break;
-        //Socks5
-        default: {
-          deleteOneSocks5(state, id);
-        }
       }
     },
   },
@@ -301,9 +271,4 @@ const deleteOneShadowsocks = (state: ProxyState, id: string) => {
       })
     );
   } else state.shadowsockses.splice(shadowsocksIndex, 1);
-};
-const deleteOneSocks5 = (state: ProxyState, id: string) => {
-  //Reset activated id
-  if (state.activeId === id) state.activeId = "";
-  state.socks5s = state.socks5s.filter((socks5) => socks5.id !== id);
 };

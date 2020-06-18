@@ -13,7 +13,7 @@ import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
 
 type ServerCardProps = {
   id: string;
-  type: "shadowsocks" | "socks5";
+  type: "shadowsocks";
   menuItems: MenuItemProps[];
   onClick: () => void;
   name?: string;
@@ -108,7 +108,7 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
   );
   return (
     <div className={styles.server}>
-      {isSelecting && type !== "socks5" ? (
+      {isSelecting ? (
         <Checkbox
           checked={Boolean(isSelected)}
           onChange={handleOnSelect}

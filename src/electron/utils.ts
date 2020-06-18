@@ -39,7 +39,7 @@ export const installExtensions = async () => {
 };
 
 export interface RemoteServer {
-  type: "socks5" | "shadowsocks";
+  type: "shadowsocks";
   host: string;
   port: number;
 

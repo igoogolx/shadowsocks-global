@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../reducers/rootReducer";
 
 export type PingServer = {
-  type: "shadowsocks" | "socks5";
+  type: "shadowsocks";
   id: string;
   host: string;
   port: number;
