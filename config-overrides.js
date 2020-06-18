@@ -1,6 +1,6 @@
 module.exports = (config) => {
   require("react-app-rewire-postcss")(config, {
-    plugins: (loader) => [
+    plugins: () => [
       require("postcss-preset-env")({
         autoprefixer: {
           flexbox: "no-2009",
@@ -11,7 +11,6 @@ module.exports = (config) => {
   });
   config.externals = {
     moment: "moment",
-    "geoip-country": "commonjs geoip-country",
     "electron-better-ipc": "commonjs electron-better-ipc",
     "electron-store": "commonjs electron-store",
   };

@@ -1,7 +1,12 @@
 import { mainWindow } from "./common";
 import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { ipcMain as ipc } from "electron-better-ipc";
-import { getAppState, getBuildInRuleDirPath, getResourcesPath } from "./utils";
+import {
+  getAppState,
+  getBuildInRuleDirPath,
+  getResourcesPath,
+  lookupRegionCode,
+} from "./utils";
 import { LOG_FILE_PATH, logger } from "./log";
 import { FlowData } from "./flow";
 
@@ -88,3 +93,6 @@ export const sendConnectionStatus = (status: ConnectionStatus) => {
   const event = `proxy-${statusString}`;
   sendToRender(event);
 };
+ipc.answerRenderer("getRegionCode", async (host: string) => {
+  return await lookupRegionCode(host);
+});

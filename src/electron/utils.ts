@@ -7,6 +7,7 @@ import { AppState } from "../reducers/rootReducer";
 import detectPort from "detect-port";
 import { mainWindow } from "./common";
 import fs from "fs";
+const geoip = require("geoip-country");
 
 const appConfig = new Store();
 export const getAppState = () => appConfig.get("state") as AppState;
@@ -133,3 +134,17 @@ export class Config {
       : activatedServer;
   };
 }
+
+export const lookupRegionCode = async (host: string) => {
+  try {
+    const ip = await lookupIp(host);
+    return await new Promise<string | undefined>((fulfill) => {
+      if (!ip) fulfill(undefined);
+      const result = geoip.lookup(ip);
+      if (result) fulfill(result.country);
+      else fulfill(undefined);
+    });
+  } catch {
+    return undefined;
+  }
+};

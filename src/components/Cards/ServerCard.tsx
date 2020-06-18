@@ -8,7 +8,7 @@ import { Card } from "../Core/Card/Card";
 import { MenuItemProps } from "../Core/Menu/Menu";
 import { useAsync, usePing } from "../../hooks";
 import classNames from "classnames";
-import { lookupRegionCode } from "../../utils/helper";
+import { getRegionCodeFromGeoIp } from "../../utils/helper";
 import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
 
 type ServerCardProps = {
@@ -71,9 +71,10 @@ export const ServerCard = React.memo((props: ServerCardProps) => {
   }, [dispatch, id, pingTime, type]);
   const isActive = activeId === id;
 
-  const getRegionCode = useCallback(async () => await lookupRegionCode(host), [
-    host,
-  ]);
+  const getRegionCode = useCallback(
+    async () => await getRegionCodeFromGeoIp(host),
+    [host]
+  );
 
   const {
     execute: executeGetRegionCode,

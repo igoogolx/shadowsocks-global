@@ -1,25 +1,9 @@
-import { lookupIp } from "../electron/share";
-//@ts-ignore
-import geoip from "geoip-country";
 import axios from "axios";
 import { decodeSsUrl } from "./url";
 import { v4 as uuid } from "uuid";
+import { ipcRenderer } from "electron-better-ipc";
 
 const UPDATE_SUBSCRIPTIONS_TIMEOUT_MS = 5000;
-
-export const lookupRegionCode = async (host: string) => {
-  try {
-    const ip = await lookupIp(host);
-    return await new Promise<string | undefined>((fulfill) => {
-      if (!ip) fulfill(undefined);
-      const result = geoip.lookup(ip);
-      if (result) fulfill(result.country);
-      else fulfill(undefined);
-    });
-  } catch {
-    return undefined;
-  }
-};
 
 export const updateSubscription = async (url: string) => {
   const nodesBase64 = await axios(url, {
@@ -33,4 +17,12 @@ export const updateSubscription = async (url: string) => {
     regionCode: "Auto",
     id: uuid(),
   }));
+};
+
+export const getRegionCodeFromGeoIp = async (host: string) => {
+  try {
+    return await ipcRenderer.callMain("getRegionCode", host);
+  } catch {
+    return undefined;
+  }
 };
