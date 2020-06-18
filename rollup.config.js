@@ -10,7 +10,7 @@ export default [
       format: "cjs",
     },
     watch: {
-      include: "electron/*",
+      include: "src/electron/*",
     },
     plugins: [
       typescript({

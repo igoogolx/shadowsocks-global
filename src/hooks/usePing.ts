@@ -30,7 +30,8 @@ export const usePing = (servers: PingServer[]) => {
   const ping = useCallback(async () => {
     setIsPing(true);
     for (let i = 0; i < servers.length; i++) {
-      if (isUnmounting.current || isConnectedRef.current) return;
+      if (isUnmounting.current || isConnectedRef.current)
+        return setIsPing(false);
       const { host, port, id, type } = servers[i];
       try {
         dispatch(

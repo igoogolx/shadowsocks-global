@@ -1,0 +1,14 @@
+{
+  "GeoDbFile": "../geoip/GeoLite2-Country.mmdb",
+  "Ip": {
+    "ProxyListFile" : "",
+    "DirectListFile": "../acl/lan.acl",
+    "Geo": [],
+    "Proxy": true
+  },
+  "Domain": {
+    "ProxyListFile" : "",
+    "DirectListFile": "",
+    "Proxy":true
+  }
+}

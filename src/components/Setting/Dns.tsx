@@ -1,12 +1,10 @@
 import React, { useCallback, useMemo, useState } from "react";
 import styles from "./setting.module.css";
-import { FieldToggle } from "../Core/Toggle/Toggle";
 import { Button, Field, Form, INPUT_SIZE } from "../Core";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { DnsSettingState, setting } from "../../reducers/settingReducer";
 import { notifier } from "../Core/Notification";
-import { ipcRenderer } from "electron";
 
 export const Dns = React.memo(() => {
   const dnsState = useSelector<AppState, DnsSettingState>(
@@ -15,10 +13,8 @@ export const Dns = React.memo(() => {
   const initValue = useMemo(() => {
     const dns = dnsState;
     return {
-      defaultDns: dns.default.server,
-      isProxyDefaultDns: dns.default.isProxy,
-      gfwListDns: dns.gfwList.server,
-      isProxyGfwListDns: dns.gfwList.isProxy,
+      localDns: dns.local,
+      remoteDns: dns.remote,
     };
   }, [dnsState]);
   const [dnsSetting, setDnsSetting] = useState(initValue);
@@ -45,8 +41,8 @@ export const Dns = React.memo(() => {
     (data) => {
       dispatch(
         setting.actions.setCustomizedDns({
-          default: { server: data.defaultDns, isProxy: data.isProxyDefaultDns },
-          gfwList: { server: data.gfwListDns, isProxy: data.isProxyGfwListDns },
+          local: data.localDns,
+          remote: data.remoteDns,
         })
       );
       setIsChanged(false);
@@ -55,40 +51,25 @@ export const Dns = React.memo(() => {
     [dispatch]
   );
 
-  const openNativeWebsitesFile = useCallback(() => {
-    ipcRenderer.send("openGfwListFile");
-  }, []);
-
   return (
     <Form onSubmit={onSubmit} onChange={onChange} value={dnsSetting}>
       <div className={styles.item}>
-        <div className={styles.title}>Default dns:</div>
+        <div className={styles.title}>Local dns:</div>
         <Field
-          name={"defaultDns"}
+          name={"localDns"}
           disabled={disabled}
           className={styles.input}
           size={INPUT_SIZE.M}
         />
-        <FieldToggle name={"isProxyDefaultDns"} disabled={disabled}>
-          Proxy this dns
-        </FieldToggle>
       </div>
       <div className={styles.item}>
-        <div className={styles.title}>Dns for gfw list:</div>
+        <div className={styles.title}>Remote dns:</div>
         <Field
-          name={"gfwListDns"}
+          name={"remoteDns"}
           disabled={disabled}
           className={styles.input}
           size={INPUT_SIZE.M}
         />
-        <FieldToggle name={"isProxyGfwListDns"} disabled={disabled}>
-          Proxy this dns
-        </FieldToggle>
-      </div>
-      <div className={styles.item}>
-        <Button isPrimary={true} onClick={openNativeWebsitesFile}>
-          Open gfw list file
-        </Button>
       </div>
       <div className={styles.footer}>
         <Button

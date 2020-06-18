@@ -1,11 +1,15 @@
 import { mainWindow } from "./common";
 import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { ipcMain as ipc } from "electron-better-ipc";
-import { GFW_LIST_FILE_PATH, getAppState, getResourcesPath } from "./utils";
+import { getAppState, getBuildInRuleDirPath, getResourcesPath } from "./utils";
 import { LOG_FILE_PATH, logger } from "./log";
 import { FlowData } from "./flow";
-import { ConnectionStatus } from "./routing_service";
 
+export enum ConnectionStatus {
+  CONNECTED,
+  DISCONNECTED,
+  RECONNECTING,
+}
 ipc.answerRenderer(
   "getCustomizedRulesDirPath",
   async (defaultPath: unknown) => {
@@ -27,7 +31,9 @@ ipc.answerRenderer(
   }
 );
 
-ipc.answerRenderer("getResourcesPath", async () => await getResourcesPath());
+ipc.answerRenderer("getBuildInRuleDirPath", getBuildInRuleDirPath);
+
+ipc.answerRenderer("getResourcesPath", async () => getResourcesPath());
 
 ipc.answerRenderer("getAppVersion", async () => await app.getVersion());
 
@@ -41,12 +47,6 @@ ipcMain.on("setRunAtSystemStartup", () => {
 ipcMain.on("openLogFile", async () => {
   try {
     await shell.openPath(LOG_FILE_PATH);
-  } catch (e) {}
-});
-
-ipcMain.on("openGfwListFile", async () => {
-  try {
-    await shell.openPath(GFW_LIST_FILE_PATH);
   } catch (e) {}
 });
 

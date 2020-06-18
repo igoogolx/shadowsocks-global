@@ -2,6 +2,8 @@
   "productName": "ShadowsocksGlobal",
   "files": [
     "acl",
+    "rule",
+    "geoip",
     "build",
     "third_party",
     "resources",
@@ -10,12 +12,15 @@
   ],
   "asarUnpack": [
     "third_party",
-    "acl"
+    "acl",
+    "rule",
+    "geoip"
   ],
   "directories": {
     "output": "dist"
   },
   "win": {
+    "requestedExecutionLevel": "requireAdministrator",
     "target": [
       {
         "target": "nsis",

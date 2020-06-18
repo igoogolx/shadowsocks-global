@@ -13,14 +13,9 @@
 // limitations under the License.
 
 import { execSync } from "child_process";
-import { ConnectionStatus, RoutingDaemon } from "./routing_service";
 import { powerMonitor } from "electron";
 import { ChildProcess, spawn } from "child_process";
-import {
-  pathToEmbeddedBinary,
-  RemoteServer,
-  GFW_LIST_FILE_PATH,
-} from "./utils";
+import { pathToEmbeddedBinary, RemoteServer } from "./utils";
 import { logger } from "./log";
 import * as path from "path";
 import { sendMessageToRender, sendUdpStatusToRender } from "./ipc";
@@ -28,11 +23,6 @@ import { checkUdpForwardingEnabled } from "./connectivity";
 import detectPort from "detect-port";
 import { flow } from "./flow";
 import { SMART_DNS_ADDRESS } from "./share";
-
-export type Route = {
-  proxy: string[];
-  reserved: string[];
-};
 
 const PROXY_ADDRESS = "127.0.0.1";
 const PROXY_PORT = 1081;
@@ -81,18 +71,10 @@ function testTapDevice() {
   if (tapLines.length < 1) {
     throw new Error("TAP device not found");
   }
-
-  // Within those lines, search for the expected IP.
-  if (
-    tapLines.filter((s) => s.indexOf(TUN2SOCKS_TAP_DEVICE_IP) !== -1).length < 1
-  ) {
-    throw new Error("TAP device has wrong IP");
-  }
 }
 
 export type Dns = {
-  server: { default: string; gfwList: string };
-
+  server: { local: string; remote: string };
   whiteListServers: string[];
 };
 
@@ -110,15 +92,17 @@ export class ConnectionManager {
 
   private exits: Promise<void>[] = [];
 
-  private readonly routing: RoutingDaemon;
   private readonly ssLocal: SsLocal | null;
   private readonly tun2socks: Tun2socks;
+  private readonly smartDnsBlock: SmartDnsBlock;
 
   // Extracted out to an instance variable because in certain situations, notably a change in UDP
   // support, we need to stop and restart tun2socks *without notifying the client* and this allows
   // us swap the listener in and out.
   private tun2socksExitListener?: () => void | undefined;
   private ssLocalExitListener?: () => void | undefined;
+
+  private onceStoppedListener = () => {};
 
   // See #resumeListener.
   private terminated = false;
@@ -134,15 +118,10 @@ export class ConnectionManager {
   constructor(
     private remoteServer: RemoteServer,
     private isDnsOverUdp: boolean,
-    private route: Route,
-    private dns: Dns
+    private dns: Dns,
+    private rule: string
   ) {
     const isSocks5 = remoteServer.type === "socks5";
-
-    this.routing = new RoutingDaemon(route, {
-      servers: [SMART_DNS_ADDRESS],
-      whiteListServers: dns.whiteListServers,
-    });
 
     this.proxyAddress = isSocks5 ? remoteServer.host : PROXY_ADDRESS;
     this.proxyPort = isSocks5
@@ -152,22 +131,27 @@ export class ConnectionManager {
     this.tun2socks = new Tun2socks(
       this.proxyAddress,
       this.proxyPort,
-      dns.server
+      this.dns.server,
+      this.remoteServer.host,
+      this.rule
     );
 
     this.ssLocal = isSocks5
       ? null
       : new SsLocal(this.proxyAddress, this.proxyPort);
+    this.smartDnsBlock = new SmartDnsBlock(this.dns.whiteListServers);
 
     // This trio of Promises, each tied to a helper process' exit, is key to the instance's
     // lifecycle:
     //  - once any helper fails or exits, stop them all
     //  - once *all* helpers have stopped, we're done
     this.exits = [
-      this.routing.onceDisconnected,
       new Promise<void>((fulfill) => {
         this.tun2socksExitListener = fulfill;
         this.tun2socks.onExit = this.tun2socksExitListener;
+      }),
+      new Promise<void>((fulfill) => {
+        this.smartDnsBlock.onExit = fulfill;
       }),
     ];
 
@@ -187,13 +171,16 @@ export class ConnectionManager {
       this.isDisconnecting = true;
       this.stop();
     });
-    this.onAllHelpersStopped = Promise.all(this.exits).then(() => {
-      logger.info("all helpers have exited");
-      this.terminated = true;
-    });
+    this.onAllHelpersStopped = Promise.all(this.exits)
+      .then(() => {
+        logger.info("all helpers have exited");
+        this.terminated = true;
+      })
+      .then(() => {
+        this.onceStoppedListener();
+      });
 
     // Handle network changes and, on Windows, suspend events.
-    this.routing.onNetworkChange = this.networkChanged.bind(this);
     powerMonitor.on("suspend", this.suspendListener.bind(this));
     powerMonitor.on("resume", this.resumeListener.bind(this));
   }
@@ -213,35 +200,15 @@ export class ConnectionManager {
       );
       return;
     }
-
     logger.info("restarting tun2socks after resume");
-
     this.tun2socks.onExit = this.tun2socksExitListener;
     await this.tun2socks.start(this.isDnsOverUdp);
-
-    // Check if UDP support has changed; if so, silently restart.
-    //TODO:retestUdp
-    // this.retestUdp();
-  }
-
-  async changeServer(newServer: RemoteServer) {
-    await this.routing.addReservedRoute(newServer.host + "/32");
-    await new Promise((fulfill) => {
-      if (this.ssLocal) {
-        this.ssLocal.onExit = () => {
-          fulfill();
-        };
-        this.ssLocal.stop();
-      }
-    });
-    if (this.ssLocal) this.ssLocal.onExit = this.ssLocalExitListener;
-    this.ssLocal?.start(newServer);
   }
 
   // Fulfills once all three helpers have started successfully.
   async start() {
     sendMessageToRender("Checking tap device...");
-    testTapDevice();
+    // testTapDevice();
     // ss-local must be up in order to test UDP support and validate credentials.
     if (this.ssLocal) {
       this.ssLocal.start(this.remoteServer);
@@ -249,6 +216,7 @@ export class ConnectionManager {
 
     sendMessageToRender("Staring tun2socks...");
     await this.tun2socks.start(this.isDnsOverUdp);
+    this.smartDnsBlock.start();
 
     //TODO: Implement a listener that terminates the start process once this.disconnecting become true.
     if (this.isDisconnecting)
@@ -262,27 +230,6 @@ export class ConnectionManager {
       );
 
     sendMessageToRender("Configuring routes...");
-    await this.routing.start();
-  }
-
-  private networkChanged(status: ConnectionStatus) {
-    if (status === ConnectionStatus.CONNECTED) {
-      if (this.reconnectedListener) {
-        this.reconnectedListener();
-      }
-
-      // Test whether UDP availability has changed; since it won't change 99% of the time, do this
-      // *after* we've informed the client we've reconnected.
-      //this.retestUdp();
-    } else if (status === ConnectionStatus.RECONNECTING) {
-      if (this.reconnectingListener) {
-        this.reconnectingListener();
-      }
-    } else {
-      console.error(
-        `unknown network change status ${status} from routing daemon`
-      );
-    }
   }
 
   // Use #onceStopped to be notified when the connection terminates.
@@ -291,7 +238,6 @@ export class ConnectionManager {
     powerMonitor.removeAllListeners("resume");
 
     try {
-      this.routing.stop();
     } catch (e) {
       // This can happen for several reasons, e.g. the daemon may have stopped while we were
       // connected.
@@ -300,14 +246,15 @@ export class ConnectionManager {
 
     if (this.ssLocal) this.ssLocal.stop();
     this.tun2socks.stop();
+    this.smartDnsBlock.stop();
   }
 
   // Fulfills once all three helper processes have stopped.
   //
   // When this happens, *as many changes made to the system in order to establish the full-system
   // VPN as possible* will have been reverted.
-  public get onceStopped() {
-    return this.onAllHelpersStopped;
+  public set onceStopped(newListen: () => void | undefined) {
+    this.onceStoppedListener = newListen;
   }
 
   // Sets an optional callback for when the routing daemon is attempting to re-connect.
@@ -415,26 +362,30 @@ class Tun2socks extends ChildProcessHelper {
   constructor(
     private proxyAddress: string,
     private proxyPort: number,
-    private dnsServer: { default: string; gfwList: string }
+    private dns: { local: string; remote: string },
+    private targetServerIp: string,
+    private acl: string
   ) {
     super(pathToEmbeddedBinary("go-tun2socks", "tun2socks"));
   }
 
   async start(isDnsOverUdp: boolean) {
     const args: string[] = [];
+    args.push("-rule", this.acl);
+    console.log(this.acl);
     args.push("-tunName", TUN2SOCKS_TAP_DEVICE_NAME);
     args.push("-tunAddr", TUN2SOCKS_TAP_DEVICE_IP);
     args.push("-tunMask", TUN2SOCKS_VIRTUAL_ROUTER_NETMASK);
     args.push("-tunGw", TUN2SOCKS_VIRTUAL_ROUTER_IP);
+    args.push("-tunDns", SMART_DNS_ADDRESS);
     args.push("-proxyServer", `${this.proxyAddress}:${this.proxyPort}`);
+    args.push("-targetServerIp", this.targetServerIp);
     args.push("-loglevel", "error");
+
     if (!isDnsOverUdp) args.push("-dnsFallback");
-    if (this.dnsServer) {
-      args.push("-primaryDNSAddr", `${this.dnsServer.gfwList}:53`);
-      args.push("-alternativeDNSAddr", `${this.dnsServer.default}:53`);
-      args.push("-primaryDNSDomainFile", GFW_LIST_FILE_PATH);
-      args.push("-smartDns");
-    }
+    args.push("-primaryDNSAddr", this.dns.remote);
+    args.push("-alternativeDNSAddr", this.dns.local);
+    args.push("-smartDns");
 
     const port = await detectPort(flow.listeningPort);
     if (port !== flow.listeningPort) flow.newListeningPort = port;
@@ -471,5 +422,16 @@ export class SsLocal extends ChildProcessHelper {
         sendUdpStatusToRender(isUdpEnabled ? "enabled" : "disabled");
       }
     );
+  }
+}
+
+export class SmartDnsBlock extends ChildProcessHelper {
+  constructor(private whitelistServers: string[]) {
+    super(pathToEmbeddedBinary("smartdnsblock", "smartdnsblock"));
+  }
+  start() {
+    const args = [];
+    args.push(this.whitelistServers.join(","));
+    this.launch(args);
   }
 }

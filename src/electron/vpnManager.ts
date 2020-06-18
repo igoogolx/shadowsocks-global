@@ -1,13 +1,12 @@
 import { ConnectionManager, Dns } from "./process_manager";
-import { Config, getAppState, RemoteServer } from "./utils";
-import { ConnectionStatus } from "./routing_service";
+import { Config, RemoteServer } from "./utils";
 import { AppTray } from "./tray";
 import {
+  ConnectionStatus,
   sendConnectionStatus,
   sendFlowToRender,
   sendMessageToRender,
 } from "./ipc";
-import { getActivatedServer, lookupIp } from "./share";
 import { flow } from "./flow";
 
 export class VpnManager {
@@ -25,24 +24,23 @@ export class VpnManager {
     });
   };
 
-  start = async () => {
+  start = async (isSendMessage = true) => {
     try {
       const config = new Config();
-      const proxyServer = await config.getProxyServer();
-      const route = await config.getRoutes();
+      const server = await config.getProxyServer();
       this.currentConnection = new ConnectionManager(
-        proxyServer as RemoteServer,
+        server as RemoteServer,
         config.getIsDnsOverUdp(),
-        route,
-        config.getDns() as Dns
+        config.getDns() as Dns,
+        await config.getRule()
       );
       if (!this.currentConnection) return;
       //TODO: Fix bug: can't catch error
-      this.currentConnection.onceStopped.then(() => {
+      this.currentConnection.onceStopped = () => {
         console.log("disconnected!");
         sendConnectionStatus(ConnectionStatus.DISCONNECTED);
         this.stop();
-      });
+      };
 
       this.currentConnection.onReconnecting = () => {
         console.log(`reconnecting`);
@@ -52,10 +50,12 @@ export class VpnManager {
         console.log(`reconnected`);
         sendConnectionStatus(ConnectionStatus.CONNECTED);
       };
-      sendMessageToRender("Connecting...");
+      if (isSendMessage) sendMessageToRender("Connecting...");
       await this.currentConnection.start();
-      sendMessageToRender("Connected!");
-      sendConnectionStatus(ConnectionStatus.CONNECTED);
+      if (isSendMessage) {
+        sendMessageToRender("Connected!");
+        sendConnectionStatus(ConnectionStatus.CONNECTED);
+      }
       this.flowTimer = setInterval(this.flowListener, 1000);
       this.tray?.setToolTip("connected");
     } catch (e) {
@@ -64,20 +64,27 @@ export class VpnManager {
     }
   };
   changeServer = async () => {
-    sendMessageToRender("Connecting...");
-    let activatedServer = getActivatedServer(getAppState().proxy);
-    const host = await lookupIp(activatedServer.host);
-    const proxyServer = { ...activatedServer, host };
-    await this.currentConnection?.changeServer(proxyServer as RemoteServer);
-    sendMessageToRender("Connected!");
+    try {
+      sendMessageToRender("Connecting...");
+      if (this.currentConnection) {
+        this.currentConnection.onceStopped = () => {};
+      }
+      await this.stop(false);
+      await this.start(false);
+      sendMessageToRender("Connected!");
+    } catch (e) {
+      await this.stop();
+    }
   };
-  stop = async () => {
+  stop = async (isSendMessage = true) => {
     try {
       if (!this.currentConnection) return;
       this.currentConnection.stop();
       await this.currentConnection.onceStopped;
-      sendConnectionStatus(ConnectionStatus.DISCONNECTED);
-      sendMessageToRender("Disconnected");
+      if (isSendMessage) {
+        sendConnectionStatus(ConnectionStatus.DISCONNECTED);
+        sendMessageToRender("Disconnected");
+      }
     } catch (e) {
       console.log(e);
     } finally {

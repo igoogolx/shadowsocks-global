@@ -1,2 +1,0 @@
-ShadowsocksGlobalService: closed source, based on [OutlineService](https://github.com/Jigsaw-Code/outline-client/tree/master/tools/OutlineService) <br />
-smartdnsblock: closed source, based on https://github.com/Jigsaw-Code/outline-client/tree/master/tools/smartdnsblock

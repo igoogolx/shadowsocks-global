@@ -1,0 +1,17 @@
+{
+  "GeoDbFile": "../geoip/GeoLite2-Country.mmdb",
+  "Ip": {
+    "ProxyListFile" : "",
+    "DirectListFile": "../acl/lan-china-list.acl",
+    "Geo": [{
+      "Country": "CN",
+      "Proxy":false
+    }],
+    "Proxy": true
+  },
+  "Domain": {
+    "ProxyListFile" : "../acl/gfwlist.acl",
+    "DirectListFile": "",
+    "Proxy": false
+  }
+}

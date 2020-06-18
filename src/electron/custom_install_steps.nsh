@@ -51,13 +51,6 @@ ${StrLoc}
   SetOutPath -
   File "${PROJECT_DIR}\scripts\add_tap_device.bat"
 
-  ; OutlineService files, stopping the service first in case it's still running.
-  nsExec::Exec "net stop ShadowsocksGlobalService"
-  File "${PROJECT_DIR}\tools\ShadowsocksGlobalService\ShadowsocksGlobalService\bin\x86\Release\ShadowsocksGlobalService.exe"
-  File "${PROJECT_DIR}\tools\smartdnsblock\bin\smartdnsblock.exe"
-  File "${PROJECT_DIR}\tools\ShadowsocksGlobalService\ShadowsocksGlobalService\bin\x86\Release\Newtonsoft.Json.dll"
-  File "${PROJECT_DIR}\scripts\install_windows_service.bat"
-
   ; ExecToStack captures both stdout and stderr from the script, in the order output.
   ; Set a (long) timeout in case the device never becomes visible to netsh.
   ReadEnvStr $0 COMSPEC
@@ -65,7 +58,7 @@ ${StrLoc}
 
   Pop $0
   Pop $1
-  StrCmp $0 0 installservice
+  StrCmp $0 0 success
 
   ; The TAP device may have failed to install because the user did not want to
   ; install the device driver. If so:
@@ -93,20 +86,6 @@ ${StrLoc}
 
 
 
-  installservice:
-
-  nsExec::Exec install_windows_service.bat
-
-  nsExec::Exec "sc query ShadowsocksGlobalService"
-  Pop $0
-  StrCmp $0 0 success
-  ; TODO: Trigger a Sentry report for service installation failure, too, and revisit
-  ;       the restart stuff in the TypeScript code.
-  MessageBox MB_OK "Sorry, we could not configure your system to connect to Shadowsocks-global. Please try \
-    running the installer again. If you still cannot install Shadowsocks-global, please get in touch with us \
-    and let us know that ShadowsocksGlobalService failed to install."
-  Quit
-
   success:
 
 !macroend
@@ -114,7 +93,3 @@ ${StrLoc}
 ; TODO: Remove the TAP device on uninstall. This is impossible to implement safely
 ;       with the bundled tapinstall.exe because it can only remove *all* devices
 ;       having hwid tap0901 and these may include non-Outline devices.
-!macro customUnInstall
-  nsExec::Exec "net stop ShadowsocksGlobalService"
-  nsExec::Exec "sc delete ShadowsocksGlobalService"
-!macroend

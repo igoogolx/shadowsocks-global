@@ -118,35 +118,14 @@ if %errorlevel% neq 0 goto :loop
 echo (Re-)enabling TAP network device...
 netsh interface set interface "%DEVICE_NAME%" admin=enabled
 
-:: Give the device an IP address.
-:: 10.0.85.x is a guess which we hope will work for most users (Docker for
-:: Windows uses 10.0.75.x by default): if the address is already in use the
-:: script will fail and the installer will show an error message to the user.
-:: TODO: Actually search the system for an unused subnet or make the subnet
-::       configurable in the Outline client.
-echo Configuring TAP device subnet...
-:: Must be different with Outline
-netsh interface ip set address %DEVICE_NAME% static 10.0.85.3 255.255.255.0
-if %errorlevel% neq 0 (
-  echo Could not set TAP network device subnet. >&2
-  exit /b 1
+echo Set all adapters metric to auto.
+for /f "skip=3 tokens=4" %%a in ('netsh interface show interface') do (
+  netsh interface ip set interface %%a metric=automatic
+  netsh interface ipv6 set interface %%a metric=automatic
 )
 
-:: Windows has no system-wide DNS server; each network device can have its
-:: "own" set of DNS servers. Windows seems to use the DNS server(s) of the
-:: network device associated with the default gateway. This is good for us
-:: as it means we do not have to modify the DNS settings of any other network
-:: device in the system. Configure with OpenDNS and Dyn resolvers.
-echo Configuring primary DNS...
-netsh interface ip set dnsservers %DEVICE_NAME% static address=208.67.222.222
-if %errorlevel% neq 0 (
-  echo Could not configure TAP device primary DNS. >&2
-  exit /b 1
-)
-echo Configuring secondary DNS...
-netsh interface ip add dnsservers %DEVICE_NAME% 216.146.35.35 index=2
-if %errorlevel% neq 0 (
-  echo Could not configure TAP device secondary DNS. >&2
-  exit /b 1
-)
+echo Set TAP adapter metric to 0.
+netsh interface ip set interface %DEVICE_NAME% metric=0
+netsh interface ipv6 set interface %DEVICE_NAME% metric=0
+
 echo TAP network device added and configured successfully

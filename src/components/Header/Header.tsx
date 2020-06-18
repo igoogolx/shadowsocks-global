@@ -34,10 +34,6 @@ import Dashboard from "../Dashboard/Dashboard";
 import Setting from "../Setting/Setting";
 import About from "../About/About";
 import Store from "electron-store";
-import {
-  BUILD_IN_RULE_GLOBAL,
-  BUILD_IN_RULE_BYPASS_MAINLAND_CHINA,
-} from "../../electron/share";
 import classNames from "classnames";
 
 const PROXY_TYPES = ["Shadowsocks", "Socks5", "Subscription"];
@@ -218,13 +214,27 @@ const Header = () => {
     const loadRulePath = async () => {
       setIsLoadingRules(true);
       let rulePaths: string[] = [];
+      const buildInRulePath = await ipc.callMain("getBuildInRuleDirPath");
+      if (buildInRulePath) {
+        try {
+          const buildInRules = await fs.promises.readdir(
+            buildInRulePath as string
+          );
+          buildInRules.forEach((rule) => {
+            if (path.extname(rule) === ".json")
+              rulePaths.push(path.join(buildInRulePath as string, rule));
+          });
+        } catch {
+          notifier.error("Fail to load build in rules");
+        }
+      }
       if (customizedRulesDirPath)
         try {
           const customizedRules = await fs.promises.readdir(
             customizedRulesDirPath
           );
           customizedRules.forEach((rule) => {
-            if (path.extname(rule) === ".rules")
+            if (path.extname(rule) === ".json")
               rulePaths.push(path.join(customizedRulesDirPath, rule));
           });
         } catch {
@@ -250,10 +260,8 @@ const Header = () => {
   }, [dispatch]);
   const rulesOptions = useMemo(
     () => [
-      { value: BUILD_IN_RULE_GLOBAL },
-      { value: BUILD_IN_RULE_BYPASS_MAINLAND_CHINA },
       ...rulePaths.map((rulePath) => ({
-        value: path.basename(rulePath, ".rules"),
+        value: path.basename(rulePath, ".json"),
       })),
     ],
     [rulePaths]

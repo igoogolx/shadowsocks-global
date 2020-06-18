@@ -1,19 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BUILD_IN_RULE_GLOBAL } from "../electron/share";
 
 const DEFAULT_LOCAL_PORT = 1081;
 
 const GOOGLE_DNS = "8.8.8.8";
 const DNS_POD = "119.29.29.29";
 
-type DnsField = {
-  isProxy: boolean;
-  server: string;
-};
-
 export type DnsSettingState = {
-  default: DnsField;
-  gfwList: DnsField;
+  local: string;
+  remote: string;
 };
 
 export type Route = { ip: string; isProxy: boolean };
@@ -54,14 +48,11 @@ export const initialSettingState: SettingState = {
     autoConnectDelay: 5,
   },
   dns: {
-    default: {
-      isProxy: false,
-      server: DNS_POD,
-    },
-    gfwList: { isProxy: true, server: GOOGLE_DNS },
+    local: DNS_POD,
+    remote: GOOGLE_DNS,
   },
   rule: {
-    current: BUILD_IN_RULE_GLOBAL,
+    current: "global",
     dirPath: "",
     additionalRoutes: [],
   },
