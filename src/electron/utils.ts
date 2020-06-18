@@ -117,11 +117,11 @@ export class Config {
     let activatedServer = getActivatedServer(this.state.proxy);
     const serverIp = await lookupIp(activatedServer.host);
     const isShadowsocks = activatedServer.type === "shadowsocks";
-    const ssLocalPort = this.state.setting.general.shadowsocksLocalPort;
+    const ssLocalPort = Number(this.state.setting.general.shadowsocksLocalPort);
     activatedServer = { ...activatedServer, host: serverIp };
     if (isShadowsocks) {
       const _port = await detectPort(ssLocalPort);
-      if (_port !== ssLocalPort)
+      if (Number(_port) !== ssLocalPort)
         throw new Error(
           `port: ${ssLocalPort} was occupied, try port: ${_port}`
         );
