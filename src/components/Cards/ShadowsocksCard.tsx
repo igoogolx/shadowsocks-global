@@ -9,6 +9,7 @@ import { AppState } from "../../reducers/rootReducer";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
 import { ipcRenderer as ipc } from "electron-better-ipc";
 import QRCode from "qrcode";
+import { PingServer, usePing } from "../../hooks";
 
 type ShadowsocksCardProps = {
   shadowsocks: Shadowsocks;
@@ -21,6 +22,12 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
   const isConnected = useSelector<AppState, boolean>(
     (state) => state.proxy.isConnected
   );
+  const pingInfo = useMemo(() => [{ type: "shadowsocks", id, host, port }], [
+    host,
+    id,
+    port,
+  ]);
+  const { isPinging, ping } = usePing(pingInfo as PingServer[]);
   const onClick = useCallback(() => {
     dispatch(proxy.actions.setActiveId(id));
     if (isConnected) {
@@ -52,6 +59,12 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
     const isActivated = activatedId === id && isConnectedOrProcessing;
 
     return [
+      {
+        iconName: ICON_NAME.INSTRUMENT,
+        content: "Ping Test",
+        handleOnClick: ping,
+        disabled: isPinging || isConnected,
+      },
       {
         iconName: ICON_NAME.EDIT,
         content: "Edit",
@@ -87,7 +100,16 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         disabled: isActivated,
       },
     ];
-  }, [activatedId, dispatch, id, isConnectedOrProcessing, props.shadowsocks]);
+  }, [
+    activatedId,
+    dispatch,
+    id,
+    isConnected,
+    isConnectedOrProcessing,
+    isPinging,
+    ping,
+    props.shadowsocks,
+  ]);
   const closeEditDialog = useCallback(() => setIsEditing(false), []);
   const closeQrCodeDialog = useCallback(() => setIsShowQrCode(false), []);
 
