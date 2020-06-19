@@ -9,6 +9,7 @@ import {
 } from "./utils";
 import { LOG_FILE_PATH, logger } from "./log";
 import { FlowData } from "./flow";
+import axios from "axios";
 
 export enum ConnectionStatus {
   CONNECTED,
@@ -95,4 +96,12 @@ export const sendConnectionStatus = (status: ConnectionStatus) => {
 };
 ipc.answerRenderer("getRegionCode", async (host: string) => {
   return await lookupRegionCode(host);
+});
+
+const UPDATE_SUBSCRIPTIONS_TIMEOUT_MS = 5000;
+ipc.answerRenderer("fetchSubscription", async (url: string) => {
+  const nodesBase64 = await axios(url, {
+    timeout: UPDATE_SUBSCRIPTIONS_TIMEOUT_MS,
+  });
+  return Buffer.from(nodesBase64.data, "base64").toString();
 });
