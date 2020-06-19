@@ -18,14 +18,10 @@ import { ChildProcess, spawn } from "child_process";
 import { pathToEmbeddedBinary, RemoteServer } from "./utils";
 import { logger } from "./log";
 import * as path from "path";
-import { sendMessageToRender, sendUdpStatusToRender } from "./ipc";
-import { checkUdpForwardingEnabled } from "./connectivity";
+import { PROXY_ADDRESS, sendMessageToRender } from "./ipc";
 import detectPort from "detect-port";
 import { flow } from "./flow";
 import { SMART_DNS_ADDRESS } from "./share";
-
-const PROXY_ADDRESS = "127.0.0.1";
-const PROXY_PORT = 1081;
 
 const TUN2SOCKS_TAP_DEVICE_NAME = "shadowsocksGlobal-tap0";
 
@@ -122,7 +118,7 @@ export class ConnectionManager {
     private rule: string
   ) {
     this.proxyAddress = PROXY_ADDRESS;
-    this.proxyPort = remoteServer.local_port || PROXY_PORT;
+    this.proxyPort = remoteServer.local_port;
 
     this.tun2socks = new Tun2socks(
       this.proxyAddress,
@@ -398,13 +394,6 @@ export class SsLocal extends ChildProcessHelper {
     args.push("--plugin", config.plugin || "");
     args.push("--plugin-opts", config.plugin_opts || "");
     this.launch(args);
-
-    sendUdpStatusToRender(""); //Reset Udp status
-    checkUdpForwardingEnabled(this.proxyAddress, this.proxyPort).then(
-      (isUdpEnabled) => {
-        sendUdpStatusToRender(isUdpEnabled ? "enabled" : "disabled");
-      }
-    );
   }
 }
 

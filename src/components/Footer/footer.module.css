@@ -10,10 +10,11 @@
   height: 25px;
   width: 100vw;
   & .udp {
-    margin: auto 20px;
+    width: 120px;
+    margin: auto 5px;
     & span {
       display: inline-block;
-      width: 50px;
+      width: 40px;
     }
   }
   & .traffic {

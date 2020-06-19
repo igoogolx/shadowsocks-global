@@ -4,43 +4,55 @@ import { Dot } from "../Dot/Dot";
 import { ipcRenderer } from "electron";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import { useFlow } from "../../hooks";
+import { useAsync, useFlow } from "../../hooks";
 import { convertFlowData } from "../../electron/share";
+import { checkUpdStatus } from "../../utils/ipc";
+import { Icon, ICON_NAME, ICON_SIZE } from "../Core";
 
 const Footer = () => {
-  const [udpStatus, setUdpStatus] = useState<
-    undefined | "disabled" | "enabled"
-  >();
   const dispatch = useDispatch();
   const [message, setMessage] = useState("");
   const isConnected = useSelector<AppState, boolean>(
     (state) => state.proxy.isConnected
   );
 
+  const {
+    pending: checking,
+    execute: checkUdp,
+    value: udpStatus,
+    error,
+  } = useAsync(checkUpdStatus);
   const flow = useFlow();
-
   useEffect(() => {
-    if (!isConnected) setUdpStatus(undefined);
-  }, [isConnected]);
+    if (isConnected) {
+      checkUdp().catch(() => {
+        //Do noting
+      });
+    }
+  }, [checkUdp, isConnected]);
 
   useEffect(() => {
     ipcRenderer.on("proxy-message", (event, message) => {
       if (message) setMessage(message);
     });
-    ipcRenderer.on("proxy-udpStatus", (event, udpStatus) => {
-      setUdpStatus(udpStatus);
-    });
 
     return () => {
       ipcRenderer.removeAllListeners("proxy-message");
-      ipcRenderer.removeAllListeners("proxy-udpStatus");
     };
   }, [dispatch]);
   return (
     <div className={styles.container}>
       <div className={styles.udp}>
         <span>UDP:</span>
-        <Dot type={udpStatus} />
+        {checking || error ? (
+          <Icon
+            iconName={ICON_NAME.LOADING}
+            isLoading={true}
+            size={ICON_SIZE.SIZE14}
+          />
+        ) : (
+          <Dot type={udpStatus ? "enabled" : "disabled"} />
+        )}
       </div>
       <div className={styles.traffic}>
         usage: {convertFlowData(flow.totalUsage)}

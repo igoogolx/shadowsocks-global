@@ -10,6 +10,7 @@ import {
 import { LOG_FILE_PATH, logger } from "./log";
 import { FlowData } from "./flow";
 import axios from "axios";
+import { checkUdpForwardingEnabled } from "./connectivity";
 
 export enum ConnectionStatus {
   CONNECTED,
@@ -69,9 +70,6 @@ const sendToRender = (channel: string, data?: any) => {
 export const sendMessageToRender = (msg: string) => {
   sendToRender("proxy-message", msg);
 };
-export const sendUdpStatusToRender = (status: string) => {
-  sendToRender("proxy-udpStatus", status);
-};
 export const sendFlowToRender = (data: FlowData & { time: number }) => {
   sendToRender("proxy-flow", data);
 };
@@ -105,3 +103,9 @@ ipc.answerRenderer("fetchSubscription", async (url: string) => {
   });
   return Buffer.from(nodesBase64.data, "base64").toString();
 });
+
+export const PROXY_ADDRESS = "127.0.0.1";
+ipc.answerRenderer(
+  "checkUdpStatus",
+  async (port: number) => await checkUdpForwardingEnabled(PROXY_ADDRESS, port)
+);
