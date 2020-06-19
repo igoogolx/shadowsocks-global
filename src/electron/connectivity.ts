@@ -1,14 +1,10 @@
 import * as dgram from "dgram";
 import { SocksClient } from "socks";
-import * as net from "net";
 import { logger } from "./log";
 
 const UDP_FORWARDING_TEST_TIMEOUT_MS = 5000;
 const UDP_FORWARDING_TEST_RETRY_INTERVAL_MS = 1000;
 // ss-local will almost always start, and fast: short timeouts, fast retries.
-const SSLOCAL_CONNECTION_TIMEOUT = 10;
-const SSLOCAL_MAX_ATTEMPTS = 10;
-const SSLOCAL_RETRY_INTERVAL_MS = 100;
 
 // DNS request to google.com.
 const DNS_REQUEST = Buffer.from([
@@ -41,40 +37,6 @@ const DNS_REQUEST = Buffer.from([
   0,
   1, // QCLASS, set to 1 = IN (Internet)
 ]);
-
-export function isServerReachable(
-  host: string,
-  port: number,
-  timeout = SSLOCAL_CONNECTION_TIMEOUT,
-  maxAttempts = SSLOCAL_MAX_ATTEMPTS,
-  retryIntervalMs = SSLOCAL_RETRY_INTERVAL_MS
-) {
-  let attempt = 0;
-  return new Promise((fulfill, reject) => {
-    const connect = () => {
-      attempt++;
-
-      const socket = new net.Socket();
-      socket.once("error", () => {
-        if (attempt < maxAttempts) {
-          setTimeout(connect, retryIntervalMs);
-        } else {
-          reject("Server is unreachable");
-        }
-      });
-
-      if (timeout > 0) {
-        socket.setTimeout(timeout);
-      }
-
-      socket.connect(port, host, () => {
-        socket.end();
-        fulfill();
-      });
-    };
-    connect();
-  });
-}
 
 // Verifies that the remote server has enabled UDP forwarding by sending a DNS request through it.
 export async function checkUdpForwardingEnabled(
