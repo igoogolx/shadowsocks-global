@@ -7,9 +7,9 @@ import { encodeSsUrl } from "../../utils/url";
 import { clipboard } from "electron";
 import { AppState } from "../../reducers/rootReducer";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
-import { ipcRenderer as ipc } from "electron-better-ipc";
 import QRCode from "qrcode";
 import { PingServer, usePing } from "../../hooks";
+import { changeServer } from "../../utils/ipc";
 
 type ShadowsocksCardProps = {
   shadowsocks: Shadowsocks;
@@ -33,8 +33,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
     if (isConnected) {
       dispatch(proxy.actions.setIsConnected(false));
       dispatch(proxy.actions.setIsProcessing(true));
-      ipc
-        .callMain("changeServer")
+      changeServer()
         .catch((e) => {
           if (e.message && typeof e.message === "string")
             notifier.error(e.message);

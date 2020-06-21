@@ -1,6 +1,9 @@
 import * as dgram from "dgram";
 import { SocksClient } from "socks";
 import { logger } from "./log";
+import net from "net";
+import dns from "dns";
+import { timeoutPromise } from "./utils";
 
 const UDP_FORWARDING_TEST_TIMEOUT_MS = 5000;
 const UDP_FORWARDING_TEST_RETRY_INTERVAL_MS = 1000;
@@ -111,3 +114,96 @@ export async function checkUdpForwardingEnabled(
     client.connect();
   });
 }
+
+const SERVER_TEST_TIMEOUT_MS = 2000;
+const CREDENTIALS_TEST_DOMAIN = "google.com";
+
+// Shadowsocks proxy.
+export const validateServerCredentials = (address: string, port: number) =>
+  timeoutPromise(
+    new Promise<number>((fulfill, reject) => {
+      const lastTime = Date.now();
+      SocksClient.createConnection({
+        proxy: { host: address, port, type: 5 },
+        destination: { host: CREDENTIALS_TEST_DOMAIN, port: 80 },
+        command: "connect",
+      })
+        .then((client) => {
+          client.socket.write(
+            `HEAD / HTTP/1.1\r\nHost: ${CREDENTIALS_TEST_DOMAIN}\r\n\r\n`
+          );
+          client.socket.on("data", (data) => {
+            if (data.toString().startsWith("HTTP/1.1")) {
+              client.socket.end();
+              fulfill(Date.now() - lastTime);
+            } else {
+              client.socket.end();
+              reject("unexpected response from remote test website");
+            }
+          });
+
+          client.socket.on("close", () => {
+            reject("could not connect to remote test website");
+          });
+          client.socket.resume();
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    }),
+    SERVER_TEST_TIMEOUT_MS
+  );
+const DNS_TEST_SERVER = "8.8.8.8";
+const DNS_TEST_DOMAIN = "google.com";
+const TEST_TIMEOUT_MS = 2000;
+export type CheckingOption = {
+  address: string;
+  port: number;
+  attempts: number;
+};
+const check = (address: string, port: number) =>
+  new Promise<number>((resolve, reject) => {
+    const s = new net.Socket();
+    const startTime = Date.now();
+    s.connect(port, address, function () {
+      const endTime = Date.now();
+      const time = endTime - startTime;
+      resolve(time);
+      s.destroy();
+    });
+    s.on("error", function (e) {
+      reject(e);
+      s.destroy();
+    });
+    s.setTimeout(TEST_TIMEOUT_MS, function () {
+      reject("Timeout");
+      s.destroy();
+    });
+  });
+export const checkServer = async (option: CheckingOption) => {
+  const { address = "localhost", port = 80, attempts } = option;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await check(address, port);
+    } catch (e) {}
+  }
+  throw new Error("ss-server is not reachable ");
+};
+//Measure dns lookup's time(millisecond)
+export const checkDns = () =>
+  timeoutPromise<number>(
+    new Promise<number>((fulfill, reject) => {
+      const resolver = new dns.Resolver();
+      resolver.setServers([DNS_TEST_SERVER]);
+
+      const lastTime = Date.now();
+
+      resolver.resolve(DNS_TEST_DOMAIN, (err, address) => {
+        if (err || !address) reject("Fail to lookup dns");
+        else {
+          fulfill(Date.now() - lastTime);
+        }
+      });
+    }),
+    TEST_TIMEOUT_MS
+  );

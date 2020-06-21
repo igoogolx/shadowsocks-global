@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import styles from "./footer.module.css";
 import { Dot } from "../Dot/Dot";
-import { ipcRenderer } from "electron";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { useAsync, useFlow } from "../../hooks";
 import { convertFlowData } from "../../electron/share";
-import { checkUpdStatus } from "../../utils/ipc";
+import {
+  checkUpdStatus,
+  subscribeMessage,
+  unsubscribeMessage,
+} from "../../utils/ipc";
 import { Icon, ICON_NAME, ICON_SIZE } from "../Core";
 
 const Footer = () => {
@@ -32,12 +35,12 @@ const Footer = () => {
   }, [checkUdp, isConnected]);
 
   useEffect(() => {
-    ipcRenderer.on("proxy-message", (event, message) => {
+    subscribeMessage((event, message) => {
       if (message) setMessage(message);
     });
 
     return () => {
-      ipcRenderer.removeAllListeners("proxy-message");
+      unsubscribeMessage();
     };
   }, [dispatch]);
   return (

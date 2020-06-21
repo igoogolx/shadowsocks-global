@@ -8,8 +8,8 @@ import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
 import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
 import { clipboard } from "electron";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
-import { updateSubscription } from "../../utils/helper";
 import { PingServer, usePing } from "../../hooks";
+import { updateSubscription } from "../../utils/ipc";
 
 type SubscriptionProps = {
   subscription: Subscription;

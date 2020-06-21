@@ -7,7 +7,7 @@ import { AppState } from "../../reducers/rootReducer";
 import { GeneralState, setting } from "../../reducers/settingReducer";
 import { notifier } from "../Core/Notification";
 import { FieldToggle } from "../Core/Toggle/Toggle";
-import { ipcRenderer } from "electron";
+import { setRunAtSystemStartup } from "../../utils/ipc";
 
 export const General = React.memo(() => {
   const general = useSelector<AppState, GeneralState>(
@@ -28,11 +28,11 @@ export const General = React.memo(() => {
     [value]
   );
   const onSubmit = useCallback(
-    (data) => {
+    async (data) => {
       dispatch(setting.actions.setGeneral(data));
       setIsChanged(false);
       if (general.runAtSystemStartup !== data.isRunAtSystemStartup)
-        ipcRenderer.send("setRunAtSystemStartup");
+        setRunAtSystemStartup();
       notifier.success("Update setting successfully");
     },
     [dispatch, general.runAtSystemStartup]

@@ -3,14 +3,14 @@ import styles from "./about.module.css";
 import { shell } from "electron";
 import { Button, notifier } from "../Core";
 import { useOnMount } from "../../hooks";
-import { ipcRenderer as ipc } from "electron-better-ipc";
+import { getAppVersion } from "../../utils/ipc";
 
 const About = () => {
   const [appVersion, setAppVersion] = useState<any>();
 
   useOnMount(() => {
     try {
-      ipc.callMain("getAppVersion").then((version) => {
+      getAppVersion().then((version) => {
         if (version) setAppVersion(version);
         else throw new Error("");
       });

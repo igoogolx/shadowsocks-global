@@ -4,7 +4,7 @@ import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./dialogs.module.css";
 import { AppState } from "../../reducers/rootReducer";
-import { updateSubscription } from "../../utils/helper";
+import { updateSubscription } from "../../utils/ipc";
 
 type EditSubscriptionDialogProps = {
   close: () => void;

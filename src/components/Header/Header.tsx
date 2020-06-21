@@ -18,13 +18,9 @@ import {
 import { notifier } from "../Core/Notification";
 import { AppState } from "../../reducers/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
-import fs from "fs";
-import { ipcRenderer as ipc } from "electron-better-ipc";
-import path from "path";
 import { setting } from "../../reducers/settingReducer";
 import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
-import { clipboard, ipcRenderer } from "electron";
-import { updateSubscription } from "../../utils/helper";
+import { clipboard } from "electron";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
 import { decodeSsUrl, encodeSsUrl } from "../../utils/url";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
@@ -34,6 +30,17 @@ import Setting from "../Setting/Setting";
 import About from "../About/About";
 import Store from "electron-store";
 import classNames from "classnames";
+import {
+  getBuildInRules,
+  hideWindow,
+  openLogFile,
+  setRunAtSystemStartup,
+  startProxy,
+  stopProxy,
+  subscribeDisconnected,
+  unsubscribeDisconnected,
+  updateSubscription,
+} from "../../utils/ipc";
 
 const PROXY_TYPES = ["Shadowsocks", "Subscription"];
 const MANGE_TYPES = ["Statistics", "Setting", "About"];
@@ -91,20 +98,18 @@ const Header = () => {
     } else if (isAutoConnect) {
       autoConnect();
     }
-    //TODO: use customized channel for "Disconnected" because there are others message.
-    ipcRenderer.on("proxy-disconnected", () => {
+    subscribeDisconnected(() => {
       dispatch(proxy.actions.setIsProcessing(false));
       dispatch(proxy.actions.setIsConnected(false));
     });
-
-    ipcRenderer.send("setRunAtSystemStartup");
+    setRunAtSystemStartup();
 
     //If the app crashes unexpectedly, the "Connect" Button can be loading state after restarting app.
     //To avoid that, the state mush be reset.
     dispatch(proxy.actions.setIsProcessing(false));
     dispatch(proxy.actions.setIsConnected(false));
     return () => {
-      ipcRenderer.removeAllListeners("proxy-disconnected");
+      unsubscribeDisconnected();
     };
     //Only be fired once to init app.
   }, []); // eslint-disable-line
@@ -126,7 +131,7 @@ const Header = () => {
   const isHideAfterConnection = useSelector<AppState, boolean>(
     (state) => state.setting.general.hideAfterConnection
   );
-  const [rulePaths, setRulePaths] = useState<string[]>([]);
+  const [rules, setRules] = useState<string[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);
   const [currentDialogType, setCurrentDialogType] = useState("");
   const addProxyDropdownItems = useMemo(
@@ -169,9 +174,7 @@ const Header = () => {
       })),
       {
         content: "Open the log file",
-        handleOnClick: () => {
-          ipcRenderer.send("openLogFile");
-        },
+        handleOnClick: openLogFile,
       },
       {
         content: "Open the configuration file",
@@ -199,9 +202,9 @@ const Header = () => {
         return;
       }
       dispatch(proxy.actions.setIsProcessing(true));
-      await ipc.callMain("start");
+      await startProxy();
       dispatch(proxy.actions.setIsConnected(true));
-      if (isHideAfterConnection) ipcRenderer.send("hideWindow");
+      if (isHideAfterConnection) hideWindow();
     } catch (e) {
       if (e.message && typeof e.message === "string") notifier.error(e.message);
       else notifier.error("Unknown error");
@@ -212,34 +215,14 @@ const Header = () => {
   useEffect(() => {
     const loadRulePath = async () => {
       setIsLoadingRules(true);
-      let rulePaths: string[] = [];
-      const buildInRulePath = await ipc.callMain("getBuildInRuleDirPath");
-      if (buildInRulePath) {
-        try {
-          const buildInRules = await fs.promises.readdir(
-            buildInRulePath as string
-          );
-          buildInRules.forEach((rule) => {
-            if (path.extname(rule) === ".json")
-              rulePaths.push(path.join(buildInRulePath as string, rule));
-          });
-        } catch {
-          notifier.error("Fail to load build in rules");
-        }
+      let rules: string[] = [];
+      try {
+        const buildInRules = (await getBuildInRules()) as string[];
+        rules = [...rules, ...buildInRules];
+      } catch (e) {
+        notifier.error("Fail to load rules");
       }
-      if (customizedRulesDirPath)
-        try {
-          const customizedRules = await fs.promises.readdir(
-            customizedRulesDirPath
-          );
-          customizedRules.forEach((rule) => {
-            if (path.extname(rule) === ".json")
-              rulePaths.push(path.join(customizedRulesDirPath, rule));
-          });
-        } catch {
-          notifier.error("Fail to load customized rules");
-        }
-      setRulePaths(rulePaths);
+      setRules(rules);
     };
     loadRulePath().then(() => {
       setIsLoadingRules(false);
@@ -249,7 +232,7 @@ const Header = () => {
   const stop = useCallback(async () => {
     dispatch(proxy.actions.setIsProcessing(true));
     try {
-      await ipc.callMain("stop");
+      await stopProxy();
       dispatch(proxy.actions.setIsConnected(false));
     } catch (e) {
       console.log(e);
@@ -259,11 +242,11 @@ const Header = () => {
   }, [dispatch]);
   const rulesOptions = useMemo(
     () => [
-      ...rulePaths.map((rulePath) => ({
-        value: path.basename(rulePath, ".json"),
+      ...rules.map((rule) => ({
+        value: rule,
       })),
     ],
-    [rulePaths]
+    [rules]
   );
 
   const selectedIds = useSelector<AppState, string[]>(

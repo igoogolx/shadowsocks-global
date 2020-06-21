@@ -1,16 +1,22 @@
 import { mainWindow } from "./common";
-import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
+import { app, BrowserWindow, dialog, shell, ipcMain } from "electron";
 import { ipcMain as ipc } from "electron-better-ipc";
 import {
   getAppState,
-  getBuildInRuleDirPath,
+  getBuildInRules,
   getResourcesPath,
   lookupRegionCode,
 } from "./utils";
 import { LOG_FILE_PATH, logger } from "./log";
 import { FlowData } from "./flow";
 import axios from "axios";
-import { checkUdpForwardingEnabled } from "./connectivity";
+import {
+  checkDns,
+  CheckingOption,
+  checkServer,
+  checkUdpForwardingEnabled,
+  validateServerCredentials,
+} from "./connectivity";
 
 export enum ConnectionStatus {
   CONNECTED,
@@ -37,8 +43,6 @@ ipc.answerRenderer(
     }
   }
 );
-
-ipc.answerRenderer("getBuildInRuleDirPath", getBuildInRuleDirPath);
 
 ipc.answerRenderer("getResourcesPath", async () => getResourcesPath());
 
@@ -109,3 +113,15 @@ ipc.answerRenderer(
   "checkUdpStatus",
   async (port: number) => await checkUdpForwardingEnabled(PROXY_ADDRESS, port)
 );
+
+ipc.answerRenderer(
+  "checkServer",
+  async (option: CheckingOption) => await checkServer(option)
+);
+ipc.answerRenderer("checkDns", async () => await checkDns());
+ipc.answerRenderer(
+  "checkInternet",
+  async (port: number) => await validateServerCredentials(PROXY_ADDRESS, port)
+);
+
+ipc.answerRenderer("getBuildInRules", async () => await getBuildInRules());

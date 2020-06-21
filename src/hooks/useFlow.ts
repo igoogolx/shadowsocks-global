@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ipcRenderer } from "electron";
+import { subscribeFlow, unsubscribeFlow } from "../utils/ipc";
 
 export const useFlow = () => {
   const [flow, setFlow] = useState({
@@ -16,9 +16,9 @@ export const useFlow = () => {
   }, []);
 
   useEffect(() => {
-    ipcRenderer.on("proxy-flow", updateFlowListener);
+    subscribeFlow(updateFlowListener);
     return () => {
-      ipcRenderer.removeListener("proxy-flow", updateFlowListener);
+      unsubscribeFlow(updateFlowListener);
     };
   }, [updateFlowListener]);
 

@@ -1,12 +1,13 @@
-import { Menu } from "electron";
-import { app } from "electron";
+import { app, Menu } from "electron";
 import path from "path";
-import { getActivatedServer, lookupIp, SMART_DNS_ADDRESS } from "./share";
+import { getActivatedServer, SMART_DNS_ADDRESS } from "./share";
 import Store from "electron-store";
 import { AppState } from "../reducers/rootReducer";
 import detectPort from "detect-port";
 import { mainWindow } from "./common";
 import fs from "fs";
+import dns from "dns";
+
 const geoip = require("geoip-country");
 
 const appConfig = new Store();
@@ -63,12 +64,65 @@ export const getResourcesPath = () => {
 export const getBuildInRuleDirPath = () =>
   path.join(getResourcesPath(), "rule");
 
+export const getBuildInRulePaths = async () => {
+  const dirPath = getBuildInRuleDirPath();
+  const paths: string[] = [];
+  const buildInRules = await fs.promises.readdir(dirPath);
+  buildInRules.forEach((rule) => {
+    if (path.extname(rule) === ".json") paths.push(path.join(dirPath, rule));
+  });
+  return paths;
+};
+export const getBuildInRules = async () => {
+  const paths = await getBuildInRulePaths();
+  return paths.map((p) => path.basename(p, ".json"));
+};
 export function pathToEmbeddedBinary(toolName: string, filename: string) {
   return path.join(
     getResourcesPath(),
     "third_party",
     toolName,
     filename + ".exe"
+  );
+}
+
+const DNS_LOOKUP_TIMEOUT_MS = 2000;
+
+export function timeoutPromise<T = any>(
+  promise: Promise<any>,
+  ms: number,
+  name = ""
+): Promise<T> {
+  let winner: Promise<any>;
+  const timeout = new Promise<void>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      clearTimeout(timeoutId);
+      if (winner) {
+        console.log(`Promise "${name}" resolved before ${ms} ms.`);
+        resolve();
+      } else {
+        console.log(`Promise "${name}" timed out after ${ms} ms.`);
+        reject("Promise timeout");
+      }
+    }, ms);
+  });
+  winner = Promise.race([promise, timeout]);
+  return winner;
+}
+
+// Effectively a no-op if hostname is already an IP.
+export function lookupIp(hostname: string) {
+  return timeoutPromise<string>(
+    new Promise<string>((fulfill, reject) => {
+      dns.lookup(hostname, 4, (e, address) => {
+        if (e || !address) {
+          return reject("could not resolve proxy server hostname");
+        }
+        fulfill(address);
+      });
+    }),
+    DNS_LOOKUP_TIMEOUT_MS,
+    "DNS lookup"
   );
 }
 
@@ -91,24 +145,10 @@ export class Config {
   };
   getRule = async () => {
     const ruleName = this.state.setting.rule.current;
-    const buildInRuleDirPath = getBuildInRuleDirPath();
-    const buildInRuleNames = await fs.promises.readdir(buildInRuleDirPath);
-    const buildInRulePaths = buildInRuleNames.map((name) =>
-      path.join(buildInRuleDirPath, name)
-    );
-    const customizedDirPath = this.state.setting.rule.dirPath;
+    const buildInRulePaths = await getBuildInRulePaths();
     let ruleFilePath = buildInRulePaths.find(
       (rulePath) => path.basename(rulePath, ".json") === ruleName
     );
-    if (!ruleFilePath && customizedDirPath) {
-      const customizedRuleNames = await fs.promises.readdir(customizedDirPath);
-      const customizedRulePaths = customizedRuleNames.map((name) =>
-        path.join(customizedDirPath, name)
-      );
-      ruleFilePath = customizedRulePaths.find(
-        (rulePath) => path.basename(rulePath, ".json") === ruleName
-      );
-    }
     if (!ruleFilePath) throw new Error("Fail to find the file");
     return ruleFilePath;
   };

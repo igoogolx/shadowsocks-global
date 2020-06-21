@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { proxy } from "../reducers/proxyReducer";
-import { checkServer } from "../utils/connectivity";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../reducers/rootReducer";
+import { checkServer } from "../utils/ipc";
 
 export type PingServer = {
   type: "shadowsocks";
@@ -45,13 +45,12 @@ export const usePing = (servers: PingServer[]) => {
           address: host,
           port,
           attempts: 1,
-          timeout: 2000,
         });
         dispatch(
           proxy.actions.update({
             type,
             id,
-            config: { pingTime },
+            config: { pingTime: pingTime as number },
           })
         );
       } catch (e) {

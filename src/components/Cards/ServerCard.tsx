@@ -8,8 +8,8 @@ import { Card } from "../Core/Card/Card";
 import { MenuItemProps } from "../Core/Menu/Menu";
 import { useAsync, usePing } from "../../hooks";
 import classNames from "classnames";
-import { getRegionCodeFromGeoIp } from "../../utils/helper";
 import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
+import { getRegionCodeFromGeoIp } from "../../utils/ipc";
 
 type ServerCardProps = {
   id: string;

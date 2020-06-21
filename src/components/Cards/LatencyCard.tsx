@@ -4,13 +4,10 @@ import { Icon, ICON_NAME, ICON_SIZE, Tooltip } from "../Core";
 import React, { useCallback, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
-import { checkServer, checkDns } from "../../utils/connectivity";
 import { useAsync } from "../../hooks";
-import {
-  getActivatedServer,
-  validateServerCredentials,
-} from "../../electron/share";
+import { getActivatedServer } from "../../electron/share";
 import { store } from "../../store/store";
+import { checkDns, checkInternet, checkServer } from "../../utils/ipc";
 
 //TODO: Remove repeated code
 export const LatencyCard = () => {
@@ -34,7 +31,6 @@ export const ToSeverCard = () => {
       address: activatedServer.host,
       port: activatedServer.port,
       attempts: 1,
-      timeout: 2000,
     });
   }, []);
   const { execute, pending, value, error } = useAsync(check, false);
@@ -126,24 +122,10 @@ export const ToDnsCard = () => {
 };
 
 export const ToInternetCard = () => {
-  const shadowsocksLocalPort = useSelector<AppState, number>(
-    (state) => state.setting.general.shadowsocksLocalPort
-  );
   const isConnected = useSelector<AppState, boolean>(
     (state) => state.proxy.isConnected
   );
-  const check = useCallback(async () => {
-    const proxy = store.getState().proxy;
-    const activatedServer = getActivatedServer(proxy);
-    if (activatedServer.type === "shadowsocks")
-      return await validateServerCredentials("127.0.0.1", shadowsocksLocalPort);
-    else
-      return await validateServerCredentials(
-        activatedServer.host,
-        activatedServer.port
-      );
-  }, [shadowsocksLocalPort]);
-  const { execute, pending, value, error } = useAsync(check, false);
+  const { execute, pending, value, error } = useAsync(checkInternet, false);
   const disabled = !isConnected || pending;
   useEffect(() => {
     if (isConnected)
