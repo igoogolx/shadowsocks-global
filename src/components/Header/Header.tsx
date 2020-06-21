@@ -14,6 +14,7 @@ import {
   ICON_NAME,
   ICON_SIZE,
   Selector,
+  Toggle,
 } from "../Core";
 import { notifier } from "../Core/Notification";
 import { AppState } from "../../reducers/rootReducer";
@@ -346,28 +347,19 @@ const Header = () => {
           </>
         ) : (
           <>
-            {isConnected ? (
-              <Button
-                isDanger={true}
-                className={styles.button}
-                onClick={stop}
-                isLoading={isProcessing}
-                disabled={isProcessing}
-              >
-                {isProcessing ? "Disconnecting" : "Disconnect"}
-              </Button>
-            ) : (
-              <Button
-                isPrimary={true}
-                className={styles.button}
-                onClick={start}
-                isLoading={isProcessing}
-                disabled={isProcessing}
-              >
-                {isProcessing ? "Connecting" : "Connect"}
-              </Button>
-            )}
-
+            <Toggle
+              size={"large"}
+              className={styles.switch}
+              checked={isConnected}
+              disabled={isProcessing}
+              onChange={async (e) => {
+                if (e.currentTarget.checked) {
+                  await start();
+                } else {
+                  await stop();
+                }
+              }}
+            />
             <Selector
               options={rulesOptions}
               label={"Rule"}

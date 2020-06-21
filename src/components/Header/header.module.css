@@ -16,6 +16,9 @@
     margin: auto 20px auto 0;
     width: 150px;
   }
+  & .switch {
+    margin: auto 40px auto 20px;
+  }
   & .selectButton {
     width: auto;
     &:hover {

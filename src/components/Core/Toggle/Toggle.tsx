@@ -11,6 +11,7 @@ type ToggleProps = {
   checked: boolean;
   disabled?: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  size?: "default" | "large";
 };
 
 //TODO: remove unnecessary props.
@@ -22,13 +23,17 @@ export const Toggle = React.memo((props: ToggleProps) => {
     title,
     leftLabel,
     checked,
+    size = "default",
     ...restProps
   } = props;
 
   const classes = classNames(
     className,
     styles.container,
-    disabled && styles.disabled
+    disabled && styles.disabled,
+    {
+      [styles.larger]: size === "large",
+    }
   );
 
   return (

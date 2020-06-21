@@ -7,12 +7,6 @@
 .container {
   cursor: pointer;
 
-  &:hover {
-    & .switch {
-      background-color: var(--main-hover-color);
-    }
-  }
-
   &.disabled {
     pointer-events: none;
   }
@@ -123,4 +117,22 @@
   );
   background-repeat: repeat;
   background-size: 4px 4px;
+}
+.larger {
+  & .switchWrapper {
+    width: calc(unit * 6);
+    height: calc(unit * 4);
+    & .input:checked + ::before {
+      transform: translateX(calc(unit * 3 - padding));
+    }
+    & .switch {
+      border-radius: calc(unit * 2);
+      &::before {
+        top: calc(padding * 2);
+        width: calc(unit * 3);
+        height: calc(unit * 3);
+        border-radius: 50%;
+      }
+    }
+  }
 }
