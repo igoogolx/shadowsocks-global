@@ -58,41 +58,41 @@ export const General = React.memo(() => {
         />
       </div>
       <FieldToggle
-        name={"DnsOverUdp"}
+        name={"dnsOverUdp"}
         disabled={disabled}
         className={styles.item}
       >
         Dns over Udp
       </FieldToggle>
       <FieldToggle
-        name={"isUpdateSubscriptionsOnOpen"}
+        name={"updateSubscriptionsOnOpen"}
         disabled={disabled}
         className={styles.item}
       >
         Update subscriptions on open
       </FieldToggle>
       <FieldToggle
-        name={"isRunAtSystemStartup"}
+        name={"runAtSystemStartup"}
         disabled={disabled}
         className={styles.item}
       >
         Run at system startup
       </FieldToggle>
       <FieldToggle
-        name={"isHideWhenWindowIsClosed"}
+        name={"hideWhenWindowIsClosed"}
         disabled={disabled}
         className={styles.item}
       >
         Hide when window is closed
       </FieldToggle>
       <FieldToggle
-        name={"isHideAfterConnection"}
+        name={"hideAfterConnection"}
         disabled={disabled}
         className={styles.item}
       >
         Hide after connection
       </FieldToggle>
-      <FieldToggle name={"isAutoConnect"} disabled={disabled}>
+      <FieldToggle name={"autoConnect"} disabled={disabled}>
         Automatically establish connection after startup
       </FieldToggle>
       <div className={styles.delayInput}>

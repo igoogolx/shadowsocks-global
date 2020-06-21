@@ -130,7 +130,7 @@ export class Config {
   private state = getAppState();
 
   getIsDnsOverUdp = () => {
-    return this.state.setting.general.DnsOverUdp;
+    return this.state.setting.general.dnsOverUdp;
   };
 
   getDns = () => {

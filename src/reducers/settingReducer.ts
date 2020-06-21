@@ -20,7 +20,7 @@ export type RuleState = {
 
 export type GeneralState = {
   shadowsocksLocalPort: number;
-  DnsOverUdp: boolean;
+  dnsOverUdp: boolean;
   updateSubscriptionsOnOpen: boolean;
   runAtSystemStartup: boolean;
   hideWhenWindowIsClosed: boolean;
@@ -39,7 +39,7 @@ export type SettingState = {
 export const initialSettingState: SettingState = {
   general: {
     shadowsocksLocalPort: DEFAULT_LOCAL_PORT,
-    DnsOverUdp: false,
+    dnsOverUdp: false,
     updateSubscriptionsOnOpen: false,
     runAtSystemStartup: false,
     hideWhenWindowIsClosed: true,
