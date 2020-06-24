@@ -6,6 +6,7 @@ import styles from "./proxies.module.css";
 import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
 import { Dropdown, Icon, ICON_NAME } from "../Core";
 import { PingServer, usePing } from "../../hooks";
+import { useTranslation } from "react-i18next";
 
 type ShadowsocksesProps = {
   shadowsockses: Shadowsocks[];
@@ -17,6 +18,7 @@ export const Shadowsockses = React.memo((props: ShadowsocksesProps) => {
   const disabled = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
+  const { t } = useTranslation();
   const pingServers = useMemo(
     () =>
       shadowsockses.map((shadowsocks) => ({
@@ -33,13 +35,13 @@ export const Shadowsockses = React.memo((props: ShadowsocksesProps) => {
     () => [
       {
         iconName: ICON_NAME.INSTRUMENT,
-        content: "Ping Test",
+        content: t("proxy.shadowsockses.ping"),
         handleOnClick: ping,
         disabled: isPinging || disabled,
       },
       {
         iconName: ICON_NAME.SORT,
-        content: "Sort By Ping Time",
+        content: t("proxy.shadowsockses.sort"),
         disabled: isPinging || disabled,
         handleOnClick: () => {
           dispatch(
@@ -51,7 +53,7 @@ export const Shadowsockses = React.memo((props: ShadowsocksesProps) => {
       },
       {
         iconName: ICON_NAME.DELETE,
-        content: "Delete",
+        content: t("proxy.shadowsockses.delete"),
         isDanger: true,
         handleOnClick: () => {
           dispatch(
@@ -62,7 +64,7 @@ export const Shadowsockses = React.memo((props: ShadowsocksesProps) => {
         },
       },
     ],
-    [disabled, dispatch, isPinging, ping]
+    [disabled, dispatch, isPinging, ping, t]
   );
   return (
     <>

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import styles from "./dialogs.module.css";
 import { AppState } from "../../reducers/rootReducer";
 import { updateSubscription } from "../../utils/ipc";
+import { useTranslation } from "react-i18next";
 
 type EditSubscriptionDialogProps = {
   close: () => void;
@@ -21,6 +22,7 @@ export const EditSubscriptionDialog = React.memo(
     const subscriptions = useSelector<AppState, Subscription[]>(
       (state) => state.proxy.subscriptions
     );
+    const { t } = useTranslation();
     const onChange = useCallback(
       (fieldValue: { [key: string]: any }) => {
         setValue({ ...value, ...fieldValue });
@@ -93,7 +95,7 @@ export const EditSubscriptionDialog = React.memo(
               disabled={isLoading}
               type={"submit"}
             >
-              Save
+              {t("form.button.save")}
             </Button>
             <Button
               isPrimary={true}
@@ -101,7 +103,7 @@ export const EditSubscriptionDialog = React.memo(
               className={styles.button}
               disabled={isLoading}
             >
-              Cancel
+              {t("form.button.cancel")}
             </Button>
           </div>
         </Form>

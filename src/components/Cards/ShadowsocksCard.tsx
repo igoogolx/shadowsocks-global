@@ -10,6 +10,7 @@ import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
 import QRCode from "qrcode";
 import { PingServer, usePing } from "../../hooks";
 import { changeServer } from "../../utils/ipc";
+import { useTranslation } from "react-i18next";
 
 type ShadowsocksCardProps = {
   shadowsocks: Shadowsocks;
@@ -53,6 +54,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
   const isConnectedOrProcessing = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
+  const { t } = useTranslation();
 
   const dropdownItems = useMemo(() => {
     const isActivated = activatedId === id && isConnectedOrProcessing;
@@ -60,13 +62,13 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
     return [
       {
         iconName: ICON_NAME.INSTRUMENT,
-        content: "Ping Test",
+        content: t("proxy.server.ping"),
         handleOnClick: ping,
         disabled: isPinging || isConnected,
       },
       {
         iconName: ICON_NAME.EDIT,
-        content: "Edit",
+        content: t("proxy.server.edit"),
         handleOnClick: () => {
           setIsEditing(true);
         },
@@ -74,7 +76,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
       },
       {
         iconName: ICON_NAME.COPY,
-        content: "Copy Url",
+        content: t("proxy.server.copy"),
         handleOnClick: async () => {
           const url = encodeSsUrl(props.shadowsocks);
           await clipboard.writeText(url);
@@ -83,7 +85,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
       },
       {
         iconName: ICON_NAME.QRCODE,
-        content: "Share QrCode",
+        content: t("proxy.server.share"),
         handleOnClick: async () => {
           setIsShowQrCode(true);
         },
@@ -92,7 +94,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
       {
         iconName: ICON_NAME.DELETE,
         isDanger: true,
-        content: "Delete",
+        content: t("proxy.server.delete"),
         handleOnClick: () => {
           dispatch(proxy.actions.deleteOne({ type: "shadowsocks", id }));
         },
@@ -108,6 +110,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
     isPinging,
     ping,
     props.shadowsocks,
+    t,
   ]);
   const closeEditDialog = useCallback(() => setIsEditing(false), []);
   const closeQrCodeDialog = useCallback(() => setIsShowQrCode(false), []);

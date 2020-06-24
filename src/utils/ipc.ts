@@ -73,3 +73,6 @@ export const getRegionCodeFromGeoIp = async (host: string) => {
     return undefined;
   }
 };
+export const localize = (translation: { [key: string]: string }) => {
+  ipcRenderer.send("localize", translation);
+};

@@ -125,3 +125,11 @@ ipc.answerRenderer(
 );
 
 ipc.answerRenderer("getBuildInRules", async () => await getBuildInRules());
+
+export const listenLocalize = (
+  listener: (translation: { [key: string]: string }) => void
+) => {
+  ipcMain.on("localize", (event, arg) => {
+    listener(arg);
+  });
+};

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { DnsSettingState, setting } from "../../reducers/settingReducer";
 import { notifier } from "../Core/Notification";
+import { useTranslation } from "react-i18next";
 
 export const Dns = React.memo(() => {
   const dnsState = useSelector<AppState, DnsSettingState>(
@@ -23,6 +24,7 @@ export const Dns = React.memo(() => {
   );
   const [isChanged, setIsChanged] = useState(false);
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const reset = useCallback(() => {
     setDnsSetting(initValue);
@@ -54,7 +56,7 @@ export const Dns = React.memo(() => {
   return (
     <Form onSubmit={onSubmit} onChange={onChange} value={dnsSetting}>
       <div className={styles.item}>
-        <div className={styles.title}>Local dns:</div>
+        <div className={styles.title}> {t("setting.dns.local")}:</div>
         <Field
           name={"localDns"}
           disabled={disabled}
@@ -63,7 +65,7 @@ export const Dns = React.memo(() => {
         />
       </div>
       <div className={styles.item}>
-        <div className={styles.title}>Remote dns:</div>
+        <div className={styles.title}>{t("setting.dns.remote")}:</div>
         <Field
           name={"remoteDns"}
           disabled={disabled}

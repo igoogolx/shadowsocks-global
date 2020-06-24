@@ -10,6 +10,7 @@ import { clipboard } from "electron";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
 import { PingServer, usePing } from "../../hooks";
 import { updateSubscription } from "../../utils/ipc";
+import { useTranslation } from "react-i18next";
 
 type SubscriptionProps = {
   subscription: Subscription;
@@ -22,6 +23,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
   const disabled = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
+  const { t } = useTranslation();
   const closeEditDialog = useCallback(() => setIsEditing(false), []);
   const dispatch = useDispatch();
   const pingServers = useMemo(
@@ -41,13 +43,13 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
     () => [
       {
         iconName: ICON_NAME.INSTRUMENT,
-        content: "Ping Test",
+        content: t("proxy.subscription.ping"),
         handleOnClick: ping,
         disabled: isPinging || disabled,
       },
       {
         iconName: ICON_NAME.SORT,
-        content: "Sort By Ping Time",
+        content: t("proxy.subscription.sort"),
         disabled: isPinging || disabled,
         handleOnClick: () => {
           dispatch(
@@ -60,7 +62,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
       },
       {
         iconName: ICON_NAME.UPDATE,
-        content: "Update",
+        content: t("proxy.subscription.update"),
         disabled: disabled,
         handleOnClick: async () => {
           try {
@@ -84,7 +86,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
       },
       {
         iconName: ICON_NAME.EDIT,
-        content: "Edit",
+        content: t("proxy.subscription.edit"),
         disabled: disabled,
         handleOnClick: () => {
           setIsEditing(true);
@@ -92,7 +94,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
       },
       {
         iconName: ICON_NAME.COPY,
-        content: "Copy Url",
+        content: t("proxy.subscription.copy"),
         handleOnClick: async () => {
           try {
             await clipboard.writeText(subscription.url);
@@ -102,7 +104,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
       },
       {
         iconName: ICON_NAME.DELETE,
-        content: "Delete",
+        content: t("proxy.subscription.delete"),
         disabled: disabled,
         isDivider: true,
         isDanger: true,
@@ -116,7 +118,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
         },
       },
     ],
-    [disabled, dispatch, isPinging, ping, subscription.id, subscription.url]
+    [disabled, dispatch, isPinging, ping, subscription.id, subscription.url, t]
   );
 
   return (

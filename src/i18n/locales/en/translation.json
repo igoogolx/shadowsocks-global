@@ -1,0 +1,85 @@
+{
+  "header": {
+    "rule": "Rule",
+    "add": {
+      "subscription": "Subscription",
+      "clipboard": "Import URL from Clipboard"
+    },
+    "management": {
+      "statistics": "Statistics",
+      "setting": "Setting",
+      "about": "About",
+      "log": "Open the log file",
+      "configuration": "Open the configuration file"
+    },
+    "select": {
+      "copy": "Copy Url",
+      "delete": "Delete",
+      "all": "Select All",
+      "done": "Done"
+    }
+  },
+  "proxy": {
+    "subscription": {
+      "ping": "Ping Test",
+      "sort": "Sort By Ping Time",
+      "update": "Update",
+      "edit": "Edit",
+      "copy": "Copy Url",
+      "delete": "Delete"
+    },
+    "shadowsockses": {
+      "ping": "Ping Test",
+      "sort": "Sort By Ping Time",
+      "delete": "Delete"
+    },
+    "server": {
+      "ping": "Ping Test",
+      "edit": "Edit",
+      "copy": "Copy Url",
+      "share": "Share QrCode",
+      "delete": "Delete"
+    }
+  },
+
+  "setting": {
+    "general": {
+      "title": "General",
+      "port": "Shadowsocks running port:",
+      "dns": "Dns Over Udp",
+      "subscription": "Update subscriptions on open",
+      "run": "Run at system startup",
+      "close": "Hide when window is closed",
+      "connection": "Hide after connection",
+      "auto": "Automatically establish connection after startup",
+      "delay": {
+        "description": "Delayed connect",
+        "unit": "seconds"
+      }
+    },
+    "dns": {
+      "title": "Dns",
+      "local": "Local Dns",
+      "remote": "Remote Dns"
+    }
+  },
+  "footer": {
+    "upload": "upload",
+    "download": "download",
+    "usage": "usage"
+  },
+  "message": {},
+  "form": {
+    "region": "Region",
+    "encryption": "Encryption",
+    "button": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "apply": "Apply",
+      "reset": "Reset"
+    }
+  },
+  "tray": {
+    "quit": "Quit"
+  }
+}

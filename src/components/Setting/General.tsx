@@ -8,6 +8,7 @@ import { GeneralState, setting } from "../../reducers/settingReducer";
 import { notifier } from "../Core/Notification";
 import { FieldToggle } from "../Core/Toggle/Toggle";
 import { setRunAtSystemStartup } from "../../utils/ipc";
+import { useTranslation } from "react-i18next";
 
 export const General = React.memo(() => {
   const general = useSelector<AppState, GeneralState>(
@@ -42,11 +43,11 @@ export const General = React.memo(() => {
     setIsChanged(false);
     notifier.success("Reset setting successfully");
   }, [general]);
-
+  const { t } = useTranslation();
   return (
     <Form onSubmit={onSubmit} onChange={onChange} value={value}>
       <div>
-        <div className={styles.title}>Shadowsocks running port:</div>
+        <div className={styles.title}>{t("setting.general.port")}</div>
         <Field
           name={"shadowsocksLocalPort"}
           type={"number"}
@@ -62,48 +63,50 @@ export const General = React.memo(() => {
         disabled={disabled}
         className={styles.item}
       >
-        Dns over Udp
+        {t("setting.general.dns")}
       </FieldToggle>
       <FieldToggle
         name={"updateSubscriptionsOnOpen"}
         disabled={disabled}
         className={styles.item}
       >
-        Update subscriptions on open
+        {t("setting.general.subscription")}
       </FieldToggle>
       <FieldToggle
         name={"runAtSystemStartup"}
         disabled={disabled}
         className={styles.item}
       >
-        Run at system startup
+        {t("setting.general.run")}
       </FieldToggle>
       <FieldToggle
         name={"hideWhenWindowIsClosed"}
         disabled={disabled}
         className={styles.item}
       >
-        Hide when window is closed
+        {t("setting.general.close")}
       </FieldToggle>
       <FieldToggle
         name={"hideAfterConnection"}
         disabled={disabled}
         className={styles.item}
       >
-        Hide after connection
+        {t("setting.general.connection")}
       </FieldToggle>
       <FieldToggle name={"autoConnect"} disabled={disabled}>
-        Automatically establish connection after startup
+        {t("setting.general.auto")}
       </FieldToggle>
       <div className={styles.delayInput}>
-        <div className={styles.label}>Delayed connect:</div>
+        <div className={styles.label}>
+          {t("setting.general.delay.description")}:
+        </div>
         <Field
           name={"autoConnectDelay"}
           className={styles.field}
           type={"number"}
           disabled={disabled}
         />
-        <div className={styles.label}>seconds</div>
+        <div className={styles.label}>{t("setting.general.delay.unit")}</div>
       </div>
       <div className={styles.footer}>
         <Button
@@ -111,14 +114,14 @@ export const General = React.memo(() => {
           disabled={!isChanged || disabled}
           isPrimary={true}
         >
-          Apply
+          {t("form.button.apply")}
         </Button>
         <Button
           disabled={!isChanged || disabled}
           isBorder={true}
           onClick={reset}
         >
-          Reset
+          {t("form.button.reset")}
         </Button>
       </div>
     </Form>

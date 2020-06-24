@@ -1,40 +1,14 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  useLayoutEffect,
-} from "react";
+import React, { useState, useCallback, useLayoutEffect } from "react";
 import styles from "./header.module.css";
-import {
-  Button,
-  Dialog,
-  Dropdown,
-  Icon,
-  ICON_NAME,
-  ICON_SIZE,
-  Selector,
-  Toggle,
-} from "../Core";
+import { Button, Icon, ICON_NAME, ICON_SIZE, Toggle } from "../Core";
 import { notifier } from "../Core/Notification";
 import { AppState } from "../../reducers/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
-import { setting } from "../../reducers/settingReducer";
-import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
-import { clipboard } from "electron";
+import { proxy, Subscription } from "../../reducers/proxyReducer";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
-import { decodeSsUrl, encodeSsUrl } from "../../utils/url";
-import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
-import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
-import Dashboard from "../Dashboard/Dashboard";
-import Setting from "../Setting/Setting";
-import About from "../About/About";
-import Store from "electron-store";
-import classNames from "classnames";
 import {
-  getBuildInRules,
   hideWindow,
-  openLogFile,
+  localize,
   setRunAtSystemStartup,
   startProxy,
   stopProxy,
@@ -42,9 +16,12 @@ import {
   unsubscribeDisconnected,
   updateSubscription,
 } from "../../utils/ipc";
+import { AddProxyDropdown } from "./AddProxyDropdown";
+import { SelectMenu } from "./SelectMenu";
+import { ManagementDropdown } from "./ManagementDropdown";
+import { RuleSelector } from "./RuleSelector";
+import { useTranslation } from "react-i18next";
 
-const PROXY_TYPES = ["Shadowsocks", "Subscription"];
-const MANGE_TYPES = ["Statistics", "Setting", "About"];
 const Header = () => {
   const subscriptions = useSelector<AppState, Subscription[]>(
     (state) => state.proxy.subscriptions
@@ -60,10 +37,13 @@ const Header = () => {
   const autoConnectDelay = useSelector<AppState, number>(
     (state) => state.setting.general.autoConnectDelay
   );
+
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   //Init app
   useLayoutEffect(() => {
+    localize(t("tray"));
     const autoConnect = () => {
       setConnectTimer(setTimeout(start, autoConnectDelay * 1000));
     };
@@ -114,85 +94,13 @@ const Header = () => {
     };
     //Only be fired once to init app.
   }, []); // eslint-disable-line
-  const customizedRulesDirPath = useSelector<AppState, string>(
-    (state) => state.setting.rule.dirPath
-  );
-  const isConnected = useSelector<AppState, boolean>(
-    (state) => state.proxy.isConnected
-  );
-  const isProcessing = useSelector<AppState, boolean>(
-    (state) => state.proxy.isProcessing
-  );
+
   const activeId = useSelector<AppState, string>(
     (state) => state.proxy.activeId
   );
-  const currentRule = useSelector<AppState, string>(
-    (state) => state.setting.rule.current
-  );
+
   const isHideAfterConnection = useSelector<AppState, boolean>(
     (state) => state.setting.general.hideAfterConnection
-  );
-  const [rules, setRules] = useState<string[]>([]);
-  const [isLoadingRules, setIsLoadingRules] = useState(false);
-  const [currentDialogType, setCurrentDialogType] = useState("");
-  const addProxyDropdownItems = useMemo(
-    () => [
-      ...PROXY_TYPES.map((type) => ({
-        content: type,
-        handleOnClick: () => {
-          setCurrentDialogType(type);
-        },
-      })),
-      {
-        content: "Import URL from Clipboard",
-        handleOnClick: async () => {
-          try {
-            const url = clipboard.readText();
-            let shadowsockses = decodeSsUrl(url);
-            if (shadowsockses.length === 0) return;
-            shadowsockses = shadowsockses.map((shadowsocks) => ({
-              ...shadowsocks,
-              regionCode: "Auto",
-            }));
-            (shadowsockses as Shadowsocks[]).forEach((shadowsocks) =>
-              dispatch(
-                proxy.actions.add({ type: "shadowsocks", config: shadowsocks })
-              )
-            );
-          } catch (e) {}
-        },
-      },
-    ],
-    [dispatch]
-  );
-  const manageDropdownItems = useMemo(
-    () => [
-      ...MANGE_TYPES.map((type) => ({
-        content: type,
-        handleOnClick: () => {
-          setCurrentDialogType(type);
-        },
-      })),
-      {
-        content: "Open the log file",
-        handleOnClick: openLogFile,
-      },
-      {
-        content: "Open the configuration file",
-        handleOnClick: () => {
-          const store = new Store();
-          store.openInEditor();
-        },
-      },
-    ],
-    []
-  );
-  const closeDialog = useCallback(() => {
-    setCurrentDialogType("");
-  }, []);
-  const changeCurrentRule = useCallback(
-    (rule: string) => dispatch(setting.actions.setCurrentRule(rule)),
-    [dispatch]
   );
 
   const start = useCallback(async () => {
@@ -213,23 +121,6 @@ const Header = () => {
       dispatch(proxy.actions.setIsProcessing(false));
     }
   }, [activeId, autoConnectTimer, dispatch, isHideAfterConnection]);
-  useEffect(() => {
-    const loadRulePath = async () => {
-      setIsLoadingRules(true);
-      let rules: string[] = [];
-      try {
-        const buildInRules = (await getBuildInRules()) as string[];
-        rules = [...rules, ...buildInRules];
-      } catch (e) {
-        notifier.error("Fail to load rules");
-      }
-      setRules(rules);
-    };
-    loadRulePath().then(() => {
-      setIsLoadingRules(false);
-    });
-  }, [customizedRulesDirPath]);
-
   const stop = useCallback(async () => {
     dispatch(proxy.actions.setIsProcessing(true));
     try {
@@ -241,110 +132,25 @@ const Header = () => {
       dispatch(proxy.actions.setIsProcessing(false));
     }
   }, [dispatch]);
-  const rulesOptions = useMemo(
-    () => [
-      ...rules.map((rule) => ({
-        value: rule,
-      })),
-    ],
-    [rules]
-  );
 
-  const selectedIds = useSelector<AppState, string[]>(
-    (state) => state.proxy.selectedIds
-  );
-  const shadowsockses = useSelector<AppState, Shadowsocks[]>(
-    (state) => state.proxy.shadowsockses
-  );
-
-  const copySelectedShadowsocksesUrl = useCallback(() => {
-    let url = "";
-    let allShadowsockses = shadowsockses;
-    subscriptions.forEach((subscription) => {
-      allShadowsockses = [...allShadowsockses, ...subscription.shadowsockses];
-    });
-    allShadowsockses.forEach((shadowsocks) => {
-      if (selectedIds.indexOf(shadowsocks.id) !== -1) {
-        url += encodeSsUrl(shadowsocks) + "\n";
-      }
-    });
-    clipboard.writeText(url);
-    notifier.success("Copy Url successfully");
-  }, [selectedIds, shadowsockses, subscriptions]);
-  const deleteSelectedShadowsockses = useCallback(() => {
-    if (selectedIds.indexOf(activeId) !== -1) {
-      return notifier.error("The activated server can't be delete");
-    }
-    dispatch(proxy.actions.delete({ type: "shadowsocks", ids: selectedIds }));
-  }, [activeId, dispatch, selectedIds]);
-  const selectAllShadowsockses = useCallback(() => {
-    dispatch(proxy.actions.selectAll());
-  }, [dispatch]);
-  const doneSelect = useCallback(() => {
-    dispatch(proxy.actions.resetSelectedIds());
-    dispatch(proxy.actions.setIsSelecting(false));
-  }, [dispatch]);
   const isSelecting = useSelector<AppState, boolean>(
     (state) => state.proxy.isSelecting
   );
+  const isConnected = useSelector<AppState, boolean>(
+    (state) => state.proxy.isConnected
+  );
+  const isProcessing = useSelector<AppState, boolean>(
+    (state) => state.proxy.isProcessing
+  );
+
   return (
     <>
-      {currentDialogType === PROXY_TYPES[0] && (
-        <EditShadowsocksDialog close={closeDialog} />
-      )}
-      {currentDialogType === PROXY_TYPES[1] && (
-        <EditSubscriptionDialog close={closeDialog} />
-      )}
-      {currentDialogType === MANGE_TYPES[0] && (
-        <Dialog close={closeDialog}>
-          <Dashboard />
-        </Dialog>
-      )}
-      {currentDialogType === MANGE_TYPES[1] && (
-        <Dialog close={closeDialog}>
-          <Setting />
-        </Dialog>
-      )}
-      {currentDialogType === MANGE_TYPES[2] && (
-        <Dialog close={closeDialog}>
-          <About />
-        </Dialog>
-      )}
       {isUpdatingSubscriptions && (
         <LoadingDialog content={"Updating subscriptions..."} />
       )}
       <div className={styles.container}>
         {isSelecting ? (
-          <>
-            <Button
-              onClick={doneSelect}
-              isPrimary={true}
-              className={classNames(styles.button, styles.selectButton)}
-            >
-              Done
-            </Button>
-            <Button
-              onClick={selectAllShadowsockses}
-              className={classNames(styles.button, styles.selectButton)}
-            >
-              <Icon iconName={ICON_NAME.CHECK_SQUARE} />
-              Select All
-            </Button>
-            <Button
-              onClick={deleteSelectedShadowsockses}
-              className={classNames(styles.button, styles.selectButton)}
-            >
-              <Icon iconName={ICON_NAME.DELETE} />
-              Delete
-            </Button>
-            <Button
-              onClick={copySelectedShadowsocksesUrl}
-              className={classNames(styles.button, styles.selectButton)}
-            >
-              <Icon iconName={ICON_NAME.COPY} />
-              Copy Url
-            </Button>
-          </>
+          <SelectMenu />
         ) : (
           <>
             <Toggle
@@ -360,26 +166,10 @@ const Header = () => {
                 }
               }}
             />
-            <Selector
-              options={rulesOptions}
-              label={"Rule"}
-              value={currentRule}
-              onChange={changeCurrentRule}
-              className={styles.selector}
-              disabled={isLoadingRules || isConnected || isProcessing}
-              isVirtualizedList={rulesOptions.length > 4}
-            />
+            <RuleSelector />
             <div className={styles.iconButtons}>
-              <Dropdown items={addProxyDropdownItems}>
-                <Button className={styles.item}>
-                  <Icon iconName={ICON_NAME.PLUS} size={ICON_SIZE.SIZE24} />
-                </Button>
-              </Dropdown>
-              <Dropdown items={manageDropdownItems}>
-                <Button className={styles.item}>
-                  <Icon iconName={ICON_NAME.SETTING} size={ICON_SIZE.SIZE24} />
-                </Button>
-              </Dropdown>
+              <AddProxyDropdown />
+              <ManagementDropdown />
               <Button
                 className={styles.item}
                 onClick={() => {

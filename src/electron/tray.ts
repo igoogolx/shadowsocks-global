@@ -4,6 +4,7 @@ import { convertFlowData } from "./share";
 import { getAppState } from "./utils";
 import { mainWindow } from "./common";
 import { flow } from "./flow";
+import { listenLocalize } from "./ipc";
 
 export class AppTray {
   private tray: Tray | undefined;
@@ -50,8 +51,10 @@ export class AppTray {
         mainWindow.get()?.hide();
       }
     });
-    const menuTemplate = [{ label: "Quit", click: quitApp }];
-    this.tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
+    listenLocalize((translation) => {
+      let menuTemplate = [{ label: translation.quit, click: quitApp }];
+      this.tray?.setContextMenu(Menu.buildFromTemplate(menuTemplate));
+    });
   }
 
   private createTrayIconImage = (imageName: string) => {

@@ -11,6 +11,7 @@ import {
   unsubscribeMessage,
 } from "../../utils/ipc";
 import { Icon, ICON_NAME, ICON_SIZE } from "../Core";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
   const dispatch = useDispatch();
@@ -33,6 +34,7 @@ const Footer = () => {
       });
     }
   }, [checkUdp, isConnected]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     subscribeMessage((event, message) => {
@@ -58,13 +60,15 @@ const Footer = () => {
         )}
       </div>
       <div className={styles.traffic}>
-        usage: {convertFlowData(flow.totalUsage)}
+        {t("footer.usage")}: {convertFlowData(flow.totalUsage)}
       </div>
       <div className={styles.traffic}>
-        download: {convertFlowData(flow.downloadBytesPerSecond) + "/S"}
+        {t("footer.download")}:{" "}
+        {convertFlowData(flow.downloadBytesPerSecond) + "/S"}
       </div>
       <div className={styles.traffic}>
-        upload: {convertFlowData(flow.uploadBytesPerSecond) + "/S"}
+        {t("footer.upload")}:{" "}
+        {convertFlowData(flow.uploadBytesPerSecond) + "/S"}
       </div>
       <div className={styles.message}>{message}</div>
     </div>

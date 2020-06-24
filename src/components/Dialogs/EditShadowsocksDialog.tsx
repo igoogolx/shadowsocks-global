@@ -8,6 +8,7 @@ import { Button, Dialog, Icon, ICON_NAME, INPUT_SIZE } from "../Core";
 import { isEmpty, isPort } from "../../utils/validator";
 import { FieldSelector } from "../Core/Selector/Selector";
 import { RegionCodeSelector } from "./RegioncodeSelector";
+import { useTranslation } from "react-i18next";
 
 type EditShadowsocksDialogProps = {
   close: () => void;
@@ -33,6 +34,7 @@ export const EditShadowsocksDialog = React.memo(
       [value]
     );
     const dispatch = useDispatch();
+    const { t } = useTranslation();
 
     const onSubmit = async (shadowsocks: Omit<Shadowsocks, "id">) => {
       if (initialValue)
@@ -72,7 +74,7 @@ export const EditShadowsocksDialog = React.memo(
           <FieldSelector
             name={"method"}
             options={methodsOptions.current}
-            label={"Encryption"}
+            label={t("form.encryption")}
             className={styles.selector}
           />
           <RegionCodeSelector />
@@ -131,10 +133,10 @@ export const EditShadowsocksDialog = React.memo(
               disabled={!isChanged}
               type={"submit"}
             >
-              Save
+              {t("form.button.save")}
             </Button>
             <Button isPrimary={true} onClick={close} className={styles.button}>
-              Cancel
+              {t("form.button.cancel")}
             </Button>
           </div>
         </Form>
