@@ -133,16 +133,7 @@ export class Config {
     return this.state.setting.general.dnsOverUdp;
   };
 
-  getDns = () => {
-    let whiteListServers;
-    //Smart Dns
-    const dns = this.state.setting.dns;
-    whiteListServers = [SMART_DNS_ADDRESS, dns.local, dns.remote];
-    return {
-      server: dns,
-      whiteListServers,
-    };
-  };
+  getDns = () => this.state.setting.dns;
   getRule = async () => {
     const ruleName = this.state.setting.rule.current;
     const buildInRulePaths = await getBuildInRulePaths();

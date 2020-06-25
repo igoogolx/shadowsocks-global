@@ -22,6 +22,7 @@ import { PROXY_ADDRESS, sendMessageToRender } from "./ipc";
 import detectPort from "detect-port";
 import { flow } from "./flow";
 import { SMART_DNS_ADDRESS } from "./share";
+import { DnsSettingState } from "../reducers/settingReducer";
 
 const TUN2SOCKS_TAP_DEVICE_NAME = "shadowsocksGlobal-tap0";
 
@@ -69,11 +70,6 @@ function testTapDevice() {
   }
 }
 
-export type Dns = {
-  server: { local: string; remote: string };
-  whiteListServers: string[];
-};
-
 // Establishes a full-system VPN with the help of Outline's routing daemon and child processes
 // ss-local and tun2socks. Follows the Mediator pattern in that none of the three "helpers" know
 // anything about the others.
@@ -90,7 +86,6 @@ export class ConnectionManager {
 
   private readonly ssLocal: SsLocal;
   private readonly tun2socks: Tun2socks;
-  private readonly smartDnsBlock: SmartDnsBlock;
 
   // Extracted out to an instance variable because in certain situations, notably a change in UDP
   // support, we need to stop and restart tun2socks *without notifying the client* and this allows
@@ -114,7 +109,7 @@ export class ConnectionManager {
   constructor(
     private remoteServer: RemoteServer,
     private isDnsOverUdp: boolean,
-    private dns: Dns,
+    private dns: DnsSettingState,
     private rule: string
   ) {
     this.proxyAddress = PROXY_ADDRESS;
@@ -123,13 +118,12 @@ export class ConnectionManager {
     this.tun2socks = new Tun2socks(
       this.proxyAddress,
       this.proxyPort,
-      this.dns.server,
+      this.dns,
       this.remoteServer.host,
       this.rule
     );
 
     this.ssLocal = new SsLocal(this.proxyAddress, this.proxyPort);
-    this.smartDnsBlock = new SmartDnsBlock(this.dns.whiteListServers);
 
     // This trio of Promises, each tied to a helper process' exit, is key to the instance's
     // lifecycle:
@@ -139,9 +133,6 @@ export class ConnectionManager {
       new Promise<void>((fulfill) => {
         this.tun2socksExitListener = fulfill;
         this.tun2socks.onExit = this.tun2socksExitListener;
-      }),
-      new Promise<void>((fulfill) => {
-        this.smartDnsBlock.onExit = fulfill;
       }),
       new Promise<void>((fulfill) => {
         this.ssLocalExitListener = fulfill;
@@ -195,7 +186,6 @@ export class ConnectionManager {
 
     sendMessageToRender("Staring tun2socks...");
     await this.tun2socks.start(this.isDnsOverUdp);
-    this.smartDnsBlock.start();
 
     //TODO: Implement a listener that terminates the start process once this.disconnecting become true.
     if (this.isDisconnecting)
@@ -225,7 +215,6 @@ export class ConnectionManager {
 
     this.ssLocal.stop();
     this.tun2socks.stop();
-    this.smartDnsBlock.stop();
   }
 
   // Fulfills once all three helper processes have stopped.
@@ -341,7 +330,7 @@ class Tun2socks extends ChildProcessHelper {
   constructor(
     private proxyAddress: string,
     private proxyPort: number,
-    private dns: { local: string; remote: string },
+    private dns: DnsSettingState,
     private targetServerIp: string,
     private acl: string
   ) {
@@ -393,17 +382,6 @@ export class SsLocal extends ChildProcessHelper {
     //Enable SIP003 plugin.
     args.push("--plugin", config.plugin || "");
     args.push("--plugin-opts", config.plugin_opts || "");
-    this.launch(args);
-  }
-}
-
-export class SmartDnsBlock extends ChildProcessHelper {
-  constructor(private whitelistServers: string[]) {
-    super(pathToEmbeddedBinary("smartdnsblock", "smartdnsblock"));
-  }
-  start() {
-    const args = [];
-    args.push(this.whitelistServers.join(","));
     this.launch(args);
   }
 }

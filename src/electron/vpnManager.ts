@@ -1,4 +1,4 @@
-import { ConnectionManager, Dns } from "./process_manager";
+import { ConnectionManager } from "./process_manager";
 import { Config, RemoteServer } from "./utils";
 import { AppTray } from "./tray";
 import {
@@ -31,7 +31,7 @@ export class VpnManager {
       this.currentConnection = new ConnectionManager(
         server as RemoteServer,
         config.getIsDnsOverUdp(),
-        config.getDns() as Dns,
+        config.getDns(),
         await config.getRule()
       );
       if (!this.currentConnection) return;
