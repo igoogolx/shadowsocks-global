@@ -4,7 +4,6 @@ import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
 import { ServerCard } from "./ServerCard";
 import { Dialog, ICON_NAME, notifier } from "../Core";
 import { encodeSsUrl } from "../../utils/url";
-import { clipboard } from "electron";
 import { AppState } from "../../reducers/rootReducer";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
 import QRCode from "qrcode";
@@ -79,7 +78,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         content: t("proxy.server.copy"),
         handleOnClick: async () => {
           const url = encodeSsUrl(props.shadowsocks);
-          await clipboard.writeText(url);
+          await navigator.clipboard.writeText(url);
           notifier.success("Copy Url successfully");
         },
       },

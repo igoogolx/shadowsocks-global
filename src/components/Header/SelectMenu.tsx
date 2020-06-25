@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "../../reducers/rootReducer";
 import { proxy, Shadowsocks, Subscription } from "../../reducers/proxyReducer";
 import { encodeSsUrl } from "../../utils/url";
-import { clipboard } from "electron";
 import { useTranslation } from "react-i18next";
 
 export const SelectMenu = React.memo(() => {
@@ -24,7 +23,7 @@ export const SelectMenu = React.memo(() => {
   );
   const dispatch = useDispatch();
 
-  const copySelectedShadowsocksesUrl = useCallback(() => {
+  const copySelectedShadowsocksesUrl = useCallback(async () => {
     let url = "";
     let allShadowsockses = shadowsockses;
     subscriptions.forEach((subscription) => {
@@ -35,7 +34,12 @@ export const SelectMenu = React.memo(() => {
         url += encodeSsUrl(shadowsocks) + "\n";
       }
     });
-    clipboard.writeText(url);
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch (e) {
+      notifier.success("Copy Url Failed");
+      return;
+    }
     notifier.success("Copy Url successfully");
   }, [selectedIds, shadowsockses, subscriptions]);
   const deleteSelectedShadowsockses = useCallback(() => {

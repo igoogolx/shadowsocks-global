@@ -6,7 +6,6 @@ import { Dropdown, Icon, ICON_NAME, notifier } from "../Core";
 import styles from "./proxies.module.css";
 import { ShadowsocksCard } from "../Cards/ShadowsocksCard";
 import { EditSubscriptionDialog } from "../Dialogs/EditSubscriptionDialog";
-import { clipboard } from "electron";
 import { LoadingDialog } from "../Dialogs/LoadingDialog";
 import { PingServer, usePing } from "../../hooks";
 import { updateSubscription } from "../../utils/ipc";
@@ -97,7 +96,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
         content: t("proxy.subscription.copy"),
         handleOnClick: async () => {
           try {
-            await clipboard.writeText(subscription.url);
+            await navigator.clipboard.writeText(subscription.url);
             notifier.success("Copy Url successfully");
           } catch {}
         },

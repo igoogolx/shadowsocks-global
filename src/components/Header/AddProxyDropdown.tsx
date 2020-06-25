@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { clipboard } from "electron";
 import { decodeSsUrl } from "../../utils/url";
 import { proxy, Shadowsocks } from "../../reducers/proxyReducer";
 import { EditShadowsocksDialog } from "../Dialogs/EditShadowsocksDialog";
@@ -34,7 +33,7 @@ export const AddProxyDropdown = React.memo(() => {
         content: t("header.add.clipboard"),
         handleOnClick: async () => {
           try {
-            const url = clipboard.readText();
+            const url = await navigator.clipboard.readText();
             let shadowsockses = decodeSsUrl(url);
             if (shadowsockses.length === 0) return;
             shadowsockses = shadowsockses.map((shadowsocks) => ({
