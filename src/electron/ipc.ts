@@ -133,3 +133,13 @@ export const listenLocalize = (
     listener(arg);
   });
 };
+
+export const listenStart = (listener: () => void) => {
+  ipc.answerRenderer("start", listener);
+};
+export const listenChangeServer = (listener: () => void) => {
+  ipc.answerRenderer("changeServer", listener);
+};
+export const listenStop = (listener: () => void) => {
+  ipc.answerRenderer("stop", listener);
+};

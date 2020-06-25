@@ -1,12 +1,12 @@
 import { app, BrowserWindow } from "electron";
 import * as path from "path";
-import { ipcMain as ipc } from "electron-better-ipc";
 import { setMenu, installExtensions, getAppState, isDev } from "./utils";
 import { VpnManager } from "./vpnManager";
 import { logger } from "./log";
 import { AppTray } from "./tray";
 import { mainWindow } from "./common";
 import "./ipc";
+import { listenChangeServer, listenStart, listenStop } from "./ipc";
 
 let tray: AppTray | undefined;
 let isAppQuitting = false;
@@ -101,17 +101,16 @@ app.on("second-instance", () => {
 
 app.setAsDefaultProtocolClient("ss");
 
-ipc.answerRenderer("start", async () => {
+listenStart(async () => {
   vpnManager = new VpnManager(tray);
   await vpnManager.start();
 });
-ipc.answerRenderer("changeServer", async () => {
+listenChangeServer(async () => {
   if (vpnManager) {
     await vpnManager.changeServer();
   }
 });
-
-ipc.answerRenderer("stop", async () => {
+listenStop(async () => {
   if (vpnManager) {
     await vpnManager.stop();
     vpnManager = undefined;
