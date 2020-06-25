@@ -21,7 +21,6 @@ export const convertFlowData = (data: number) => {
   else return `${financial(data / GB)} GB`;
 };
 
-export const SMART_DNS_ADDRESS = "127.0.0.1";
 //Note: If no server has been selected, this function will return undefined.
 export const getActivatedServer = (proxy: ProxyState) => {
   const activatedId = proxy.activeId;

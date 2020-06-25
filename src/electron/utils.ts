@@ -1,6 +1,6 @@
 import { app, Menu } from "electron";
 import path from "path";
-import { getActivatedServer, SMART_DNS_ADDRESS } from "./share";
+import { getActivatedServer } from "./share";
 import Store from "electron-store";
 import { AppState } from "../reducers/rootReducer";
 import detectPort from "detect-port";

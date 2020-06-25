@@ -21,7 +21,6 @@ import * as path from "path";
 import { PROXY_ADDRESS, sendMessageToRender } from "./ipc";
 import detectPort from "detect-port";
 import { flow } from "./flow";
-import { SMART_DNS_ADDRESS } from "./share";
 import { DnsSettingState } from "../reducers/settingReducer";
 
 const TUN2SOCKS_TAP_DEVICE_NAME = "shadowsocksGlobal-tap0";
@@ -345,15 +344,14 @@ class Tun2socks extends ChildProcessHelper {
     args.push("-tunAddr", TUN2SOCKS_TAP_DEVICE_IP);
     args.push("-tunMask", TUN2SOCKS_VIRTUAL_ROUTER_NETMASK);
     args.push("-tunGw", TUN2SOCKS_VIRTUAL_ROUTER_IP);
-    args.push("-tunDns", SMART_DNS_ADDRESS);
+    args.push("-tunDns", "127.0.0.1");
     args.push("-proxyServer", `${this.proxyAddress}:${this.proxyPort}`);
     args.push("-targetServerIp", this.targetServerIp);
     args.push("-loglevel", "error");
 
     if (!isDnsOverUdp) args.push("-dnsFallback");
-    args.push("-primaryDNSAddr", this.dns.remote);
-    args.push("-alternativeDNSAddr", this.dns.local);
-    args.push("-smartDns");
+    args.push("-remoteDNSAddr", this.dns.remote);
+    args.push("-localDNSAddr", this.dns.local);
 
     const port = await detectPort(flow.listeningPort);
     if (port !== flow.listeningPort) flow.newListeningPort = port;
