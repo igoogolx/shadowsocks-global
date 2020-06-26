@@ -7,6 +7,7 @@ import { RuleState, setting } from "../../reducers/settingReducer";
 import { ipcRenderer as ipc } from "electron-better-ipc";
 import { notifier } from "../Core/Notification";
 import { EditAdditionalRoutesDialog } from "../Dialogs/EditAdditionalRoutesDialog";
+import { useTranslation } from "react-i18next";
 
 export const Rule = React.memo(() => {
   const ruleState = useSelector<AppState, RuleState>(
@@ -32,6 +33,7 @@ export const Rule = React.memo(() => {
     setIsEditAdditionalRoutes(true);
   }, []);
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const onChange = useCallback(
     (field: { [key: string]: any }) => {
@@ -43,8 +45,8 @@ export const Rule = React.memo(() => {
   const reset = useCallback(() => {
     setValue(initValue);
     setIsChanged(false);
-    notifier.success("Update setting successfully");
-  }, [initValue]);
+    notifier.success(t("message.success.resetSetting"));
+  }, [initValue, t]);
   const onSubmit = useCallback(
     (data) => {
       dispatch(
@@ -58,9 +60,9 @@ export const Rule = React.memo(() => {
           })
         );
       setIsChanged(false);
-      notifier.success("Reset setting successfully");
+      notifier.success(t("message.success.updateSetting"));
     },
-    [dispatch]
+    [dispatch, t]
   );
   return (
     <>

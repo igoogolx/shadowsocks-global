@@ -29,8 +29,8 @@ export const Dns = React.memo(() => {
   const reset = useCallback(() => {
     setDnsSetting(initValue);
     setIsChanged(false);
-    notifier.success("Reset setting successfully");
-  }, [initValue]);
+    notifier.success(t("message.success.resetSetting"));
+  }, [initValue, t]);
 
   const onChange = useCallback(
     (field: { [key: string]: any }) => {
@@ -48,9 +48,9 @@ export const Dns = React.memo(() => {
         })
       );
       setIsChanged(false);
-      notifier.success("Update setting successfully");
+      notifier.success(t("message.success.updateSetting"));
     },
-    [dispatch]
+    [dispatch, t]
   );
 
   return (

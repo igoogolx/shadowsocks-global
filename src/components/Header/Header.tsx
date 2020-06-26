@@ -67,10 +67,10 @@ const Header = () => {
       setIsUpdatingSubscriptions(true);
       updateSubscriptions()
         .then(() => {
-          notifier.success("Update subscriptions successfully");
+          notifier.success(t("message.success.updateSubscription"));
         })
         .catch(() => {
-          notifier.error("Fail to update subscriptions");
+          notifier.error("message.error.updateSubscription");
         })
         .finally(() => {
           setIsUpdatingSubscriptions(false);
@@ -107,7 +107,7 @@ const Header = () => {
     try {
       if (autoConnectTimer) clearTimeout(autoConnectTimer);
       if (!activeId) {
-        notifier.error("No server has been selected!");
+        notifier.error(t("message.error.noSelectedServer"));
         return;
       }
       dispatch(proxy.actions.setIsProcessing(true));
@@ -116,11 +116,11 @@ const Header = () => {
       if (isHideAfterConnection) hideWindow();
     } catch (e) {
       if (e.message && typeof e.message === "string") notifier.error(e.message);
-      else notifier.error("Unknown error");
+      else notifier.error(t("message.error.unknown"));
     } finally {
       dispatch(proxy.actions.setIsProcessing(false));
     }
-  }, [activeId, autoConnectTimer, dispatch, isHideAfterConnection]);
+  }, [activeId, autoConnectTimer, dispatch, isHideAfterConnection, t]);
   const stop = useCallback(async () => {
     dispatch(proxy.actions.setIsProcessing(true));
     try {

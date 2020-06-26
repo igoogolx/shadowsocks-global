@@ -77,7 +77,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
               })
             );
           } catch {
-            notifier.error("Fail to update the subscription!");
+            notifier.error(t("message.error.updateSubscription"));
           } finally {
             setIsUpdating(false);
           }
@@ -97,7 +97,7 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
         handleOnClick: async () => {
           try {
             await navigator.clipboard.writeText(subscription.url);
-            notifier.success("Copy Url successfully");
+            notifier.success(t("message.success.copy"));
           } catch {}
         },
       },
@@ -128,7 +128,9 @@ const SubscriptionComponent = (props: SubscriptionProps) => {
           initialValue={subscription}
         />
       )}
-      {isUpdating && <LoadingDialog content={"Updating the subscription..."} />}
+      {isUpdating && (
+        <LoadingDialog content={t("message.info.updatingSubscriptions")} />
+      )}
       <div key={subscription.id}>
         <div className={styles.title}>
           {subscription.name}

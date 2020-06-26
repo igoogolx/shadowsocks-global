@@ -4,9 +4,11 @@ import { shell } from "electron";
 import { Button, notifier } from "../Core";
 import { useOnMount } from "../../hooks";
 import { getAppVersion } from "../../utils/ipc";
+import { useTranslation } from "react-i18next";
 
 const About = () => {
   const [appVersion, setAppVersion] = useState<any>();
+  const { t } = useTranslation();
 
   useOnMount(() => {
     try {
@@ -15,7 +17,7 @@ const About = () => {
         else throw new Error("");
       });
     } catch (e) {
-      notifier.error("Fail to get app version");
+      notifier.error(t("message.error.version"));
     }
   });
   return (

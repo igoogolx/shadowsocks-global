@@ -22,7 +22,7 @@ export const SelectMenu = React.memo(() => {
     (state) => state.proxy.activeId
   );
   const dispatch = useDispatch();
-
+  const { t } = useTranslation();
   const copySelectedShadowsocksesUrl = useCallback(async () => {
     let url = "";
     let allShadowsockses = shadowsockses;
@@ -37,17 +37,17 @@ export const SelectMenu = React.memo(() => {
     try {
       await navigator.clipboard.writeText(url);
     } catch (e) {
-      notifier.success("Copy Url Failed");
+      notifier.error(t("message.error.copy"));
       return;
     }
-    notifier.success("Copy Url successfully");
-  }, [selectedIds, shadowsockses, subscriptions]);
+    notifier.success(t("message.success.copy"));
+  }, [selectedIds, shadowsockses, subscriptions, t]);
   const deleteSelectedShadowsockses = useCallback(() => {
     if (selectedIds.indexOf(activeId) !== -1) {
-      return notifier.error("The activated server can't be delete");
+      return notifier.error(t("message.error.deleteActivatedServer"));
     }
     dispatch(proxy.actions.delete({ type: "shadowsocks", ids: selectedIds }));
-  }, [activeId, dispatch, selectedIds]);
+  }, [activeId, dispatch, selectedIds, t]);
   const selectAllShadowsockses = useCallback(() => {
     dispatch(proxy.actions.selectAll());
   }, [dispatch]);
@@ -55,7 +55,6 @@ export const SelectMenu = React.memo(() => {
     dispatch(proxy.actions.resetSelectedIds());
     dispatch(proxy.actions.setIsSelecting(false));
   }, [dispatch]);
-  const { t } = useTranslation();
 
   return (
     <>

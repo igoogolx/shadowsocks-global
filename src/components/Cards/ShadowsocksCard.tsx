@@ -28,6 +28,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
     port,
   ]);
   const { isPinging, ping } = usePing(pingInfo as PingServer[]);
+  const { t } = useTranslation();
   const onClick = useCallback(() => {
     dispatch(proxy.actions.setActiveId(id));
     if (isConnected) {
@@ -37,14 +38,14 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         .catch((e) => {
           if (e.message && typeof e.message === "string")
             notifier.error(e.message);
-          else notifier.error("Unknown error");
+          else notifier.error(t("message.error.unknown"));
         })
         .finally(() => {
           dispatch(proxy.actions.setIsConnected(true));
           dispatch(proxy.actions.setIsProcessing(false));
         });
     }
-  }, [dispatch, id, isConnected]);
+  }, [dispatch, id, isConnected, t]);
   const [isEditing, setIsEditing] = useState(false);
   const activatedId = useSelector<AppState, string>(
     (state) => state.proxy.activeId
@@ -53,7 +54,6 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
   const isConnectedOrProcessing = useSelector<AppState, boolean>(
     (state) => state.proxy.isProcessing || state.proxy.isConnected
   );
-  const { t } = useTranslation();
 
   const dropdownItems = useMemo(() => {
     const isActivated = activatedId === id && isConnectedOrProcessing;
@@ -79,7 +79,7 @@ export const ShadowsocksCard = (props: ShadowsocksCardProps) => {
         handleOnClick: async () => {
           const url = encodeSsUrl(props.shadowsocks);
           await navigator.clipboard.writeText(url);
-          notifier.success("Copy Url successfully");
+          notifier.success(t("message.success.copy"));
         },
       },
       {

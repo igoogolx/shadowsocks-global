@@ -21,6 +21,7 @@ export const RuleSelector = React.memo(() => {
   const [isLoadingRules, setIsLoadingRules] = useState(false);
 
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const changeCurrentRule = useCallback(
     (rule: string) => dispatch(setting.actions.setCurrentRule(rule)),
     [dispatch]
@@ -44,16 +45,15 @@ export const RuleSelector = React.memo(() => {
         const buildInRules = (await getBuildInRules()) as string[];
         rules = [...rules, ...buildInRules];
       } catch (e) {
-        notifier.error("Fail to load rules");
+        notifier.error(t("message.error.rule"));
       }
       setRules(rules);
     };
     loadRulePath().then(() => {
       setIsLoadingRules(false);
     });
-  }, [customizedRulesDirPath]);
+  }, [customizedRulesDirPath, t]);
 
-  const { t } = useTranslation();
   return (
     <Selector
       options={rulesOptions}

@@ -36,7 +36,7 @@ export const EditSubscriptionDialog = React.memo(
         //Check whether the url has been added.
         if (!initialValue) {
           if (subscriptions.some((item) => item.url === subscription.url))
-            return notifier.error("Add the subscription repeatedly");
+            return notifier.error(t("message.error.addSubscription"));
         }
         setIsLoading(true);
         const name = new URL(subscription.url).hostname;
@@ -64,10 +64,10 @@ export const EditSubscriptionDialog = React.memo(
               },
             })
           );
-        notifier.success("Update the subscription successfully!");
+        notifier.success(t("message.success.updateSubscription"));
         close();
       } catch (e) {
-        notifier.error("Fail to update the subscription!");
+        notifier.error(t("message.error.updateSubscription"));
         setIsLoading(false);
       }
     };

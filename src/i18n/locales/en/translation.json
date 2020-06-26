@@ -68,7 +68,27 @@
     "download": "download",
     "usage": "usage"
   },
-  "message": {},
+  "message": {
+    "success": {
+      "copy": "Copy Url successfully",
+      "updateSubscription": "Update subscriptions successfully",
+      "resetSetting": "Reset setting successfully",
+      "updateSetting": "Update setting successfully"
+    },
+    "info": {
+      "updatingSubscriptions": "Updating subscriptions..."
+    },
+    "error": {
+      "copy": "Copy Url Failed",
+      "noSelectedServer": "No server has been selected",
+      "unknown": "Unknown error",
+      "updateSubscription": "Fail to update subscriptions",
+      "version": "Fail to get app version",
+      "addSubscription": "Add the subscription repeatedly",
+      "rule": "Fail to load rules",
+      "deleteActivatedServer": "The activated server can't be delete"
+    }
+  },
   "form": {
     "region": "Region",
     "encryption": "Encryption",

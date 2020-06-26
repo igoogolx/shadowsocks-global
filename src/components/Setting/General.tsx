@@ -20,7 +20,7 @@ export const General = React.memo(() => {
   const [value, setValue] = useState(general);
   const [isChanged, setIsChanged] = useState(false);
   const dispatch = useDispatch();
-
+  const { t } = useTranslation();
   const onChange = useCallback(
     (field: { [key: string]: any }) => {
       setValue({ ...value, ...field });
@@ -34,16 +34,15 @@ export const General = React.memo(() => {
       setIsChanged(false);
       if (general.runAtSystemStartup !== data.isRunAtSystemStartup)
         setRunAtSystemStartup();
-      notifier.success("Update setting successfully");
+      notifier.success(t("message.success.updateSetting"));
     },
-    [dispatch, general.runAtSystemStartup]
+    [dispatch, general.runAtSystemStartup, t]
   );
   const reset = useCallback(() => {
     setValue(general);
     setIsChanged(false);
-    notifier.success("Reset setting successfully");
-  }, [general]);
-  const { t } = useTranslation();
+    notifier.success(t("message.success.resetSetting"));
+  }, [general, t]);
   return (
     <Form onSubmit={onSubmit} onChange={onChange} value={value}>
       <div>
