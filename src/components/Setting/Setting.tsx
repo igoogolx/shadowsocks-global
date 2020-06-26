@@ -6,7 +6,12 @@ import { General } from "./General";
 import styles from "./setting.module.css";
 import { useTranslation } from "react-i18next";
 
-const Setting = () => {
+type SettingProps = {
+  close: () => void;
+};
+
+const Setting = React.memo((props: SettingProps) => {
+  const { close } = props;
   const [currentSetting, setCurrentSetting] = useState("general");
   const { t } = useTranslation();
   return (
@@ -16,13 +21,13 @@ const Setting = () => {
       className={styles.body}
     >
       <Tab id={"general"} title={t("setting.general.title")}>
-        <General />
+        <General close={close} />
       </Tab>
       <Tab id={"dns"} title={t("setting.dns.title")}>
-        <Dns />
+        <Dns close={close} />
       </Tab>
     </Tabs>
   );
-};
+});
 
 export default Setting;

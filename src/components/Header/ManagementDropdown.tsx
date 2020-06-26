@@ -61,7 +61,7 @@ export const ManagementDropdown = React.memo(() => {
       )}
       {currentDialogType === "setting" && (
         <Dialog close={closeDialog}>
-          <Setting />
+          <Setting close={closeDialog} />
         </Dialog>
       )}
       {currentDialogType === "about" && (

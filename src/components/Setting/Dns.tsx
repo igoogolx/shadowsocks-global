@@ -7,7 +7,12 @@ import { DnsSettingState, setting } from "../../reducers/settingReducer";
 import { notifier } from "../Core/Notification";
 import { useTranslation } from "react-i18next";
 
-export const Dns = React.memo(() => {
+type DnsProps = {
+  close: () => void;
+};
+
+export const Dns = React.memo((props: DnsProps) => {
+  const { close } = props;
   const dnsState = useSelector<AppState, DnsSettingState>(
     (state) => state.setting.dns
   );
@@ -48,9 +53,10 @@ export const Dns = React.memo(() => {
         })
       );
       setIsChanged(false);
+      close();
       notifier.success(t("message.success.updateSetting"));
     },
-    [dispatch, t]
+    [close, dispatch, t]
   );
 
   return (

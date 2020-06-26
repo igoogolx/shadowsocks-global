@@ -10,7 +10,12 @@ import { FieldToggle } from "../Core/Toggle/Toggle";
 import { setRunAtSystemStartup } from "../../utils/ipc";
 import { useTranslation } from "react-i18next";
 
-export const General = React.memo(() => {
+type GeneralProps = {
+  close: () => void;
+};
+
+export const General = React.memo((props: GeneralProps) => {
+  const { close } = props;
   const general = useSelector<AppState, GeneralState>(
     (state) => state.setting.general
   );
@@ -34,9 +39,10 @@ export const General = React.memo(() => {
       setIsChanged(false);
       if (general.runAtSystemStartup !== data.isRunAtSystemStartup)
         setRunAtSystemStartup();
+      close();
       notifier.success(t("message.success.updateSetting"));
     },
-    [dispatch, general.runAtSystemStartup, t]
+    [close, dispatch, general.runAtSystemStartup, t]
   );
   const reset = useCallback(() => {
     setValue(general);
