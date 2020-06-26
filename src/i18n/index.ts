@@ -6,7 +6,7 @@ i18n
   .use(initReactI18next)
   .init({
     lng: "en",
-    debug: true,
+    debug: process.env.NODE_ENV === "development",
     returnObjects: true,
     resources: {
       en: {
