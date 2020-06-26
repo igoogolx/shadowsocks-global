@@ -1,7 +1,7 @@
 .message {
   z-index: var(--z-index-top);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin: 10px auto 0 auto;
+  margin: 15px auto 0 auto;
   font-size: 16px;
   background-color: white;
   padding: 6px 24px;
