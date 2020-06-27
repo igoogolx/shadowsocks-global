@@ -15,7 +15,7 @@
 import { execSync } from "child_process";
 import { powerMonitor } from "electron";
 import { ChildProcess, spawn } from "child_process";
-import { pathToEmbeddedBinary, RemoteServer } from "./utils";
+import { getResourcesPath, pathToEmbeddedBinary, RemoteServer } from "./utils";
 import { logger } from "./log";
 import * as path from "path";
 import { PROXY_ADDRESS, sendMessageToRender } from "./ipc";
@@ -345,8 +345,15 @@ class Tun2socks extends ChildProcessHelper {
     args.push("-tunMask", TUN2SOCKS_VIRTUAL_ROUTER_NETMASK);
     args.push("-tunGw", TUN2SOCKS_VIRTUAL_ROUTER_IP);
     args.push("-tunDns", "127.0.0.1");
+
     args.push("-proxyServer", `${this.proxyAddress}:${this.proxyPort}`);
     args.push("-targetServerIp", this.targetServerIp);
+
+    args.push(
+      "-geoIpDb",
+      path.join(getResourcesPath(), "geoip", "GeoLite2-Country.mmdb")
+    );
+
     args.push("-loglevel", "error");
 
     if (!isDnsOverUdp) args.push("-dnsFallback");
