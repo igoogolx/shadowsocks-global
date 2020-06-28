@@ -37,23 +37,25 @@ export const Toggle = React.memo((props: ToggleProps) => {
   );
 
   return (
-    <label className={classes} title={title}>
-      {leftLabel && <span className={styles.leftLabel}>{leftLabel}</span>}
+    <div className={classes}>
+      <label title={title}>
+        {leftLabel && <span className={styles.leftLabel}>{leftLabel}</span>}
 
-      <span className={styles.switchWrapper}>
-        <input
-          {...restProps}
-          type="checkbox"
-          disabled={disabled}
-          className={styles.input}
-          checked={checked}
-        />
+        <span className={styles.switchWrapper}>
+          <input
+            {...restProps}
+            type="checkbox"
+            disabled={disabled}
+            className={styles.input}
+            checked={checked}
+          />
 
-        <span className={styles.switch} />
-      </span>
+          <span className={styles.switch} />
+        </span>
 
-      {children && <span className={styles.label}>{children}</span>}
-    </label>
+        {children && <span className={styles.label}>{children}</span>}
+      </label>
+    </div>
   );
 });
 

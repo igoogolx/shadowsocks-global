@@ -5,8 +5,6 @@
 @value timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 
 .container {
-  cursor: pointer;
-
   &.disabled {
     pointer-events: none;
   }
@@ -14,6 +12,7 @@
 
 .label {
   margin-left: calc(unit / 2);
+  cursor: pointer;
 }
 
 .leftLabel {
@@ -21,6 +20,7 @@
 }
 
 .switchWrapper {
+  cursor: pointer;
   position: relative;
 
   display: inline-block;
