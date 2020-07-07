@@ -3,7 +3,6 @@ import path from "path";
 import { getActivatedServer } from "./share";
 import Store from "electron-store";
 import { AppState } from "../reducers/rootReducer";
-import detectPort from "detect-port";
 import { mainWindow } from "./common";
 import fs from "fs";
 import dns from "dns";
@@ -47,13 +46,11 @@ export interface RemoteServer {
 
   name?: string;
 
-  method?: string;
-  password?: string;
+  method: string;
+  password: string;
 
   plugin?: string;
   plugin_opts?: string;
-
-  local_port: number;
 }
 export const isDev = process.env.NODE_ENV === "development";
 
@@ -147,22 +144,8 @@ export class Config {
   getProxyServer = async () => {
     let activatedServer = getActivatedServer(this.state.proxy);
     const serverIp = await lookupIp(activatedServer.host);
-    const isShadowsocks = activatedServer.type === "shadowsocks";
-    const ssLocalPort = Number(this.state.setting.general.shadowsocksLocalPort);
     activatedServer = { ...activatedServer, host: serverIp };
-    if (isShadowsocks) {
-      const _port = await detectPort(ssLocalPort);
-      if (Number(_port) !== ssLocalPort)
-        throw new Error(
-          `port: ${ssLocalPort} was occupied, try port: ${_port}`
-        );
-    }
-    return isShadowsocks
-      ? {
-          ...activatedServer,
-          local_port: this.state.setting.general.shadowsocksLocalPort,
-        }
-      : activatedServer;
+    return activatedServer;
   };
 }
 

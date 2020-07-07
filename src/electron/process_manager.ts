@@ -18,7 +18,7 @@ import { ChildProcess, spawn } from "child_process";
 import { getResourcesPath, pathToEmbeddedBinary, RemoteServer } from "./utils";
 import { logger } from "./log";
 import * as path from "path";
-import { PROXY_ADDRESS, sendMessageToRender } from "./ipc";
+import { sendMessageToRender } from "./ipc";
 import detectPort from "detect-port";
 import { flow } from "./flow";
 import { DnsSettingState } from "../reducers/settingReducer";
@@ -78,19 +78,13 @@ function testTapDevice() {
 //  - repeat the UDP test when the network changes and restart tun2socks if the result has changed
 //  - silently restart tun2socks when the system is about to suspend (Windows only)
 export class ConnectionManager {
-  readonly proxyAddress: string;
-  readonly proxyPort: number;
-
   private exits: Promise<void>[] = [];
-
-  private readonly ssLocal: SsLocal;
   private readonly tun2socks: Tun2socks;
 
   // Extracted out to an instance variable because in certain situations, notably a change in UDP
   // support, we need to stop and restart tun2socks *without notifying the client* and this allows
   // us swap the listener in and out.
   private tun2socksExitListener?: () => void | undefined;
-  private ssLocalExitListener?: () => void | undefined;
 
   private onceStoppedListener = () => {};
 
@@ -111,18 +105,12 @@ export class ConnectionManager {
     private dns: DnsSettingState,
     private rule: string
   ) {
-    this.proxyAddress = PROXY_ADDRESS;
-    this.proxyPort = remoteServer.local_port;
-
     this.tun2socks = new Tun2socks(
-      this.proxyAddress,
-      this.proxyPort,
       this.dns,
       this.remoteServer.host,
-      this.rule
+      this.rule,
+      this.remoteServer
     );
-
-    this.ssLocal = new SsLocal(this.proxyAddress, this.proxyPort);
 
     // This trio of Promises, each tied to a helper process' exit, is key to the instance's
     // lifecycle:
@@ -133,10 +121,10 @@ export class ConnectionManager {
         this.tun2socksExitListener = fulfill;
         this.tun2socks.onExit = this.tun2socksExitListener;
       }),
-      new Promise<void>((fulfill) => {
-        this.ssLocalExitListener = fulfill;
-        if (this.ssLocal) this.ssLocal.onExit = this.ssLocalExitListener;
-      }),
+      // new Promise<void>((fulfill) => {
+      //   this.ssLocalExitListener = fulfill;
+      //   if (this.ssLocal) this.ssLocal.onExit = this.ssLocalExitListener;
+      // }),
     ];
     Promise.race(this.exits).then(() => {
       logger.info("a helper has exited, disconnecting");
@@ -181,7 +169,6 @@ export class ConnectionManager {
   async start() {
     sendMessageToRender("Checking tap device...");
     // testTapDevice();
-    this.ssLocal.start(this.remoteServer);
 
     sendMessageToRender("Staring tun2socks...");
     await this.tun2socks.start(this.isDnsOverUdp);
@@ -212,7 +199,6 @@ export class ConnectionManager {
       logger.error(`could not stop routing: ${e.message}`);
     }
 
-    this.ssLocal.stop();
     this.tun2socks.stop();
   }
 
@@ -327,11 +313,10 @@ class ChildProcessHelper {
 
 class Tun2socks extends ChildProcessHelper {
   constructor(
-    private proxyAddress: string,
-    private proxyPort: number,
     private dns: DnsSettingState,
     private targetServerIp: string,
-    private acl: string
+    private acl: string,
+    private ssServer: Omit<RemoteServer, "type">
   ) {
     super(pathToEmbeddedBinary("go-tun2socks", "tun2socks"));
   }
@@ -339,15 +324,25 @@ class Tun2socks extends ChildProcessHelper {
   async start(isDnsOverUdp: boolean) {
     const args: string[] = [];
     args.push("-rule", this.acl);
-    console.log(this.acl);
     args.push("-tunName", TUN2SOCKS_TAP_DEVICE_NAME);
     args.push("-tunAddr", TUN2SOCKS_TAP_DEVICE_IP);
     args.push("-tunMask", TUN2SOCKS_VIRTUAL_ROUTER_NETMASK);
     args.push("-tunGw", TUN2SOCKS_VIRTUAL_ROUTER_IP);
-    args.push("-tunDns", "127.0.0.1");
 
-    args.push("-proxyServer", `${this.proxyAddress}:${this.proxyPort}`);
-    args.push("-targetServerIp", this.targetServerIp);
+    args.push("-proxyServer", `${this.ssServer.host}:${this.ssServer.port}`);
+
+    args.push("-proxyPassword", this.ssServer.password);
+    args.push("-proxyCipher", this.ssServer.method);
+    if (this.ssServer.plugin) {
+      args.push(
+        "-proxyPlugin",
+        this.ssServer.plugin.includes("obfs") ? "obfs" : this.ssServer.plugin
+      );
+    }
+
+    if (this.ssServer.plugin_opts)
+      args.push("-proxyPluginOpts", this.ssServer.plugin_opts);
+    args.push("-proxyType", "shadowsocks");
 
     args.push(
       "-geoIpDb",
@@ -363,30 +358,6 @@ class Tun2socks extends ChildProcessHelper {
     const port = await detectPort(flow.listeningPort);
     if (port !== flow.listeningPort) flow.newListeningPort = port;
     args.push("-flowListenAddr", `127.0.0.1:${flow.listeningPort}`);
-    this.launch(args);
-  }
-}
-
-export class SsLocal extends ChildProcessHelper {
-  constructor(
-    private readonly proxyAddress: string,
-    private readonly proxyPort: number
-  ) {
-    super(pathToEmbeddedBinary("shadowsocks-libev", "ss-local"));
-  }
-
-  start(config: Omit<RemoteServer, "type">) {
-    // ss-local -s x.x.x.x -p 65336 -k mypassword -m aes-128-cfb -l 1081 -u
-    const args = ["-l", this.proxyPort.toString()];
-    args.push("-s", config.host || "");
-    args.push("-p", "" + config.port);
-    args.push("-k", config.password || "");
-    args.push("-m", config.method || "");
-    args.push("-u");
-
-    //Enable SIP003 plugin.
-    args.push("--plugin", config.plugin || "");
-    args.push("--plugin-opts", config.plugin_opts || "");
     this.launch(args);
   }
 }

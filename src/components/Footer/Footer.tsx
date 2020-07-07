@@ -47,18 +47,18 @@ const Footer = () => {
   }, [dispatch]);
   return (
     <div className={styles.container}>
-      <div className={styles.udp}>
-        <span>UDP:</span>
-        {checking || error ? (
-          <Icon
-            iconName={ICON_NAME.LOADING}
-            isLoading={true}
-            size={ICON_SIZE.SIZE14}
-          />
-        ) : (
-          <Dot type={udpStatus ? "enabled" : "disabled"} />
-        )}
-      </div>
+      {/*<div className={styles.udp}>*/}
+      {/*  <span>UDP:</span>*/}
+      {/*  {checking || error ? (*/}
+      {/*    <Icon*/}
+      {/*      iconName={ICON_NAME.LOADING}*/}
+      {/*      isLoading={true}*/}
+      {/*      size={ICON_SIZE.SIZE14}*/}
+      {/*    />*/}
+      {/*  ) : (*/}
+      {/*    <Dot type={udpStatus ? "enabled" : "disabled"} />*/}
+      {/*  )}*/}
+      {/*</div>*/}
       <div className={styles.traffic}>
         {t("footer.usage")}: {convertFlowData(flow.totalUsage)}
       </div>

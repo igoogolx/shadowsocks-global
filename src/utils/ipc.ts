@@ -6,9 +6,9 @@ import { FlowData } from "../electron/flow";
 import { decodeSsUrl } from "./url";
 import { v4 as uuid } from "uuid";
 
+//TODO:refactor
 export const checkUpdStatus = async () => {
-  const port = store.getState().setting.general.shadowsocksLocalPort;
-  return await ipc.callMain("checkUdpStatus", port);
+  return await ipc.callMain("checkUdpStatus");
 };
 export const checkDns = async () => {
   return await ipc.callMain("checkDns");
@@ -16,9 +16,10 @@ export const checkDns = async () => {
 export const checkServer = async (option: CheckingOption) => {
   return await ipc.callMain("checkServer", option);
 };
+
+//TODO:refactor
 export const checkInternet = async () => {
-  const port = store.getState().setting.general.shadowsocksLocalPort;
-  return await ipc.callMain("checkInternet", port);
+  return await ipc.callMain("checkInternet");
 };
 
 export const subscribeFlow = (

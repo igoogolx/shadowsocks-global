@@ -108,21 +108,17 @@ ipc.answerRenderer("fetchSubscription", async (url: string) => {
   return Buffer.from(nodesBase64.data, "base64").toString();
 });
 
-export const PROXY_ADDRESS = "127.0.0.1";
-ipc.answerRenderer(
-  "checkUdpStatus",
-  async (port: number) => await checkUdpForwardingEnabled(PROXY_ADDRESS, port)
-);
+//TODO:refactor
+ipc.answerRenderer("checkUdpStatus", () => 0);
 
 ipc.answerRenderer(
   "checkServer",
   async (option: CheckingOption) => await checkServer(option)
 );
 ipc.answerRenderer("checkDns", async () => await checkDns());
-ipc.answerRenderer(
-  "checkInternet",
-  async (port: number) => await validateServerCredentials(PROXY_ADDRESS, port)
-);
+
+//TODO:refactor
+ipc.answerRenderer("checkInternet", () => 0);
 
 ipc.answerRenderer("getBuildInRules", async () => await getBuildInRules());
 

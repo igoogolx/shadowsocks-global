@@ -1,7 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const DEFAULT_LOCAL_PORT = 1081;
-
 const GOOGLE_DNS = "8.8.8.8";
 const DNS_POD = "119.29.29.29";
 
@@ -19,7 +17,6 @@ export type RuleState = {
 };
 
 export type GeneralState = {
-  shadowsocksLocalPort: number;
   dnsOverUdp: boolean;
   updateSubscriptionsOnOpen: boolean;
   runAtSystemStartup: boolean;
@@ -38,7 +35,6 @@ export type SettingState = {
 //Note: The state will be initialed in configureStore by preloadedState.
 export const initialSettingState: SettingState = {
   general: {
-    shadowsocksLocalPort: DEFAULT_LOCAL_PORT,
     dnsOverUdp: false,
     updateSubscriptionsOnOpen: false,
     runAtSystemStartup: false,
