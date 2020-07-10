@@ -11,14 +11,14 @@ const parseLegacyURL = (url: string) => {
     port: 0,
     password: "",
     method: "",
-    name: ""
+    name: "",
   };
   const UrlFinder = new RegExp(
     "ss://(?<base64>[A-Za-z0-9+-/=_]+)(?:#(?<tag>\\S+))?",
     "i"
   );
   const DetailsParser = new RegExp(
-    "^((?<method>.+?):(?<password>.*)@(?<hostname>.+?):(?<port>\\d+?))$",
+    "^((?<method>.+?):(?<password>.*)@(?<host>.+?):(?<port>\\d+?))$",
     "i"
   );
 
@@ -31,6 +31,7 @@ const parseLegacyURL = (url: string) => {
     const details = base64 && DetailsParser.exec(decodeBase64(base64));
     if (!details) return null;
     server = { ...server, ...details.groups };
+    console.log(server);
   } catch (e) {
     return null;
   }
@@ -39,7 +40,7 @@ const parseLegacyURL = (url: string) => {
 
 export const decodeSsUrl = (url: string) => {
   const serverUrls = url.split(/[\n\r ]/);
-  const shadowsockses = serverUrls.map(url => {
+  const shadowsockses = serverUrls.map((url) => {
     if (!url.startsWith("ss://")) return null;
     const legacyServer = parseLegacyURL(url);
     if (legacyServer) return legacyServer;
@@ -50,13 +51,14 @@ export const decodeSsUrl = (url: string) => {
       plugin: "",
       method: "",
       name: "",
-      plugin_opts: ""
+      plugin_opts: "",
     };
     try {
       const serverURL = new URL(
         //It seems that URL can't parse ss Url. So we replace it with http Url
         decodeURIComponent(url.replace(/^ss/g, "http"))
       );
+      console.log(serverURL);
       const base64 = serverURL.username;
       const [method, password] = decodeBase64(base64).split(":");
       config.method = method;
@@ -75,7 +77,7 @@ export const decodeSsUrl = (url: string) => {
     }
   });
   let filteredShadowsocks: Server[] = [];
-  shadowsockses.forEach(shadowsocks => {
+  shadowsockses.forEach((shadowsocks) => {
     if (shadowsocks) filteredShadowsocks.push(shadowsocks);
   });
 
@@ -86,7 +88,7 @@ const encodeBase64 = (str: string) =>
   Buffer.from(str, "utf8").toString("base64");
 
 export const encodeSsUrl = (server: Server) => {
-  let url = "";
+  let url: string;
   if (!server.plugin) {
     const parts = `${server.method}:${server.password}@${server.host}:${server.port}`;
     url = encodeBase64(parts);
