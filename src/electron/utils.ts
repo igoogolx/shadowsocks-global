@@ -6,8 +6,7 @@ import { AppState } from "../reducers/rootReducer";
 import { mainWindow } from "./common";
 import fs from "fs";
 import dns from "dns";
-
-const geoip = require("geoip-country");
+import maxmind, { CountryResponse } from "maxmind";
 
 const appConfig = new Store();
 export const getAppState = () => appConfig.get("state") as AppState;
@@ -149,15 +148,20 @@ export class Config {
   };
 }
 
+const lookupGeoIp = async (ip: string) => {
+  const db = await maxmind.open<CountryResponse>(
+    path.join(getResourcesPath(), "geoip", "GeoLite2-Country.mmdb")
+  );
+  return db.get(ip);
+};
+
 export const lookupRegionCode = async (host: string) => {
   try {
     const ip = await lookupIp(host);
-    return await new Promise<string | undefined>((fulfill) => {
-      if (!ip) fulfill(undefined);
-      const result = geoip.lookup(ip);
-      if (result) fulfill(result.country);
-      else fulfill(undefined);
-    });
+    const geoResult = await lookupGeoIp(ip);
+    if (geoResult?.country) {
+      return geoResult.country.iso_code;
+    } else return undefined;
   } catch {
     return undefined;
   }

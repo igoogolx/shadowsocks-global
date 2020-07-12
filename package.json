@@ -8,8 +8,8 @@
     "detect-port": "^1.3.0",
     "electron-better-ipc": "^1.1.0",
     "electron-store": "^5.2.0",
-    "geoip-country": "^4.0.21",
     "log4js": "^6.3.0",
+    "maxmind": "^4.1.3",
     "sudo-prompt": "^9.2.1"
   },
   "description": "A VPN or proxy client for Windows.",

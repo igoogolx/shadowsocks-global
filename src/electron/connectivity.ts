@@ -38,7 +38,7 @@ export const checkServer = async (option: CheckingOption) => {
   }
   throw new Error("ss-server is not reachable ");
 };
-//Measure dns lookup's time(millisecond)
+//Measure dns lookupGeoIp's time(millisecond)
 export const checkDns = () =>
   timeoutPromise<number>(
     new Promise<number>((fulfill, reject) => {
@@ -48,7 +48,7 @@ export const checkDns = () =>
       const lastTime = Date.now();
 
       resolver.resolve(DNS_TEST_DOMAIN, (err, address) => {
-        if (err || !address) reject("Fail to lookup dns");
+        if (err || !address) reject("Fail to lookupGeoIp dns");
         else {
           fulfill(Date.now() - lastTime);
         }
