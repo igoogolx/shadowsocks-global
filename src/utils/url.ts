@@ -58,7 +58,6 @@ export const decodeSsUrl = (url: string) => {
         //It seems that URL can't parse ss Url. So we replace it with http Url
         decodeURIComponent(url.replace(/^ss/g, "http"))
       );
-      console.log(serverURL);
       const base64 = serverURL.username;
       const [method, password] = decodeBase64(base64).split(":");
       config.method = method;
