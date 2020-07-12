@@ -1,12 +1,10 @@
 import { ipcRenderer as ipc } from "electron-better-ipc";
-import { store } from "../store/store";
 import { CheckingOption } from "../electron/connectivity";
 import { ipcRenderer, IpcRendererEvent } from "electron";
-import { FlowData } from "../electron/flow";
+import { FlowData } from "../electron/manager";
 import { decodeSsUrl } from "./url";
 import { v4 as uuid } from "uuid";
 
-//TODO:refactor
 export const checkUpdStatus = async () => {
   return await ipc.callMain("checkUdpStatus");
 };
@@ -17,7 +15,6 @@ export const checkServer = async (option: CheckingOption) => {
   return await ipc.callMain("checkServer", option);
 };
 
-//TODO:refactor
 export const checkInternet = async () => {
   return await ipc.callMain("checkInternet");
 };

@@ -8,15 +8,9 @@ import {
   lookupRegionCode,
 } from "./utils";
 import { LOG_FILE_PATH, logger } from "./log";
-import { FlowData } from "./flow";
+import { FlowData, manager } from "./manager";
 import axios from "axios";
-import {
-  checkDns,
-  CheckingOption,
-  checkServer,
-  checkUdpForwardingEnabled,
-  validateServerCredentials,
-} from "./connectivity";
+import { checkDns, CheckingOption, checkServer } from "./connectivity";
 
 export enum ConnectionStatus {
   CONNECTED,
@@ -108,8 +102,7 @@ ipc.answerRenderer("fetchSubscription", async (url: string) => {
   return Buffer.from(nodesBase64.data, "base64").toString();
 });
 
-//TODO:refactor
-ipc.answerRenderer("checkUdpStatus", () => 0);
+ipc.answerRenderer("checkUdpStatus", async () => await manager.testUdpStatus());
 
 ipc.answerRenderer(
   "checkServer",
@@ -117,8 +110,10 @@ ipc.answerRenderer(
 );
 ipc.answerRenderer("checkDns", async () => await checkDns());
 
-//TODO:refactor
-ipc.answerRenderer("checkInternet", () => 0);
+ipc.answerRenderer(
+  "checkInternet",
+  async () => await manager.testInternetLatency()
+);
 
 ipc.answerRenderer("getBuildInRules", async () => await getBuildInRules());
 

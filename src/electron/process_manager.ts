@@ -20,7 +20,7 @@ import { logger } from "./log";
 import * as path from "path";
 import { sendMessageToRender } from "./ipc";
 import detectPort from "detect-port";
-import { flow } from "./flow";
+import { manager } from "./manager";
 import { DnsSettingState } from "../reducers/settingReducer";
 
 const TUN2SOCKS_TAP_DEVICE_NAME = "shadowsocksGlobal-tap0";
@@ -355,9 +355,9 @@ class Tun2socks extends ChildProcessHelper {
     args.push("-remoteDNSAddr", this.dns.remote);
     args.push("-localDNSAddr", this.dns.local);
 
-    const port = await detectPort(flow.listeningPort);
-    if (port !== flow.listeningPort) flow.newListeningPort = port;
-    args.push("-flowListenAddr", `127.0.0.1:${flow.listeningPort}`);
+    const port = await detectPort(manager.listeningPort);
+    if (port !== manager.listeningPort) manager.newListeningPort = port;
+    args.push("-managerAddr", `127.0.0.1:${manager.listeningPort}`);
     this.launch(args);
   }
 }

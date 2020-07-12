@@ -10,7 +10,6 @@
     "electron-store": "^5.2.0",
     "geoip-country": "^4.0.21",
     "log4js": "^6.3.0",
-    "socks": "^2.4.1",
     "sudo-prompt": "^9.2.1"
   },
   "description": "A VPN or proxy client for Windows.",

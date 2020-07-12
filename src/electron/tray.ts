@@ -3,7 +3,7 @@ import path from "path";
 import { convertFlowData } from "./share";
 import { getAppState } from "./utils";
 import { mainWindow } from "./common";
-import { flow } from "./flow";
+import { manager } from "./manager";
 import { listenLocalize } from "./ipc";
 
 export class AppTray {
@@ -15,7 +15,7 @@ export class AppTray {
       }
     | undefined;
   private flowListener = async (title: string, proxyRule: string) => {
-    const flowData = await flow.getData();
+    const flowData = await manager.getFlow();
     if (!flowData) return;
     this.tray?.setToolTip(
       title +

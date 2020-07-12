@@ -7,7 +7,7 @@ import {
   sendFlowToRender,
   sendMessageToRender,
 } from "./ipc";
-import { flow } from "./flow";
+import { manager } from "./manager";
 
 export class VpnManager {
   private currentConnection: ConnectionManager | undefined;
@@ -16,7 +16,7 @@ export class VpnManager {
   constructor(private tray: AppTray | undefined) {}
 
   private flowListener = async () => {
-    const flowData = await flow.getData();
+    const flowData = await manager.getFlow();
     if (!flowData) return;
     sendFlowToRender({
       ...flowData,
