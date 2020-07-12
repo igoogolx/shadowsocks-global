@@ -63,7 +63,7 @@
     "chart.js": "^2.9.3",
     "classnames": "^2.2.6",
     "concurrently": "^5.2.0",
-    "electron": "^9.0.5",
+    "electron": "^9.1.0",
     "electron-builder": "^22.7.0",
     "electron-devtools-installer": "^3.1.0",
     "flag-icon-css": "^3.5.0",
