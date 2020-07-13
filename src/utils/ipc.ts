@@ -3,7 +3,7 @@ import { CheckingOption } from "../electron/connectivity";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 import { FlowData } from "../electron/manager";
 import { decodeSsUrl } from "./url";
-import { v4 as uuid } from "uuid";
+import { nanoid } from "@reduxjs/toolkit";
 
 export const checkUpdStatus = async () => {
   return await ipc.callMain("checkUdpStatus");
@@ -61,7 +61,7 @@ export const updateSubscription = async (url: string) => {
   return shadowsockses.map((shadowsocks) => ({
     ...shadowsocks,
     regionCode: "Auto",
-    id: uuid(),
+    id: nanoid(),
   }));
 };
 export const getRegionCodeFromGeoIp = async (host: string) => {

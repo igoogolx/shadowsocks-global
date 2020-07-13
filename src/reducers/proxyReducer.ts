@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { v4 as uuid } from "uuid";
+import { nanoid } from "@reduxjs/toolkit";
 
 export type Shadowsocks = {
   id: string;
@@ -99,7 +99,7 @@ export const proxy = createSlice({
           | { type: "shadowsocks"; config: Omit<Shadowsocks, "id"> }
           | { type: "subscription"; config: Omit<Subscription, "id"> }
       ) => ({
-        payload: { ...proxy, config: { id: uuid(), ...proxy.config } },
+        payload: { ...proxy, config: { id: nanoid(), ...proxy.config } },
       }),
     },
     sortByPingTime: (
