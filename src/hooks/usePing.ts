@@ -29,39 +29,43 @@ export const usePing = (servers: PingServer[]) => {
   }, [isConnected]);
   const ping = useCallback(async () => {
     setIsPing(true);
-    for (let i = 0; i < servers.length; i++) {
+    for (let i = 0; i < servers.length; i = i + 4) {
       if (isUnmounting.current || isConnectedRef.current)
         return setIsPing(false);
-      const { host, port, id, type } = servers[i];
-      try {
-        dispatch(
-          proxy.actions.update({
-            type,
-            id,
-            config: { pingTime: "pinging" },
-          })
-        );
-        const pingTime = await checkServer({
-          address: host,
-          port,
-          attempts: 1,
-        });
-        dispatch(
-          proxy.actions.update({
-            type,
-            id,
-            config: { pingTime: pingTime as number },
-          })
-        );
-      } catch (e) {
-        dispatch(
-          proxy.actions.update({
-            type,
-            id,
-            config: { pingTime: "timeout" },
-          })
-        );
-      }
+      await Promise.all(
+        servers.slice(i, i + 4).map(async (server) => {
+          const { host, port, id, type } = server;
+          try {
+            dispatch(
+              proxy.actions.update({
+                type,
+                id,
+                config: { pingTime: "pinging" },
+              })
+            );
+            const pingTime = await checkServer({
+              address: host,
+              port,
+              attempts: 1,
+            });
+            dispatch(
+              proxy.actions.update({
+                type,
+                id,
+                config: { pingTime: pingTime as number },
+              })
+            );
+          } catch (e) {
+            dispatch(
+              proxy.actions.update({
+                type,
+                id,
+                config: { pingTime: "timeout" },
+              })
+            );
+          }
+        })
+      );
     }
     setIsPing(false);
   }, [dispatch, servers]);
