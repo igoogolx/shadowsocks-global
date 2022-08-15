@@ -1,3 +1,5 @@
+# Note: The project is deprecated. Try [Lux](https://github.com/igoogolx/lux).
+
 # Shadowsocks-global ![Build](https://github.com/igoogolx/shadowsocks-global/workflows/Build/badge.svg)
 
 A VPN or proxy client for Windows, based [Outline-client](https://github.com/Jigsaw-Code/outline-client)(windows). **IPV6: not support**
