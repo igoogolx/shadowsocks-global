@@ -4,7 +4,7 @@
   "homepage": "./",
   "main": "public/electron.js",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "detect-port": "^1.3.0",
     "electron-better-ipc": "^1.1.0",
     "electron-store": "^5.2.0",
